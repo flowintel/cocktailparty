@@ -18,16 +18,4 @@ defmodule Cocktailparty.Catalog.Source do
     |> validate_required([:name, :description, :type, :channel])
     |> unique_constraint(:name)
   end
-
-  # def subscribe(source) do
-    # case get_source(source) do
-    #   {:ok, pid} ->
-    #     Redix.PubSub.subscribe(pid, source.channel)
-    #     {:ok, pid}
-
-    #   {:error, reason} ->
-    #     {:error, reason}
-    # end
-  # end
-
 end
