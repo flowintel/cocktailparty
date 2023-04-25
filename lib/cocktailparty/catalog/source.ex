@@ -5,10 +5,8 @@ defmodule Cocktailparty.Catalog.Source do
   schema "sources" do
     field :channel, :string
     field :description, :string
-    field :driver, :string
     field :name, :string
     field :type, :string
-    field :url, :string
 
     timestamps()
   end
@@ -16,7 +14,20 @@ defmodule Cocktailparty.Catalog.Source do
   @doc false
   def changeset(source, attrs) do
     source
-    |> cast(attrs, [:name, :description, :driver, :type, :url, :channel])
-    |> validate_required([:name, :description, :driver, :type, :url, :channel])
+    |> cast(attrs, [:name, :description, :type, :channel])
+    |> validate_required([:name, :description, :type, :channel])
+    |> unique_constraint(:name)
   end
+
+  # def subscribe(source) do
+    # case get_source(source) do
+    #   {:ok, pid} ->
+    #     Redix.PubSub.subscribe(pid, source.channel)
+    #     {:ok, pid}
+
+    #   {:error, reason} ->
+    #     {:error, reason}
+    # end
+  # end
+
 end

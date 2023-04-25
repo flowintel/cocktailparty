@@ -77,3 +77,7 @@ config :phoenix, :plug_init_mode, :runtime
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+# Configure your redis connection
+config :cocktailparty,
+  redix_uri: "redis://127.0.0.1:6379/0"

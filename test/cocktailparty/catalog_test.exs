@@ -21,7 +21,14 @@ defmodule Cocktailparty.CatalogTest do
     end
 
     test "create_source/1 with valid data creates a source" do
-      valid_attrs = %{channel: "some channel", description: "some description", driver: "some driver", name: "some name", type: "some type", url: "some url"}
+      valid_attrs = %{
+        channel: "some channel",
+        description: "some description",
+        driver: "some driver",
+        name: "some name",
+        type: "some type",
+        url: "some url"
+      }
 
       assert {:ok, %Source{} = source} = Catalog.create_source(valid_attrs)
       assert source.channel == "some channel"
@@ -38,7 +45,15 @@ defmodule Cocktailparty.CatalogTest do
 
     test "update_source/2 with valid data updates the source" do
       source = source_fixture()
-      update_attrs = %{channel: "some updated channel", description: "some updated description", driver: "some updated driver", name: "some updated name", type: "some updated type", url: "some updated url"}
+
+      update_attrs = %{
+        channel: "some updated channel",
+        description: "some updated description",
+        driver: "some updated driver",
+        name: "some updated name",
+        type: "some updated type",
+        url: "some updated url"
+      }
 
       assert {:ok, %Source{} = source} = Catalog.update_source(source, update_attrs)
       assert source.channel == "some updated channel"

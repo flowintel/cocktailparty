@@ -3,8 +3,22 @@ defmodule CocktailpartyWeb.SourceControllerTest do
 
   import Cocktailparty.CatalogFixtures
 
-  @create_attrs %{channel: "some channel", description: "some description", driver: "some driver", name: "some name", type: "some type", url: "some url"}
-  @update_attrs %{channel: "some updated channel", description: "some updated description", driver: "some updated driver", name: "some updated name", type: "some updated type", url: "some updated url"}
+  @create_attrs %{
+    channel: "some channel",
+    description: "some description",
+    driver: "some driver",
+    name: "some name",
+    type: "some type",
+    url: "some url"
+  }
+  @update_attrs %{
+    channel: "some updated channel",
+    description: "some updated description",
+    driver: "some updated driver",
+    name: "some updated name",
+    type: "some updated type",
+    url: "some updated url"
+  }
   @invalid_attrs %{channel: nil, description: nil, driver: nil, name: nil, type: nil, url: nil}
 
   describe "index" do

@@ -12,47 +12,91 @@
     </script>
   </head>
   <body class="bg-white antialiased">
-    <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
-      <%= if @current_user do %>
-        <li class="text-[0.8125rem] leading-6 text-zinc-900">
-          <%= @current_user.email %>
-        </li>
-        <li>
-          <.link
-            href={~p"/users/settings"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-          >
-            Settings
-          </.link>
-        </li>
-        <li>
-          <.link
-            href={~p"/users/log_out"}
-            method="delete"
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-          >
-            Log out
-          </.link>
-        </li>
-      <% else %>
-        <li>
-          <.link
-            href={~p"/users/register"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-          >
-            Register
-          </.link>
-        </li>
-        <li>
-          <.link
-            href={~p"/users/log_in"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-          >
-            Log in
-          </.link>
-        </li>
-      <% end %>
-    </ul>
+    <header class="px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between border-b border-zinc-100 py-3">
+        <div class="flex items-center gap-4">
+          <a href="/">
+            <svg width="32" height="32" viewBox="0 0 16.029 16.005" class="h-6" aria-hidden="true">
+              <g transform="matrix(1.25 0 0 -1.25 0 15.988)">
+                <g transform="matrix(.141 0 0 .14237 0 -.012093)">
+                  <path
+                    d="m12.926 60.08c1.586 3.352 3.699 6.473 6.304 9.231l15.985-9.231zm62.215 4.418c.402-.605.789-1.23 1.156-1.867 1.5-2.602 2.637-5.309 3.43-8.067l-15.481-8.937zm-27.118-55.488c-3.652-.278-7.308.015-10.835.832v17.941zm-10.835 49.933 25.058-14.468-25.058-14.469v28.937"
+                    fill="#456f84"
+                  />
+                  <g transform="translate(0 -.080101)">
+                    <g clip-path="url(#clipPath22)">
+                      <path
+                        d="m54.938.066c26.234 5.594 41.949 32.559 33.89 58.133l-50.59-29.211 16.7-28.922"
+                        fill="#ee2338"
+                      />
+                    </g>
+                  </g>
+                  <path
+                    d="m68.203 83.818c-18.808 10.86-42.141 6.758-56.23-8.617l50.734-29.289 16.66 28.852c-3.137 3.504-6.871 6.578-11.164 9.054"
+                    fill="#ee2338"
+                  />
+                  <g transform="translate(0 -.080101)">
+                    <g clip-path="url(#clipPath44)">
+                      <path
+                        d="m22.742 5.16c4.149-2.402 8.524-4.066 12.973-5.047v58.575h-33.457c-6.582-20.016 1.512-42.579 20.484-53.528"
+                        fill="#ee2338"
+                      />
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </svg>
+          </a>
+        </div>
+        <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
+          <%= if @current_user do %>
+            <li>
+              <.link
+                href={~p"/sources"}
+                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+              >
+                Sources
+              </.link>
+            </li>
+            <li>
+              <.link
+                href={~p"/users/settings"}
+                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+              >
+                <%= @current_user.email %>
+              </.link>
+            </li>
+            <li>
+              <.link
+                href={~p"/users/log_out"}
+                method="delete"
+                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+              >
+                Log out
+              </.link>
+            </li>
+          <% else %>
+            <li>
+              <.link
+                href={~p"/users/register"}
+                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+              >
+                Register
+              </.link>
+            </li>
+            <li>
+              <.link
+                href={~p"/users/log_in"}
+                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+              >
+                Log in
+              </.link>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </header>
+
     <%= @inner_content %>
   </body>
 </html>

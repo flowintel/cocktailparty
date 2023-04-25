@@ -9,3 +9,10 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+
+Cocktailparty.Repo.insert!(%Cocktailparty.Catalog.Source{
+  channel: "dns-collector",
+  description: "CIRCL pdns redis pubsub",
+  name: "Passive DNS",
+  type: "pubsub"
+})
