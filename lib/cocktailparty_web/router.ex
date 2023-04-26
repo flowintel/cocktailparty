@@ -23,9 +23,24 @@ defmodule CocktailpartyWeb.Router do
     plug :put_user_token
   end
 
+  pipeline :require_admin do
+    plug :set_admin_rights
+    plug :require_admin_user
+  end
+
   scope "/", CocktailpartyWeb do
     pipe_through [:browser, :auth]
     get "/", PageController, :home
+    get "/sources", SourceController, :index
+    get "/sources", SourceController, :show
+    # resources "/sources", SourceController, only: [:index, :show]
+  end
+
+  scope "/admin", CocktailpartyWeb do
+    pipe_through [:browser, :auth, :require_admin]
+    get "/", PageController, :home
+    # TODO User administration
+    # resources "/users", UserController
     resources "/sources", SourceController
   end
 
@@ -89,7 +104,7 @@ defmodule CocktailpartyWeb.Router do
     end
   end
 
-  # plug function to assign the user token needed to connect to the socket
+  # plug function to assigns the user token needed to connect to the socket
   defp put_user_token(conn, _) do
     if current_user = conn.assigns[:current_user] do
       token = Phoenix.Token.sign(conn, "user socket", current_user.id)

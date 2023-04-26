@@ -8,6 +8,7 @@ defmodule Cocktailparty.Repo.Migrations.CreateUsersAuthTables do
       add :email, :citext, null: false
       add :hashed_password, :string, null: false
       add :confirmed_at, :naive_datetime
+      add :is_admin, :boolean, null: false, default: false
       timestamps()
     end
 

@@ -350,4 +350,21 @@ defmodule Cocktailparty.Accounts do
       {:error, :user, changeset, _} -> {:error, changeset}
     end
   end
+
+  @doc """
+  Return admin status of user
+
+  ## Examples
+
+      iex> is_user_admin(1)
+      true
+
+  """
+  def is_admin(id) do
+    user = Repo.get!(User, id)
+    case user.is_admin do
+      true -> true
+      false -> false
+    end
+ end
 end

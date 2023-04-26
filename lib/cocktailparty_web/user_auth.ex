@@ -108,6 +108,18 @@ defmodule CocktailpartyWeb.UserAuth do
     end
   end
 
+
+  @doc """
+  Give the admin status to the user by looking into the session
+  and remember me token.
+  """
+  def set_admin_rights(conn, _opts) do
+    {user_token, conn} = ensure_user_token(conn)
+    user = user_token && Accounts.get_user_by_session_token(user_token)
+    is_admin = user && Accounts.is_admin(user.id)
+    assign(conn, :is_admin, is_admin)
+  end
+
   @doc """
   Handles mounting and authenticating the current_user in LiveViews.
 
@@ -205,6 +217,21 @@ defmodule CocktailpartyWeb.UserAuth do
     else
       conn
       |> put_flash(:error, "You must log in to access this page.")
+      |> maybe_store_return_to()
+      |> redirect(to: ~p"/users/log_in")
+      |> halt()
+    end
+  end
+
+  @doc """
+  Used for routes that require the user to be admin.
+  """
+  def require_admin_user(conn, _opts) do
+    if conn.assigns[:is_admin] do
+      conn
+    else
+      conn
+      |> put_flash(:error, "You must admin in to access this page.")
       |> maybe_store_return_to()
       |> redirect(to: ~p"/users/log_in")
       |> halt()
