@@ -32,13 +32,11 @@ defmodule CocktailpartyWeb.Router do
     pipe_through [:browser, :auth]
     get "/", PageController, :home
     get "/sources", SourceController, :index
-    get "/sources", SourceController, :show
-    # resources "/sources", SourceController, only: [:index, :show]
+    get "/sources/:id", SourceController, :show
   end
 
-  scope "/admin", CocktailpartyWeb do
+  scope "/admin", CocktailpartyWeb.Admin do
     pipe_through [:browser, :auth, :require_admin]
-    get "/", PageController, :home
     # TODO User administration
     # resources "/users", UserController
     resources "/sources", SourceController

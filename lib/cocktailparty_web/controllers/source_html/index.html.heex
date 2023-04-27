@@ -1,7 +1,7 @@
 <.header>
   Listing Sources
   <:actions>
-    <.link href={~p"/sources/new"}>
+    <.link href={~p"/admin/sources/new"} :if={@is_admin}>
       <.button>New Source</.button>
     </.link>
   </:actions>
@@ -15,11 +15,12 @@
   <:action :let={source}>
     <div class="sr-only">
       <.link navigate={~p"/sources/#{source}"}>Show</.link>
+      <.link navigate={~p"/admin/sources/#{source}"} :if={@is_admin}>Show</.link>
     </div>
-    <.link navigate={~p"/sources/#{source}/edit"}>Edit</.link>
+      <.link navigate={~p"/admin/sources/#{source}/edit"} :if={@is_admin}>Edit</.link>
   </:action>
   <:action :let={source}>
-    <.link href={~p"/sources/#{source}"} method="delete" data-confirm="Are you sure?">
+    <.link href={~p"/admin/sources/#{source}"} method="delete" data-confirm="Are you sure?" :if={@is_admin} >
       Delete
     </.link>
   </:action>

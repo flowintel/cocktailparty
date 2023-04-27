@@ -1,7 +1,7 @@
-defmodule CocktailpartyWeb.SourceHTML do
+defmodule CocktailpartyWeb.Admin.SourceHTML do
   use CocktailpartyWeb, :html
 
-  embed_templates "source_html/*", only: ~w(index show)
+  embed_templates "../source_html/*"
 
   @doc """
   Renders a source form.
@@ -10,4 +10,5 @@ defmodule CocktailpartyWeb.SourceHTML do
   attr :action, :string, required: true
 
   def source_form(assigns)
+
 end
