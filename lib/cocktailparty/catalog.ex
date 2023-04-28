@@ -7,6 +7,8 @@ defmodule Cocktailparty.Catalog do
   alias Cocktailparty.Repo
 
   alias Cocktailparty.Catalog.Source
+  alias Cocktailparty.Accounts.User
+  alias Cocktailparty.Accounts
 
   @doc """
   Returns the list of sources.
@@ -19,6 +21,7 @@ defmodule Cocktailparty.Catalog do
   """
   def list_sources do
     Repo.all(Source)
+    |> Repo.preload(:users)
   end
 
   @doc """
@@ -35,7 +38,10 @@ defmodule Cocktailparty.Catalog do
       ** (Ecto.NoResultsError)
 
   """
-  def get_source!(id), do: Repo.get!(Source, id)
+  def get_source!(id) do
+    Repo.get!(Source, id)
+    |> Repo.preload(:users)
+  end
 
   @doc """
   Creates a source.
@@ -51,7 +57,7 @@ defmodule Cocktailparty.Catalog do
   """
   def create_source(attrs \\ %{}) do
     %Source{}
-    |> Source.changeset(attrs)
+    |> change_source(attrs)
     |> Repo.insert()
   end
 
@@ -69,7 +75,7 @@ defmodule Cocktailparty.Catalog do
   """
   def update_source(%Source{} = source, attrs) do
     source
-    |> Source.changeset(attrs)
+    |> change_source(attrs)
     |> Repo.update()
   end
 
@@ -99,6 +105,52 @@ defmodule Cocktailparty.Catalog do
 
   """
   def change_source(%Source{} = source, attrs \\ %{}) do
-    Source.changeset(source, attrs)
+    users = list_users_by_id(attrs["user_ids"])
+
+    source
+    |> Repo.preload(:users)
+    |> Source.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:users, users)
+  end
+
+  def list_users_by_id([]), do: []
+  def list_users_by_id(nil), do: []
+
+  def list_users_by_id(user_ids) do
+    dbg(user_ids)
+    Repo.all(from u in User, where: u.id in ^user_ids)
+  end
+
+  def is_subscribed?(source_id, user_id) do
+    src = get_source!(source_id)
+    user = Accounts.get_user!(user_id)
+
+    if Enum.member?(src.users, user) do
+      true
+    else
+      false
+    end
+  end
+
+  def subscribe(source_id, user_id) do
+    src = get_source!(source_id)
+    user = Accounts.get_user!(user_id)
+    user_list = src.users |> Enum.concat([user])
+
+    src_chgst = Ecto.Changeset.change(src)
+    src_with_user = Ecto.Changeset.put_assoc(src_chgst, :users, user_list)
+    Repo.update(src_with_user)
+  end
+
+  def unsubscribe(source_id, user_id) do
+    # straight forward way
+    query =
+      from s in "sources_subscriptions",
+        where:
+          s.source_id == ^source_id and
+            s.user_id == ^user_id,
+        select: s.id
+
+    Repo.delete_all(query)
   end
 end

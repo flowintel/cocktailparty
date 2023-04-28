@@ -10,5 +10,4 @@ defmodule CocktailpartyWeb.Admin.SourceHTML do
   attr :action, :string, required: true
 
   def source_form(assigns)
-
 end

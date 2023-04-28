@@ -8,6 +8,10 @@ defmodule Cocktailparty.Catalog.Source do
     field :name, :string
     field :type, :string
 
+    many_to_many :users, Cocktailparty.Accounts.User,
+      join_through: "sources_subscriptions",
+      on_replace: :delete
+
     timestamps()
   end
 

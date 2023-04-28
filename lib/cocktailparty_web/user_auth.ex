@@ -108,7 +108,6 @@ defmodule CocktailpartyWeb.UserAuth do
     end
   end
 
-
   @doc """
   Give the admin status to the user by looking into the session
   and remember me token.

@@ -9,6 +9,10 @@ defmodule Cocktailparty.Accounts.User do
     field :confirmed_at, :naive_datetime
     field :is_admin, :boolean, default: false
 
+    many_to_many :sources, Cocktailparty.Catalog.Source,
+      join_through: "sources_subscriptions",
+      on_replace: :delete
+
     timestamps()
   end
 

@@ -1,7 +1,9 @@
 defmodule CocktailpartyWeb.SourceHTML do
   use CocktailpartyWeb, :html
 
-  embed_templates "source_html/*", only: ~w(index show)
+  # import Phoenix.HTML.Form
+
+  embed_templates "source_html/*", only: ~w(index)
 
   @doc """
   Renders a source form.
