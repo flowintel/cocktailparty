@@ -21,7 +21,9 @@ defmodule Cocktailparty.Application do
       # Start a worker by calling: Cocktailparty.Worker.start_link(arg)
       # {Cocktailparty.Worker, arg}
       # Redis connection
-      {Redix, {Application.get_env(:cocktailparty, :redix_uri), [name: :redix]}}
+      {Redix, {Application.get_env(:cocktailparty, :redix_uri), [name: :redix]}},
+      # Start the Broker once the application is started
+      Cocktailparty.Broker
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
