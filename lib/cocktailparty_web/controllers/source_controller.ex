@@ -31,6 +31,7 @@ defmodule CocktailpartyWeb.SourceController do
 
   def unsubscribe(conn, params) do
     Logger.debug("Unsubscribing user #{conn.assigns.current_user.id} from source #{params["id"]}")
+
     case Catalog.unsubscribe(String.to_integer(params["id"]), conn.assigns.current_user.id) do
       {1, _deleted} ->
         redirect(conn, to: ~p"/sources")

@@ -10,7 +10,8 @@ defmodule Cocktailparty.Catalog.Source do
 
     many_to_many :users, Cocktailparty.Accounts.User,
       join_through: "sources_subscriptions",
-      on_replace: :delete
+      on_replace: :delete,
+      on_delete: :delete_all
 
     timestamps()
   end

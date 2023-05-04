@@ -1,17 +1,21 @@
-defmodule CocktailpartyWeb.RoomChannel do
+defmodule CocktailpartyWeb.FeedChannel do
   use CocktailpartyWeb, :channel
 
+  require Logger
+
+  alias Cocktailparty.Catalog
+
   @impl true
-  def join("room:lobby", payload, socket) do
-    if authorized?(payload) do
+  def join("feed:lobby", _payload, socket) do
+    {:ok, socket}
+  end
+
+  def join("feed:" <> feed_id, _params, socket = %{assigns: %{current_user: user_id}}) do
+    if authorized?(feed_id, user_id) do
       {:ok, socket}
     else
       {:error, %{reason: "unauthorized"}}
     end
-  end
-
-  def join("room:" <> _private_room_id, _params, _socket) do
-    {:error, %{reason: "unauthorized"}}
   end
 
   # Channels can be used in a request/response fashion
@@ -30,7 +34,8 @@ defmodule CocktailpartyWeb.RoomChannel do
   end
 
   # Add authorization logic here as required.
-  defp authorized?(_payload) do
-    true
+  defp authorized?(feed_id, user_id) do
+    Logger.info("Checking authorization for #{feed_id} and #{user_id}")
+    Catalog.is_subscribed?(feed_id, user_id)
   end
 end
