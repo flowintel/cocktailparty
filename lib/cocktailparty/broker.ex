@@ -33,14 +33,28 @@ defmodule Cocktailparty.Broker do
 
   def handle_info({:redix_pubsub, _pid, ref, :subscribed, _message}, state) do
     # Find the source that we are subscribing to
-    source = Enum.find(state.subscribing, fn subscribing -> subscribing.ref == ref end)
+    current_sub = Enum.find(state.subscribing, fn subscribing -> subscribing.ref == ref end)
     # Remove the source from the list of sources we are subscribing to
     subscribing = Enum.reject(state.subscribing, fn subscribing -> subscribing.ref == ref end)
     # Add the source to the list of sources we are subscribed to
-    subscribed = [%{source: source.source, ref: ref} | state.subscribed]
+    subscribed = [%{source: current_sub.source, ref: ref} | state.subscribed]
     # Update the state
     state = %{subscribing: subscribing, subscribed: subscribed, pubsub: state.pubsub}
     # Log the subscription
+    Logger.info("Subscribed to #{current_sub.source.name}")
+    {:noreply, state}
+  end
+
+  def handle_info({:redix_pubsub, _pid, ref, :disconnected, _message}, state) do
+    # Find the source that is disconnecting
+    current_sub = Enum.find(state.subscribed, fn subscribed -> subscribed.ref == ref end)
+    # Remove the source from the list of sources we are subscribed to
+    subscribed = Enum.reject(state.subscribed, fn subscribed -> subscribed.ref == ref end)
+    # Add the sources to the list of sources we are subscribing to
+    subscribing = [%{source: current_sub.source, ref: ref} | state.subscribing]
+    # Update the state
+    state = %{subscribing: subscribing, subscribed: subscribed, pubsub: state.pubsub}
+    Logger.info("Disconnected from #{inspect(current_sub.source.name)}")
     {:noreply, state}
   end
 
