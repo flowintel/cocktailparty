@@ -59,6 +59,14 @@ defmodule Cocktailparty.Catalog do
     %Source{}
     |> change_source(attrs)
     |> Repo.insert()
+    |> case do
+      {:ok, source} ->
+        _ = notify_broker({:new_source, source})
+        {:ok, source}
+
+      {:error, msg} ->
+        {:error, msg}
+    end
   end
 
   @doc """
@@ -93,6 +101,14 @@ defmodule Cocktailparty.Catalog do
   """
   def delete_source(%Source{} = source) do
     Repo.delete(source)
+    |> case do
+      {:ok, source} ->
+        _ = notify_broker({:delete_source, source})
+        {:ok, source}
+
+      {:error, msg} ->
+        {:error, msg}
+    end
   end
 
   @doc """
@@ -152,5 +168,9 @@ defmodule Cocktailparty.Catalog do
         select: s.id
 
     Repo.delete_all(query)
+  end
+
+  defp notify_broker(msg) do
+    GenServer.cast(Cocktailparty.Broker, msg)
   end
 end
