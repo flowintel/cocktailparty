@@ -2,6 +2,7 @@ defmodule Cocktailparty.Catalog do
   @moduledoc """
   The Catalog context.
   """
+  require Logger
 
   import Ecto.Query, warn: false
   alias Cocktailparty.Repo
@@ -82,9 +83,32 @@ defmodule Cocktailparty.Catalog do
 
   """
   def update_source(%Source{} = source, attrs) do
-    source
-    |> change_source(attrs)
-    |> Repo.update()
+    changeset = change_source(source, attrs)
+
+    case changeset do
+      %Ecto.Changeset{
+        changes: %{channel: new_channel},
+        data: %Source{} = source
+      }
+      when source.channel != new_channel ->
+        # We ask the broker to delete the source with the old channel
+        GenServer.cast(Cocktailparty.Broker, {:delete_source, source})
+
+
+        # We update the source
+        {:ok, source} = Repo.update(changeset)
+
+        # And we ask the broker to subscribe to the updated source
+        GenServer.cast(
+          Cocktailparty.Broker,
+          {:new_source, source}
+        )
+
+        {:ok, source}
+
+      _ ->
+        Repo.update(changeset)
+    end
   end
 
   @doc """
