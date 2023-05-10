@@ -84,6 +84,8 @@ defmodule Cocktailparty.Catalog do
   """
   def update_source(%Source{} = source, attrs) do
     changeset = change_source(source, attrs)
+    # Preserve the existing users association
+    changeset = Ecto.Changeset.put_assoc(changeset, :users, source.users)
 
     case changeset do
       %Ecto.Changeset{
@@ -157,7 +159,6 @@ defmodule Cocktailparty.Catalog do
   def list_users_by_id(nil), do: []
 
   def list_users_by_id(user_ids) do
-    dbg(user_ids)
     Repo.all(from u in User, where: u.id in ^user_ids)
   end
 
