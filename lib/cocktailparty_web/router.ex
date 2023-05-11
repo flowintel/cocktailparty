@@ -14,6 +14,15 @@ defmodule CocktailpartyWeb.Router do
     plug :default_admin_rights
   end
 
+  pipeline :mounted_apps do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_secure_browser_headers
+    plug :fetch_current_user
+    plug :default_admin_rights
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -27,11 +36,6 @@ defmodule CocktailpartyWeb.Router do
 
   pipeline :require_admin do
     plug :require_admin_user
-  end
-
-  pipeline :mounted_apps do
-    plug :accepts, ["html"]
-    plug :put_secure_browser_headers
   end
 
   scope "/", CocktailpartyWeb do
@@ -50,7 +54,7 @@ defmodule CocktailpartyWeb.Router do
   end
 
   scope path: "/feature-flags" do
-    pipe_through :mounted_apps
+    pipe_through [:mounted_apps, :auth, :require_admin]
     forward "/", FunWithFlags.UI.Router, namespace: "feature-flags"
   end
 

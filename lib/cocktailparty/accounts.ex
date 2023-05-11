@@ -372,4 +372,8 @@ defmodule Cocktailparty.Accounts do
       false -> false
     end
   end
+
+  def get_users_by_role(role) do
+    Repo.all(from u in User, where: u.role == ^role)
+  end
 end

@@ -96,7 +96,6 @@ defmodule Cocktailparty.Catalog do
         # We ask the broker to delete the source with the old channel
         GenServer.cast(Cocktailparty.Broker, {:delete_source, source})
 
-
         # We update the source
         {:ok, source} = Repo.update(changeset)
 

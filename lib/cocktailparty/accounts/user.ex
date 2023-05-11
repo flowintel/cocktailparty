@@ -3,12 +3,17 @@ defmodule Cocktailparty.Accounts.User do
 
   import Ecto.Changeset
 
+  @uuser "uuser"
+  @user_role "user"
+  @poweruser_role "poweruser"
+
   schema "users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
     field :is_admin, :boolean, default: false
+    field :role, :string, default: "user"
 
     many_to_many :sources, Cocktailparty.Catalog.Source,
       join_through: "sources_subscriptions",
@@ -159,6 +164,18 @@ defmodule Cocktailparty.Accounts.User do
       add_error(changeset, :current_password, "is not valid")
     end
   end
+
+  @doc """
+  A user changeset for promoting the user to a new role
+
+  """
+  def promote_changeset(user, attrs, _opts \\ []) do
+    user
+    |> cast(attrs, [:role])
+    |> validate_inclusion(:role, roles())
+  end
+
+  def roles, do: [@uuser, @user_role, @poweruser_role]
 
   defimpl FunWithFlags.Actor, for: Cocktailparty.Accounts.User do
     def id(%Cocktailparty.Accounts.User{id: id}), do: "user:#{id}"

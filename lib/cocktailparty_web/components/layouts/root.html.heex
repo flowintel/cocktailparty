@@ -55,22 +55,29 @@
           <%= if @current_user do %>
             <li>
               <.link
+                :if={@is_admin}
                 href={~p"/admin/sources"}
                 class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-                :if={@is_admin}
-                >
-              
+              >
                 Admin Sources
               </.link>
             </li>
             <li>
               <.link
+                :if={@is_admin}
                 href={~p"/admin/sources"}
                 class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-                :if={@is_admin}
-                >
-              
+              >
                 Admin Users
+              </.link>
+            </li>
+            <li>
+              <.link
+                :if={@is_admin}
+                href={~p"/feature-flags"}
+                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+              >
+                FeatureFlags
               </.link>
             </li>
             <li>

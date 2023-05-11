@@ -62,9 +62,13 @@ config :phoenix, :json_library, Jason
 # Fun With Flags configuration
 config :fun_with_flags, :cache,
   enabled: true,
-  ttl: 900 # in seconds
+  # in seconds
+  ttl: 900
+
 config :fun_with_flags, :persistence,
-  [adapter: FunWithFlags.Store.Persistent.Ecto, repo: Cocktailparty.Repo]
+  adapter: FunWithFlags.Store.Persistent.Ecto,
+  repo: Cocktailparty.Repo
+
 config :fun_with_flags, :cache_bust_notifications,
   enabled: true,
   adapter: FunWithFlags.Notifications.PhoenixPubSub,
