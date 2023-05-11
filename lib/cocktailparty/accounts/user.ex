@@ -1,5 +1,6 @@
 defmodule Cocktailparty.Accounts.User do
   use Ecto.Schema
+
   import Ecto.Changeset
 
   schema "users" do
@@ -157,5 +158,9 @@ defmodule Cocktailparty.Accounts.User do
     else
       add_error(changeset, :current_password, "is not valid")
     end
+  end
+
+  defimpl FunWithFlags.Actor, for: Cocktailparty.Accounts.User do
+    def id(%Cocktailparty.Accounts.User{id: id}), do: "user:#{id}"
   end
 end

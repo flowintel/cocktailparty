@@ -22,6 +22,8 @@ defmodule Cocktailparty.Application do
       # {Cocktailparty.Worker, arg}
       # Redis connection
       {Redix, {Application.get_env(:cocktailparty, :redix_uri), [name: :redix]}},
+      # Fun with Flags
+      FunWithFlags.Supervisor,
       # Start the Broker once the application is started
       Cocktailparty.Broker
     ]
