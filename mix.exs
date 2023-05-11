@@ -53,7 +53,8 @@ defmodule Cocktailparty.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:redix, "~>1.2.2"},
       # runtime: false because we don't want to start the FunWithFlags.Supervisor automatically
-      {:fun_with_flags, "~> 1.10.1", runtime: false}
+      {:fun_with_flags, "~> 1.10.1", runtime: false},
+      {:fun_with_flags_ui, "~> 0.8.1", runtime: false}
     ]
   end
 

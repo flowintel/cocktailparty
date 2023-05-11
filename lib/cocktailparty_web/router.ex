@@ -29,6 +29,11 @@ defmodule CocktailpartyWeb.Router do
     plug :require_admin_user
   end
 
+  pipeline :mounted_apps do
+    plug :accepts, ["html"]
+    plug :put_secure_browser_headers
+  end
+
   scope "/", CocktailpartyWeb do
     pipe_through [:browser, :auth]
     get "/", PageController, :home
@@ -42,6 +47,11 @@ defmodule CocktailpartyWeb.Router do
     # TODO User administration
     # resources "/users", UserController
     resources "/sources", SourceController
+  end
+
+  scope path: "/feature-flags" do
+    pipe_through :mounted_apps
+    forward "/", FunWithFlags.UI.Router, namespace: "feature-flags"
   end
 
   # Other scopes may use custom stacks.
