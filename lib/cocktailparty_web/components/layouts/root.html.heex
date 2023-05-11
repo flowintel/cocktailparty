@@ -55,6 +55,26 @@
           <%= if @current_user do %>
             <li>
               <.link
+                href={~p"/admin/sources"}
+                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+                :if={@is_admin}
+                >
+              
+                Admin Sources
+              </.link>
+            </li>
+            <li>
+              <.link
+                href={~p"/admin/sources"}
+                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+                :if={@is_admin}
+                >
+              
+                Admin Users
+              </.link>
+            </li>
+            <li>
+              <.link
                 href={~p"/sources"}
                 class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
               >

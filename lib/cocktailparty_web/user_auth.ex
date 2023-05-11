@@ -110,13 +110,20 @@ defmodule CocktailpartyWeb.UserAuth do
 
   @doc """
   Give the admin status to the user by looking into the session
-  and remember me token.
+  and remember the token.
   """
   def set_admin_rights(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
     user = user_token && Accounts.get_user_by_session_token(user_token)
     is_admin = user && Accounts.is_admin(user.id)
     assign(conn, :is_admin, is_admin)
+  end
+
+  @doc """
+  Assigns is_admin
+  """
+  def default_admin_rights(conn, _opts) do
+    assign(conn, :is_admin, false)
   end
 
   @doc """

@@ -6,7 +6,7 @@ defmodule CocktailpartyWeb.Admin.SourceController do
 
   def index(conn, _params) do
     sources = Catalog.list_sources()
-    render(conn, :index, sources: sources, is_admin: true)
+    render(conn, :index, sources: sources)
   end
 
   def new(conn, _params) do
@@ -28,7 +28,7 @@ defmodule CocktailpartyWeb.Admin.SourceController do
 
   def show(conn, %{"id" => id}) do
     source = Catalog.get_source!(id)
-    render(conn, :show, source: source, is_admin: true)
+    render(conn, :show, source: source)
   end
 
   def edit(conn, %{"id" => id}) do

@@ -11,6 +11,7 @@ defmodule CocktailpartyWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_user
+    plug :default_admin_rights
   end
 
   pipeline :api do
@@ -21,10 +22,10 @@ defmodule CocktailpartyWeb.Router do
     plug :fetch_current_user
     plug :require_authenticated_user
     plug :put_user_token
+    plug :set_admin_rights
   end
 
   pipeline :require_admin do
-    plug :set_admin_rights
     plug :require_admin_user
   end
 

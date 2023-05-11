@@ -13,7 +13,7 @@ defmodule CocktailpartyWeb.SourceController do
         %{source | users: Catalog.is_subscribed?(source.id, conn.assigns.current_user.id)}
       end)
 
-    render(conn, :index, sources: sources, is_admin: false)
+    render(conn, :index, sources: sources)
   end
 
   def subscribe(conn, params) do
@@ -39,6 +39,7 @@ defmodule CocktailpartyWeb.SourceController do
       {0, _deleted} ->
         conn
         |> put_flash(:error, "Unsubscribe failed")
+        |> redirect(to: ~p"/sources")
     end
   end
 end
