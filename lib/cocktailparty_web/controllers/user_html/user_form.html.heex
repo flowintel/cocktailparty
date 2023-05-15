@@ -1,0 +1,11 @@
+<.simple_form :let={f} for={@changeset} action={@action}>
+  <.error :if={@changeset.action}>
+    Oops, something went wrong! Please check the errors below.
+  </.error>
+  <.input field={f[:email]} type="text" label="Email" />
+  <.input field={f[:role]} type="select" label="Role" options={@roles} />
+  <.input field={f[:is_admin]} type="select" label="Admin" options={["true", "false"]}/>
+  <:actions>
+    <.button>Save User</.button>
+  </:actions>
+</.simple_form>

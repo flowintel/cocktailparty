@@ -48,8 +48,7 @@ defmodule CocktailpartyWeb.Router do
 
   scope "/admin", CocktailpartyWeb.Admin do
     pipe_through [:browser, :auth, :require_admin]
-    # TODO User administration
-    # resources "/users", UserController
+    resources "/users", UserController
     resources "/sources", SourceController
   end
 
