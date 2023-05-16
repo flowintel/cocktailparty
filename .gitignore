@@ -35,3 +35,5 @@ cocktailparty-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Elixir-LS
+/.elixir_ls/
