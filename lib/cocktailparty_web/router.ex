@@ -96,7 +96,7 @@ defmodule CocktailpartyWeb.Router do
   end
 
   scope "/", CocktailpartyWeb do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser, :auth]
 
     live_session :require_authenticated_user,
       on_mount: [{CocktailpartyWeb.UserAuth, :ensure_authenticated}] do
