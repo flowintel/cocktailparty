@@ -15,7 +15,13 @@
   <:item title="Channel"><%= @source.channel %></:item>
 </.list>
 
+
+<div class="mockup-code">
+  <pre data-prefix="$"><code>
+./websocat.x86_64-unknown-linux-musl --ping-interval 5 "ws://localhost:4000/socket/websocket?token=<%= @user_token %>&vsn=2.0.0" -p '["3","3","feed:<%= @source.id %>","phx_join",{}]'
+  </code></pre>
+</div>
+
+
 <.back :if={!@is_admin} navigate={~p"/sources"}>Back to sources</.back>
 <.back :if={@is_admin} navigate={~p"/admin/sources"}>Back to sources</.back>
-
-Here will be the instructions to connect to the source.
