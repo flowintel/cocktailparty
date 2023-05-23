@@ -1,8 +1,6 @@
 defmodule CocktailpartyWeb.Admin.UserHTML do
   use CocktailpartyWeb, :html
 
-  alias Cocktailparty.UserManagement.User
-
   embed_templates "../user_html/*"
 
   @doc """

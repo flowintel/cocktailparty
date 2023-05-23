@@ -62,7 +62,7 @@ defmodule Cocktailparty.UserManagement.User do
     |> validate_password(opts)
   end
 
-  defp validate_email(changeset, opts) do
+  def validate_email(changeset, opts) do
     changeset
     |> validate_required([:email])
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
@@ -70,7 +70,7 @@ defmodule Cocktailparty.UserManagement.User do
     |> maybe_validate_unique_email(opts)
   end
 
-  defp validate_password(changeset, opts) do
+  def validate_password(changeset, opts) do
     changeset
     |> validate_required([:password])
     |> validate_length(:password, min: 12, max: 72)
@@ -136,7 +136,7 @@ defmodule Cocktailparty.UserManagement.User do
   def password_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:password])
-    |> validate_confirmation(:password, message: "does not match password")
+    # |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
   end
 
@@ -187,7 +187,7 @@ defmodule Cocktailparty.UserManagement.User do
 
   def roles, do: [@uuser, @user_role, @poweruser_role]
 
-  defimpl FunWithFlags.Actor, for: Cocktailparty.Accounts.User do
+  defimpl FunWithFlags.Actor, for: Cocktailparty.UserManagement.User do
     def id(%Cocktailparty.Accounts.User{id: id}), do: "user:#{id}"
   end
 end

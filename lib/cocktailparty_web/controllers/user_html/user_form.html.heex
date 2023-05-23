@@ -2,9 +2,10 @@
   <.error :if={@changeset.action}>
     Oops, something went wrong! Please check the errors below.
   </.error>
-  <.input field={f[:email]} type="text" label="Email" />
+  <.input field={f[:email]} type="email" label="Email" required />
+  <.input field={f[:password]} type="text" label="Password" />
   <.input field={f[:role]} type="select" label="Role" options={@roles} />
-  <.input field={f[:is_admin]} type="select" label="Admin" options={["true", "false"]}/>
+  <.input field={f[:is_admin]} type="select" label="Admin" options={["true", "false"]} />
   <:actions>
     <.button>Save User</.button>
   </:actions>

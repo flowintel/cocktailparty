@@ -4,6 +4,7 @@ defmodule Cocktailparty.UserManagement do
   """
 
   import Ecto.Query, warn: false
+  import Ecto.Changeset
   alias Cocktailparty.Repo
 
   # we reuse Accounts.User schema
@@ -49,9 +50,9 @@ defmodule Cocktailparty.UserManagement do
       {:error, ...}
 
   """
-  def create_user(attrs \\ %User{}) do
+  def create_user(attrs \\ %{}) do
     %User{}
-    |>change_user(attrs)
+    |> User.registration_changeset(attrs)
     |> Repo.insert()
   end
 
@@ -69,10 +70,31 @@ defmodule Cocktailparty.UserManagement do
   """
 
   def update_user(%User{} = user, attrs) do
-    changeset = change_user(user, attrs)
-
-    changeset
+    user
+    |> change_user(attrs)
+    |> validate_email_if_set()
+    |> validate_password_if_set()
     |> Repo.update()
+  end
+
+  def validate_email_if_set(changeset, opts \\ []) do
+    case changed?(changeset, :email) do
+      false ->
+        changeset
+
+      true ->
+        User.validate_email(changeset, opts)
+    end
+  end
+
+  def validate_password_if_set(changeset, opts \\ []) do
+    case changed?(changeset, :password) do
+      false ->
+        changeset
+
+      true ->
+        User.validate_password(changeset, opts)
+    end
   end
 
   @doc """
@@ -88,8 +110,14 @@ defmodule Cocktailparty.UserManagement do
 
   """
   def delete_user(%User{} = user) do
-    IO.inspect(user)
-    raise "TODO"
+    Repo.delete(user)
+    |> case do
+      {:ok, user} ->
+        {:ok, user}
+
+      {:error, msg} ->
+        {:error, msg}
+    end
   end
 
   @doc """
@@ -102,7 +130,18 @@ defmodule Cocktailparty.UserManagement do
 
   """
   def change_user(%User{} = user, attrs \\ %{}) do
-    user
-    |> User.changeset(attrs)
+    # all change go through this
+    changeset = User.changeset(user, attrs)
+    # I add the password change if it is present
+    case attrs["password"] do
+      nil ->
+        changeset
+
+      "" ->
+        changeset
+
+      _ ->
+        put_change(changeset, :password, attrs["password"])
+    end
   end
 end

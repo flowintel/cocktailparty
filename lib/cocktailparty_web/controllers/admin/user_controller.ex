@@ -37,6 +37,7 @@ defmodule CocktailpartyWeb.Admin.UserController do
     render(conn, :edit, user: user, changeset: changeset, roles: User.roles())
   end
 
+  @spec update(Plug.Conn.t(), map) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "user" => user_params}) do
     user = UserManagement.get_user!(id)
 
@@ -51,6 +52,7 @@ defmodule CocktailpartyWeb.Admin.UserController do
     end
   end
 
+  @spec delete(Plug.Conn.t(), map) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     user = UserManagement.get_user!(id)
     {:ok, _user} = UserManagement.delete_user(user)
