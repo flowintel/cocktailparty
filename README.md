@@ -1,4 +1,4 @@
-# Cocktailparty
+# CocktailParty
 
 To start your Phoenix server:
 
