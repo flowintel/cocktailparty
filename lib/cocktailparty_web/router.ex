@@ -42,6 +42,7 @@ defmodule CocktailpartyWeb.Router do
     pipe_through [:browser, :auth]
     get "/", PageController, :home
     get "/sources", SourceController, :index
+    get "/sources/:id", SourceController, :show
     post "/sources/:id", SourceController, :subscribe
     delete "/sources/:id", SourceController, :unsubscribe
   end

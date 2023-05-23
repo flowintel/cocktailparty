@@ -16,16 +16,24 @@ defmodule CocktailpartyWeb.SourceController do
     render(conn, :index, sources: sources)
   end
 
+  def show(conn, %{"id" => id}) do
+    source = Catalog.get_source!(id)
+    render(conn, :show, source: source)
+  end
+
   def subscribe(conn, params) do
     Logger.debug("Subscribing user #{conn.assigns.current_user.id} to source #{params["id"]}")
 
     case Catalog.subscribe(params["id"], conn.assigns.current_user.id) do
       {:ok, _source} ->
-        redirect(conn, to: ~p"/sources")
+        conn
+        |> put_flash(:info, "Subscribed")
+        |> redirect(to: ~p"/sources/#{params["id"]}")
 
       {:error, changeset} ->
         conn
         |> put_flash(:error, changeset)
+        |> redirect(to: ~p"/sources")
     end
   end
 
@@ -34,7 +42,9 @@ defmodule CocktailpartyWeb.SourceController do
 
     case Catalog.unsubscribe(String.to_integer(params["id"]), conn.assigns.current_user.id) do
       {1, _deleted} ->
-        redirect(conn, to: ~p"/sources")
+        conn
+        |> put_flash(:info, "Unsubscribed")
+        |> redirect(to: ~p"/sources")
 
       {0, _deleted} ->
         conn
