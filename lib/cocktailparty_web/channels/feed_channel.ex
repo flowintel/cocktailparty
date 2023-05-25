@@ -28,8 +28,10 @@ defmodule CocktailpartyWeb.FeedChannel do
   # Broadcast messages from the broker to all clients
   # broadcast to everyone in the current topic (room:lobby).
   @impl true
-  def handle_info(%{channel: "dns_collector", payload: payload}, socket) do
-    broadcast!(socket, "new_msg", %{body: Jason.decode!(payload)})
+  def handle_info(%{channel: channel, payload: payload}, socket) do
+    #TODO make this failsafe - send base64 encoded payload when not json
+    # broadcast!(socket, "new_msg", %{body: Jason.decode!(payload)})
+    broadcast!(socket, channel, %{body: payload})
     {:noreply, socket}
   end
 

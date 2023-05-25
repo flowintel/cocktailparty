@@ -112,4 +112,9 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Hackney
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+  # Configure your redis connection
+
+  redis_uri = System.get_env("REDIS_URI") || "redis://127.0.0.1:6379/0"
+  config :cocktailparty,
+    redix_uri: redis_uri
 end
