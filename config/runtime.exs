@@ -114,7 +114,24 @@ if config_env() == :prod do
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
   # Configure your redis connection
 
-  redis_uri = System.get_env("REDIS_URI") || "redis://127.0.0.1:6379/0"
+  standalone =
+    case System.get_env("STANDALONE") || true do
+      "true" -> true
+      "false" -> false
+      nil -> true
+    end
+
+  broker =
+    case System.get_env("BROKER") || true do
+      "true" -> true
+      "false" -> false
+      nil -> true
+    end
+
   config :cocktailparty,
-    redix_uri: redis_uri
+    redix_uri: System.get_env("REDIS_URI") || "redis://127.0.0.1:6379/0",
+    # won't start libcluster unless this is true
+    standalone: standalone,
+    # won't start the broker and redis connection unless this is true
+    broker: broker
 end

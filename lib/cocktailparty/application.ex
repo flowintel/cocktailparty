@@ -7,26 +7,39 @@ defmodule Cocktailparty.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      # Start the Telemetry supervisor
-      CocktailpartyWeb.Telemetry,
-      # Start the Ecto repository
-      Cocktailparty.Repo,
-      # Start the PubSub system
-      {Phoenix.PubSub, name: Cocktailparty.PubSub},
-      # Start Finch
-      {Finch, name: Cocktailparty.Finch},
-      # Start the Endpoint (http/https)
-      CocktailpartyWeb.Endpoint,
-      # Start a worker by calling: Cocktailparty.Worker.start_link(arg)
-      # {Cocktailparty.Worker, arg}
-      # Redis connection
-      {Redix, {Application.get_env(:cocktailparty, :redix_uri), [name: :redix]}},
-      # Fun with Flags
-      FunWithFlags.Supervisor,
-      # Start the Broker once the application is started
-      Cocktailparty.Broker
-    ]
+    # Common children
+    children =
+      [
+        # Start the Telemetry supervisor
+        CocktailpartyWeb.Telemetry,
+        # Start the Ecto repository
+        Cocktailparty.Repo,
+        # Start the PubSub system
+        {Phoenix.PubSub, name: Cocktailparty.PubSub},
+        # Start Finch
+        {Finch, name: Cocktailparty.Finch},
+        # Start the Endpoint (http/https)
+        CocktailpartyWeb.Endpoint,
+        # Start a worker by calling: Cocktailparty.Worker.start_link(arg)
+        # {Cocktailparty.Worker, arg}
+        # Fun with Flags
+        FunWithFlags.Supervisor
+      ]
+      |> append_if_true(
+        !Application.get_env(:cocktailparty, :standalone),
+        {Cluster.Supervisor,
+         [Application.get_env(:libcluster, :topologies), [name: Cocktailparty.ClusterSupervisor]]}
+      )
+      |> append_if_true(
+        Application.get_env(:cocktailparty, :standalone) ||
+          Application.get_env(:cocktailparty, :broker),
+        {Redix, {Application.get_env(:cocktailparty, :redix_uri), [name: :redix]}}
+      )
+      |> append_if_true(
+        Application.get_env(:cocktailparty, :standalone) ||
+          Application.get_env(:cocktailparty, :broker),
+        Cocktailparty.Broker
+      )
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -40,5 +53,9 @@ defmodule Cocktailparty.Application do
   def config_change(changed, _new, removed) do
     CocktailpartyWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  defp append_if_true(list, cond, extra) do
+    if cond, do: list ++ [extra], else: list
   end
 end
