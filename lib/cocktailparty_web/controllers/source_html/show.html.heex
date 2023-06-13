@@ -26,7 +26,7 @@
     <div class="mockup-code">
       <pre><code>./websocat.x86_64-unknown-linux-musl \
     --ping-interval 5 \
-    "ws://<%= @conn.host %>:<%= @conn.port %>/socket/websocket?token=<%= @user_token %>&vsn=2.0.0" \
+    "wss://<%= @conn.host %>/socket/websocket?token=<%= @user_token %>&vsn=2.0.0" \
     -p '["3","3","feed:<%= @source.id %>","phx_join",{}]'
   </code></pre>
     </div>
