@@ -15,10 +15,22 @@
   <:item title="Channel"><%= @source.channel %></:item>
 </.list>
 
-<div class="mockup-code">
-  <pre data-prefix="$"><code>
-./websocat.x86_64-unknown-linux-musl --ping-interval 5 "ws://localhost:4000/socket/websocket?token=<%= @user_token %>&vsn=2.0.0" -p '["3","3","feed:<%= @source.id %>","phx_join",{}]'
+<br />
+
+<div class="w-full border-opacity-50">
+
+  In order to collect the data from the websocket, one can use
+  <a href="https://github.com/vi/websocat" class="link">websocat</a>. Simply download the latest release for your platform and start receiving data with the following command:<br>
+
+  <div class="grid h-80 place-items-center">
+    <div class="mockup-code">
+      <pre><code>./websocat.x86_64-unknown-linux-musl \
+    --ping-interval 5 \
+    "ws://<%= @conn.host %>:<%= @conn.port %>/socket/websocket?token=<%= @user_token %>&vsn=2.0.0" \
+    -p '["3","3","feed:<%= @source.id %>","phx_join",{}]'
   </code></pre>
+    </div>
+  </div>
 </div>
 
 <.back :if={!@is_admin} navigate={~p"/sources"}>Back to sources</.back>
