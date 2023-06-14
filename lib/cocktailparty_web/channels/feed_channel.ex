@@ -29,11 +29,9 @@ defmodule CocktailpartyWeb.FeedChannel do
   # broadcast to everyone in the current topic (room:lobby).
   @impl true
   def handle_info(%{channel: channel, payload: payload}, socket) do
-    # TODO make this failsafe - send base64 encoded payload when not json
-    # broadcast!(socket, "new_msg", %{body: Jason.decode!(payload)})
-    # broadcast!(socket, channel, %{body: payload})
-    hash = :crypto.hash(:sha256, payload) |> Base.encode16()
-    broadcast_from!(socket, channel, %{hash: hash})
+    # hash = :crypto.hash(:sha256, payload) |> Base.encode16()
+    # push(socket, channel, %{hash: hash})
+    push(socket, channel, %{body: payload})
     {:noreply, socket}
   end
 
