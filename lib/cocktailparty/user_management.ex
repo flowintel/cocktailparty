@@ -110,6 +110,15 @@ defmodule Cocktailparty.UserManagement do
 
   """
   def delete_user(%User{} = user) do
+    # TODO make this a transaction
+    query =
+      from s in "sources_subscriptions",
+        where:
+            s.user_id == ^user.id,
+        select: s.id
+
+    Repo.delete_all(query)
+
     Repo.delete(user)
     |> case do
       {:ok, user} ->
