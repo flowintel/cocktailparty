@@ -113,8 +113,7 @@ defmodule Cocktailparty.UserManagement do
     # TODO make this a transaction
     query =
       from s in "sources_subscriptions",
-        where:
-            s.user_id == ^user.id,
+        where: s.user_id == ^user.id,
         select: s.id
 
     Repo.delete_all(query)

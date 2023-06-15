@@ -1,5 +1,6 @@
 defmodule CocktailpartyWeb.FeedChannel do
   use CocktailpartyWeb, :channel
+  alias CocktailpartyWeb.Presence
 
   require Logger
 
@@ -12,6 +13,7 @@ defmodule CocktailpartyWeb.FeedChannel do
 
   def join("feed:" <> feed_id, _params, socket = %{assigns: %{current_user: user_id}}) do
     if authorized?(feed_id, user_id) do
+      send(self(), :after_join)
       {:ok, socket}
     else
       {:error, %{reason: "unauthorized"}}
@@ -32,6 +34,26 @@ defmodule CocktailpartyWeb.FeedChannel do
     # hash = :crypto.hash(:sha256, payload) |> Base.encode16()
     # push(socket, channel, %{hash: hash})
     push(socket, channel, %{body: payload})
+    {:noreply, socket}
+  end
+
+  # Presence tracking
+  @impl true
+  def handle_info(:after_join, socket) do
+    {:ok, _} =
+      Presence.track(socket, socket.assigns.current_user, %{
+        online_at: inspect(System.system_time(:second)),
+        current_ip: inspect(socket)
+      })
+
+    {:noreply, socket}
+  end
+
+  # intercept presence_diff
+  intercept(["presence_diff"])
+
+  @impl true
+  def handle_out("presence_diff", _msg, socket) do
     {:noreply, socket}
   end
 

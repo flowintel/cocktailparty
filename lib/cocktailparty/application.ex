@@ -18,6 +18,8 @@ defmodule Cocktailparty.Application do
         {Phoenix.PubSub, name: Cocktailparty.PubSub},
         # Start Finch
         {Finch, name: Cocktailparty.Finch},
+        # Start the presence module
+        CocktailpartyWeb.Presence,
         # Start the Endpoint (http/https)
         CocktailpartyWeb.Endpoint,
         # Start a worker by calling: Cocktailparty.Worker.start_link(arg)

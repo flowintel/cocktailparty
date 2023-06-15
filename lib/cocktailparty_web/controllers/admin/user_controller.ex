@@ -3,10 +3,24 @@ defmodule CocktailpartyWeb.Admin.UserController do
 
   alias Cocktailparty.UserManagement
   alias Cocktailparty.UserManagement.User
+  alias CocktailpartyWeb.Presence
+
+  require Logger
 
   def index(conn, _params) do
     users = UserManagement.list_users()
-    render(conn, :index, users: users)
+    # List connected user
+    connected_users = Presence.get_all_connected_users()
+
+    updated_users =
+      Enum.reduce(users, [], fn user, updated_users ->
+        updated_user =
+          Map.put(user, :is_present, Enum.member?(connected_users, Integer.to_string(user.id)))
+
+        [updated_user | updated_users]
+      end)
+
+    render(conn, :index, users: updated_users)
   end
 
   def new(conn, _params) do

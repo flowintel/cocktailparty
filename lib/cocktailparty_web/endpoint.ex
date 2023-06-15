@@ -14,7 +14,7 @@ defmodule CocktailpartyWeb.Endpoint do
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   socket "/socket", CocktailpartyWeb.SinkSocket,
-    websocket: true,
+    websocket: [connect_info: [:peer_data]],
     longpoll: false
 
   # Serve at "/" the static files from "priv/static" directory.
