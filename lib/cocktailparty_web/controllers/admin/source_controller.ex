@@ -3,6 +3,7 @@ defmodule CocktailpartyWeb.Admin.SourceController do
 
   alias Cocktailparty.Catalog
   alias Cocktailparty.Catalog.Source
+  alias CocktailpartyWeb.Presence
 
   def index(conn, _params) do
     sources = Catalog.list_sources()
@@ -28,6 +29,17 @@ defmodule CocktailpartyWeb.Admin.SourceController do
 
   def show(conn, %{"id" => id}) do
     source = Catalog.get_source!(id)
+
+    connected_users = Presence.get_all_connected_users()
+
+    updated_users =
+      Enum.reduce(source.users, [], fn user, updated_users ->
+        updated_user = Map.put(user, :is_present, Enum.member?(connected_users, user.id))
+        [updated_user | updated_users]
+      end)
+
+    source = %{source | users: updated_users}
+
     render(conn, :show, source: source)
   end
 

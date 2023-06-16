@@ -7,40 +7,45 @@
   </:actions>
 </.header>
 
-<%!-- <.table id="sources" rows={@sources} row_click={&JS.navigate(~p"/sources/#{&1}/subscribe")}> --%>
-<.table id="sources" rows={@sources}>
+<.table :if={@is_admin} id="sources" rows={@sources} row_click={&JS.navigate(~p"/admin/sources/#{&1}")}>
   <:col :let={source} label="Name"><%= source.name %></:col>
   <:col :let={source} label="Description"><%= source.description %></:col>
   <:col :let={source} label="Type"><%= source.type %></:col>
   <:col :let={source} label="Channel"><%= source.channel %></:col>
-  <:col :let={source} :if={!@is_admin} label="Subscribed">
-    <%= source.users %>
-  </:col>
-
-  <:action :let={source}>
-    <.link :if={!@is_admin} href={~p"/sources/#{source}"} method="post">Subcribe</.link>
-  </:action>
-
-  <:action :let={source}>
-    <.link :if={!@is_admin} href={~p"/sources/#{source}"} method="delete">Unsubcribe</.link>
-  </:action>
 
   <:action :let={source}>
     <div class="sr-only">
       <%!-- <.link navigate={~p"/sources/#{source}/subscribe"}>Show</.link> --%>
-      <.link :if={@is_admin} navigate={~p"/admin/sources/#{source}"}>Show</.link>
+      <.link navigate={~p"/admin/sources/#{source}"}>Show</.link>
     </div>
-    <.link :if={@is_admin} navigate={~p"/admin/sources/#{source}/edit"}>Edit</.link>
+    <.link navigate={~p"/admin/sources/#{source}/edit"}>Edit</.link>
   </:action>
 
   <:action :let={source}>
     <.link
-      :if={@is_admin}
       href={~p"/admin/sources/#{source}"}
       method="delete"
       data-confirm="Are you sure?"
     >
       Delete
     </.link>
+  </:action>
+</.table>
+
+<.table :if={!@is_admin}  id="sources" rows={@sources} >
+  <:col :let={source} label="Name"><%= source.name %></:col>
+  <:col :let={source} label="Description"><%= source.description %></:col>
+  <:col :let={source} label="Type"><%= source.type %></:col>
+  <:col :let={source} label="Channel"><%= source.channel %></:col>
+  <:col :let={source} label="Subscribed">
+    <%= source.users %>
+  </:col>
+
+  <:action :let={source}>
+    <.link href={~p"/sources/#{source}"} method="delete">Unsubcribe</.link>
+  </:action>
+
+  <:action :let={source}>
+    <.link href={~p"/sources/#{source}"} method="post">Subcribe</.link>
   </:action>
 </.table>

@@ -1,5 +1,5 @@
 <.header>
-  Source <%= @source.id %>
+  Source <%= @source.name %>
   <:subtitle>This is a source record from your database.</:subtitle>
   <:actions>
     <.link :if={@is_admin} href={~p"/admin/sources/#{@source}/edit"}>
@@ -10,12 +10,29 @@
 
 <.list>
   <:item title="Name"><%= @source.name %></:item>
+  <:item title="Id"><%= @source.id %></:item>
   <:item title="Description"><%= @source.description %></:item>
   <:item title="Type"><%= @source.type %></:item>
   <:item title="Channel"><%= @source.channel %></:item>
 </.list>
 
+<div :if={@is_admin}>
 <br />
+<h1 class="text-lg font-semibold leading-8 text-zinc-800">Subscribed users</h1>
+
+<.table id="users" rows={@source.users} row_click={&JS.navigate(~p"/admin/users/#{&1}")}>
+  <:col :let={user} label="email">
+    <div class="indicator">
+      <span :if={user.is_present} class="indicator-item badge badge-success"></span>
+      <span :if={!user.is_present} class="indicator-item badge badge-ghost"></span>
+      <span><%= user.email %></span>
+    </div>
+  </:col>
+</.table>
+</div>
+
+<br />
+<h1 class="text-lg font-semibold leading-8 text-zinc-800">Instructions</h1>
 
 <div class="w-full border-opacity-50">
   In order to collect the data from the websocket, one can use <a
