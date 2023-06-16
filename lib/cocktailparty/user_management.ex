@@ -36,6 +36,7 @@ defmodule Cocktailparty.UserManagement do
   """
   def get_user!(id) do
     Repo.get!(User, id)
+    |> Repo.preload(:sources)
   end
 
   @doc """

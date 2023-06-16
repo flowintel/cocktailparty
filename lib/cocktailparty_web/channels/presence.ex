@@ -23,10 +23,10 @@ defmodule CocktailpartyWeb.Presence do
 
     connected_clients =
       Enum.reduce(feeds, %{}, fn feed, connected_clients ->
-        inspect(list(feed))
         Map.merge(list(feed), connected_clients)
       end)
 
     Map.keys(connected_clients)
+    |> Enum.map(&String.to_integer/1)
   end
 end

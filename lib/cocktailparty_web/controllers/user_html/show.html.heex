@@ -1,6 +1,5 @@
 <.header>
-  User <%= @user.id %>
-  <:subtitle>This is a user record from your database.</:subtitle>
+  User: <%= @user.email %>
   <:actions>
     <.link href={~p"/admin/users/#{@user}/edit"}>
       <.button>Edit user</.button>
@@ -9,9 +8,28 @@
 </.header>
 
 <.list>
+  <:item title="Id"><%= @user.id %></:item>
   <:item title="Email"><%= @user.email %></:item>
   <:item title="Role"><%= @user.role %></:item>
   <:item title="Admin"><%= @user.is_admin %></:item>
+  <:item title="Status">
+    <div :if={@user.is_present} class="badge badge-success">
+      online
+    </div>
+    <div :if={!@user.is_present} class="badge badge-warning">
+      offline
+    </div>
+  </:item>
 </.list>
+
+<br />
+<h1 class="text-lg font-semibold leading-8 text-zinc-800">Subscribed sources</h1>
+
+<.table id="sources" rows={@user.sources}>
+  <:col :let={source} label="Name"><%= source.name %></:col>
+  <:col :let={source} label="Description"><%= source.description %></:col>
+  <:col :let={source} label="Type"><%= source.type %></:col>
+  <:col :let={source} label="Channel"><%= source.channel %></:col>
+</.table>
 
 <.back navigate={~p"/admin/users"}>Back to users</.back>

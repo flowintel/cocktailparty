@@ -14,9 +14,7 @@ defmodule CocktailpartyWeb.Admin.UserController do
 
     updated_users =
       Enum.reduce(users, [], fn user, updated_users ->
-        updated_user =
-          Map.put(user, :is_present, Enum.member?(connected_users, Integer.to_string(user.id)))
-
+        updated_user = Map.put(user, :is_present, Enum.member?(connected_users, user.id))
         [updated_user | updated_users]
       end)
 
@@ -42,7 +40,8 @@ defmodule CocktailpartyWeb.Admin.UserController do
 
   def show(conn, %{"id" => id}) do
     user = UserManagement.get_user!(id)
-    render(conn, :show, user: user)
+    connected_users = Presence.get_all_connected_users()
+    render(conn, :show, user: Map.put(user, :is_present, Enum.member?(connected_users, String.to_integer(id))))
   end
 
   def edit(conn, %{"id" => id}) do
