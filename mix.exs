@@ -44,6 +44,10 @@ defmodule Cocktailparty.MixProject do
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},
       {:postgrex, ">= 0.0.0"},
+      {:table, ">= 0.0.0"},
+      {:myxql, ">= 0.0.0"},
+      {:geo, ">= 0.0.0"},
+      {:tds, ">= 0.0.0"},
       {:phoenix_html, "~> 3.3"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 0.18.16"},
@@ -59,6 +63,7 @@ defmodule Cocktailparty.MixProject do
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
       {:redix, "~>1.2.2"},
+      {:remote_ip, "~>1.1.0"},
       # runtime: false because we don't want to start the FunWithFlags.Supervisor automatically
       {:fun_with_flags, "~> 1.10.1", runtime: false},
       {:fun_with_flags_ui, "~> 0.8.1", runtime: false},

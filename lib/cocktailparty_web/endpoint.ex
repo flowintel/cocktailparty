@@ -11,10 +11,13 @@ defmodule CocktailpartyWeb.Endpoint do
     same_site: "Lax"
   ]
 
+  # rewrite x-fwd-for headers.
+  plug RemoteIp
+
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   socket "/socket", CocktailpartyWeb.SinkSocket,
-    websocket: [connect_info: [:peer_data]],
+    websocket: [connect_info: [:peer_data, :x_headers]],
     longpoll: false
 
   # Serve at "/" the static files from "priv/static" directory.
@@ -52,4 +55,5 @@ defmodule CocktailpartyWeb.Endpoint do
   plug Plug.Head
   plug Plug.Session, @session_options
   plug CocktailpartyWeb.Router
+
 end

@@ -51,10 +51,21 @@ config :tailwind,
     cd: Path.expand("../assets", __DIR__)
   ]
 
-# Configures Elixir's Logger
-config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+# Configures Erlang's Logger
+config :logger, :default_handler,
+  config: [
+    file: ~c"logs/cocktailparty.log",
+    filesync_repeat_interval: 5000,
+    file_check: 5000,
+    max_no_bytes: 10_000_000,
+    max_no_files: 5,
+    compress_on_rotate: true
+  ]
+
+# Configures Elixir's Log formatter
+config :logger, :default_formatter,
+  format: "$time $message $metadata",
+  metadata: [:request_id, :remote_ip, :websocket_token, :current_user]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
@@ -97,3 +108,6 @@ config :cocktailparty,
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
+
+# IP x-fwd-for rewriting config
+config :remote_ip, debug: false
