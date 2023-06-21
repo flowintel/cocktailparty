@@ -23,7 +23,7 @@ That's it.
 - a working postgresql instance with a database
 - a working redis server in which data are pushed in pubsub topics
 
-## compile from source
+## compiling from source
 ```
 git clone https://github.com/flowintel/cocktailparty.git
 cd cocktailparty
@@ -53,6 +53,8 @@ export BROKER=false
 # or for a running a release:
 #./cocktailparty/bin/server
 ```
+## creating a release
+Execute `script/release.sh` from the root.
 
 # Deployment
 Cocktailparty is meant to be deployed behind a proxy. Nodes' duties can be separated beteween broker nodes and nodes serving clients requests.
