@@ -7,11 +7,14 @@ defmodule Cocktailparty.UserManagementFixtures do
   @doc """
   Generate a user.
   """
-  def user_fixture(attrs \\ %{}) do
+  def user_fixture(_ \\ %{}) do
     {:ok, user} =
-      attrs
-      |> Enum.into(%{})
-      |> Cocktailparty.UserManagement.create_user()
+      Cocktailparty.UserManagement.create_user(%{
+        email: "toto@test.com",
+        password: "234324SDFdsag sdFGdsfgmypassword",
+        is_admin: false,
+        role: "unconfirmed"
+      })
 
     user
   end

@@ -7,7 +7,12 @@
   </:actions>
 </.header>
 
-<.table :if={@is_admin} id="sources" rows={@sources} row_click={&JS.navigate(~p"/admin/sources/#{&1}")}>
+<.table
+  :if={@is_admin}
+  id="sources"
+  rows={@sources}
+  row_click={&JS.navigate(~p"/admin/sources/#{&1}")}
+>
   <:col :let={source} label="Name"><%= source.name %></:col>
   <:col :let={source} label="Description"><%= source.description %></:col>
   <:col :let={source} label="Type"><%= source.type %></:col>
@@ -22,17 +27,13 @@
   </:action>
 
   <:action :let={source}>
-    <.link
-      href={~p"/admin/sources/#{source}"}
-      method="delete"
-      data-confirm="Are you sure?"
-    >
+    <.link href={~p"/admin/sources/#{source}"} method="delete" data-confirm="Are you sure?">
       Delete
     </.link>
   </:action>
 </.table>
 
-<.table :if={!@is_admin}  id="sources" rows={@sources} >
+<.table :if={!@is_admin} id="sources" rows={@sources}>
   <:col :let={source} label="Name"><%= source.name %></:col>
   <:col :let={source} label="Description"><%= source.description %></:col>
   <:col :let={source} label="Type"><%= source.type %></:col>

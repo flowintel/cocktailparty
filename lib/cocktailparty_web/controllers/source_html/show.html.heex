@@ -17,18 +17,18 @@
 </.list>
 
 <div :if={@is_admin}>
-<br />
-<h1 class="text-lg font-semibold leading-8 text-zinc-800">Subscribed users</h1>
+  <br />
+  <h1 class="text-lg font-semibold leading-8 text-zinc-800">Subscribed users</h1>
 
-<.table id="users" rows={@source.users} row_click={&JS.navigate(~p"/admin/users/#{&1}")}>
-  <:col :let={user} label="email">
-    <div class="indicator">
-      <span :if={user.is_present} class="indicator-item badge badge-success"></span>
-      <span :if={!user.is_present} class="indicator-item badge badge-ghost"></span>
-      <span><%= user.email %></span>
-    </div>
-  </:col>
-</.table>
+  <.table id="users" rows={@source.users} row_click={&JS.navigate(~p"/admin/users/#{&1}")}>
+    <:col :let={user} label="email">
+      <div class="indicator">
+        <span :if={user.is_present} class="indicator-item badge badge-success"></span>
+        <span :if={!user.is_present} class="indicator-item badge badge-ghost"></span>
+        <span><%= user.email %></span>
+      </div>
+    </:col>
+  </.table>
 </div>
 
 <br />

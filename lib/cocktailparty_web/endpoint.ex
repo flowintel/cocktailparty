@@ -55,5 +55,4 @@ defmodule CocktailpartyWeb.Endpoint do
   plug Plug.Head
   plug Plug.Session, @session_options
   plug CocktailpartyWeb.Router
-
 end

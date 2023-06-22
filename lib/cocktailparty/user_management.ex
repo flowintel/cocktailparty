@@ -153,4 +153,17 @@ defmodule Cocktailparty.UserManagement do
         put_change(changeset, :password, attrs["password"])
     end
   end
+
+  @doc """
+  Check whether a user has been confirmed by an admin
+  """
+  def is_confirmed?(user_id) do
+    user = get_user!(user_id)
+
+    if Enum.member?(User.roles(), user.role) do
+      true
+    else
+      false
+    end
+  end
 end

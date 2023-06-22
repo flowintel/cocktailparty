@@ -13,7 +13,7 @@ defmodule Cocktailparty.UserManagement.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
     field :is_admin, :boolean, default: false
-    field :role, :string, default: "user"
+    field :role, :string, default: "unconfirmed"
 
     many_to_many :sources, Cocktailparty.Catalog.Source,
       join_through: "sources_subscriptions",

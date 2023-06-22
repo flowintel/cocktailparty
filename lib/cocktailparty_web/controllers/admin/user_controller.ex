@@ -41,7 +41,10 @@ defmodule CocktailpartyWeb.Admin.UserController do
   def show(conn, %{"id" => id}) do
     user = UserManagement.get_user!(id)
     connected_users = Presence.get_all_connected_users()
-    render(conn, :show, user: Map.put(user, :is_present, Enum.member?(connected_users, String.to_integer(id))))
+
+    render(conn, :show,
+      user: Map.put(user, :is_present, Enum.member?(connected_users, String.to_integer(id)))
+    )
   end
 
   def edit(conn, %{"id" => id}) do

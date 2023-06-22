@@ -11,7 +11,7 @@ config :argon2_elixir, t_cost: 1, m_cost: 8
 config :cocktailparty, Cocktailparty.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "localhost",
+  hostname: "10.106.129.71",
   database: "cocktailparty_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
@@ -34,3 +34,8 @@ config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+config :cocktailparty,
+  redix_uri: "redis://127.0.0.1:6379/0",
+  standalone: true,
+  broker: true

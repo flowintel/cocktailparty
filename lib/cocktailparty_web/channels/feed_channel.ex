@@ -5,6 +5,7 @@ defmodule CocktailpartyWeb.FeedChannel do
   require Logger
 
   alias Cocktailparty.Catalog
+  alias Cocktailparty.UserManagement
 
   @impl true
   def join("feed:lobby", _payload, socket) do
@@ -57,9 +58,9 @@ defmodule CocktailpartyWeb.FeedChannel do
     {:noreply, socket}
   end
 
-  # Add authorization logic here as required.
+  # Check whether a used is authorized to subscribe to a feed
   defp authorized?(feed_id, user_id) do
-    Logger.info("Checking authorization for #{feed_id} and #{user_id}")
-    Catalog.is_subscribed?(feed_id, user_id)
+    Logger.info("Checking authorization for UserID: #{user_id} @ FeedId: #{feed_id}.")
+    UserManagement.is_confirmed?(user_id) && Catalog.is_subscribed?(feed_id, user_id)
   end
 end
