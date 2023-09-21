@@ -15,9 +15,9 @@ defmodule CocktailpartyWeb.SinkSocket do
         remote_ip =
           case RemoteIp.from(connect_info.x_headers) do
             nil -> connect_info.peer_data.address
-            #ipv4
+            # ipv4
             {a, b, c, d} -> {a, b, c, d}
-            #ipv6
+            # ipv6
             {a, b, c, d, e, f, g, h} -> {a, b, c, d, e, f, g, h}
           end
 

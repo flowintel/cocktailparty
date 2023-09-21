@@ -40,6 +40,23 @@ defmodule Cocktailparty.UserManagement do
   end
 
   @doc """
+  Gets a single user.
+
+  Returns nil if the User does not exist
+
+
+  ## Examples
+
+      iex> get_user!(123)
+      %User{}
+
+  """
+  def get_user(id) do
+    Repo.get(User, id)
+    |> Repo.preload(:sources)
+  end
+
+  @doc """
   Creates a user.
 
   ## Examples
@@ -158,12 +175,18 @@ defmodule Cocktailparty.UserManagement do
   Check whether a user has been confirmed by an admin
   """
   def is_confirmed?(user_id) do
-    user = get_user!(user_id)
+    user = get_user(user_id)
 
-    if Enum.member?(User.roles(), user.role) do
-      true
-    else
-      false
+    case user do
+      nil ->
+        false
+
+      _ ->
+        if Enum.member?(User.roles(), user.role) do
+          true
+        else
+          false
+        end
     end
   end
 end
