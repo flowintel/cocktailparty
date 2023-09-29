@@ -22,6 +22,16 @@ defmodule Cocktailparty.Accounts.User do
     timestamps()
   end
 
+  @doc false
+  def changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:email, :is_admin, :role])
+    |> validate_required([:email, :is_admin, :role])
+    |> validate_email(opts)
+    |> validate_inclusion(:role, roles())
+    |> unique_constraint(:email)
+  end
+
   @doc """
   A user changeset for registration.
 
@@ -52,7 +62,7 @@ defmodule Cocktailparty.Accounts.User do
     |> validate_password(opts)
   end
 
-  defp validate_email(changeset, opts) do
+  def validate_email(changeset, opts) do
     changeset
     |> validate_required([:email])
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
@@ -60,7 +70,7 @@ defmodule Cocktailparty.Accounts.User do
     |> maybe_validate_unique_email(opts)
   end
 
-  defp validate_password(changeset, opts) do
+  def validate_password(changeset, opts) do
     changeset
     |> validate_required([:password])
     |> validate_length(:password, min: 12, max: 72)

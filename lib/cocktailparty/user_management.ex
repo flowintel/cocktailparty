@@ -8,7 +8,7 @@ defmodule Cocktailparty.UserManagement do
   alias Cocktailparty.Repo
 
   # we reuse Accounts.User schema
-  alias Cocktailparty.UserManagement.User
+  alias Cocktailparty.Accounts.User
 
   @doc """
   Returns the list of users.

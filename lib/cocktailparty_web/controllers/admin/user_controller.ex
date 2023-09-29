@@ -2,7 +2,7 @@ defmodule CocktailpartyWeb.Admin.UserController do
   use CocktailpartyWeb, :controller
 
   alias Cocktailparty.UserManagement
-  alias Cocktailparty.UserManagement.User
+  alias Cocktailparty.Accounts.User
   alias CocktailpartyWeb.Presence
 
   require Logger
