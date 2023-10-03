@@ -19,6 +19,8 @@ defmodule Cocktailparty.Accounts.User do
       join_through: "sources_subscriptions",
       on_replace: :delete
 
+    has_many :sinks, Cocktailparty.SinkCatalog.Sink
+
     timestamps()
   end
 

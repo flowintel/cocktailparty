@@ -1,10 +1,10 @@
-defmodule CocktailpartyWeb.SinkSocket do
+defmodule CocktailpartyWeb.FeedSocket do
   use Phoenix.Socket
 
   require RemoteIp
   require Logger
 
-  channel "sink:*", CocktailpartyWeb.SinkChannel
+  channel "feed:*", CocktailpartyWeb.FeedChannel
 
   @impl true
   def connect(%{"token" => token}, socket, connect_info) do
@@ -21,7 +21,7 @@ defmodule CocktailpartyWeb.SinkSocket do
             {a, b, c, d, e, f, g, h} -> {a, b, c, d, e, f, g, h}
           end
 
-        Logger.metadata(SinkSoket_token: token)
+        Logger.metadata(FeedSoket_token: token)
         Logger.metadata(remote_ip: to_string(:inet_parse.ntoa(remote_ip)))
         Logger.metadata(current_user: user_id)
         Logger.info(to_string(:inet_parse.ntoa(remote_ip)))

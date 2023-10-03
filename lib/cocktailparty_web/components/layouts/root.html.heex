@@ -91,6 +91,15 @@
             </li>
             <li>
               <.link
+                :if={!@is_admin}
+                href={~p"/sinks"}
+                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+              >
+                Sinks
+              </.link>
+            </li>
+            <li>
+              <.link
                 href={~p"/users/settings"}
                 class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
               >

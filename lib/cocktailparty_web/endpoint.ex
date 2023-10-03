@@ -16,7 +16,11 @@ defmodule CocktailpartyWeb.Endpoint do
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
-  socket "/socket", CocktailpartyWeb.SinkSocket,
+  socket "/feedsocket", CocktailpartyWeb.FeedSocket,
+    websocket: [connect_info: [:peer_data, :x_headers]],
+    longpoll: false
+
+  socket "/sinksocket", CocktailpartyWeb.SinkSocket,
     websocket: [connect_info: [:peer_data, :x_headers]],
     longpoll: false
 
