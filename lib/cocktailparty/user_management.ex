@@ -198,12 +198,17 @@ defmodule Cocktailparty.UserManagement do
 
     # first check whether the role exists
     if Enum.member?(User.roles(), trole) do
-      tindex = Enum.find_index(User.roles(), fn x -> x == trole end)
-      uindex = Enum.find_index(User.roles(), fn x -> x == user.role end)
-      if uindex >= tindex do
-        true
+      if !user.is_admin do
+        tindex = Enum.find_index(User.roles(), fn x -> x == trole end)
+        uindex = Enum.find_index(User.roles(), fn x -> x == user.role end)
+
+        if uindex >= tindex do
+          true
+        else
+          false
+        end
       else
-        false
+        true
       end
     else
       false
