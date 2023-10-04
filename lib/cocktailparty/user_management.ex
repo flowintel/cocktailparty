@@ -189,4 +189,24 @@ defmodule Cocktailparty.UserManagement do
         end
     end
   end
+
+  @doc """
+  Check whether a users'role is above a threshold role
+  """
+  def is_allowed?(user_id, trole) do
+    user = get_user(user_id)
+
+    # first check whether the role exists
+    if Enum.member?(User.roles(), trole) do
+      tindex = Enum.find_index(User.roles(), fn x -> x == trole end)
+      uindex = Enum.find_index(User.roles(), fn x -> x == user.role end)
+      if uindex >= tindex do
+        true
+      else
+        false
+      end
+    else
+      false
+    end
+  end
 end
