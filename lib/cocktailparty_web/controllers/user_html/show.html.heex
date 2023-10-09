@@ -32,4 +32,15 @@
   <:col :let={source} label="Channel"><%= source.channel %></:col>
 </.table>
 
+<br />
+<h1 class="text-lg font-semibold leading-8 text-zinc-800">Sinks</h1>
+
+<.table id="sinks" rows={@user.sinks}>
+  <:col :let={sink} label="Name"><%= sink.name %></:col>
+  <:col :let={sink} label="Description"><%= sink.description %></:col>
+  <:col :let={sink} label="Type"><%= sink.type %></:col>
+  <:col :let={sink} label="Channel"><%= sink.channel %></:col>
+</.table>
+
+
 <.back navigate={~p"/admin/users"}>Back to users</.back>

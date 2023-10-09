@@ -52,6 +52,7 @@ defmodule CocktailpartyWeb.Router do
     pipe_through [:browser, :auth, :require_admin]
     resources "/users", UserController
     resources "/sources", SourceController
+    resources "/sinks", SinkController
   end
 
   scope path: "/feature-flags" do

@@ -1,0 +1,27 @@
+<.header>
+  Listing Sinks
+  <:actions>
+    <.link href={~p"/admin/sinks/new"}>
+      <.button>New Sink</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="sinks" rows={@sinks} row_click={&JS.navigate(~p"/admin/sinks/#{&1}")}>
+  <:col :let={sink} label="Name"><%= sink.name %></:col>
+  <:col :let={sink} label="Description"><%= sink.description %></:col>
+  <:col :let={sink} label="Type"><%= sink.type %></:col>
+  <:col :let={sink} label="Channel"><%= sink.channel %></:col>
+
+  <:action :let={sink}>
+    <div class="sr-only">
+      <.link navigate={~p"/admin/sinks/#{sink}"}>Show</.link>
+    </div>
+    <.link navigate={~p"/admin/sinks/#{sink}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={sink}>
+    <.link href={~p"/admin/sinks/#{sink}"} method="delete" data-confirm="Are you sure?">
+      Delete
+    </.link>
+  </:action>
+</.table>
