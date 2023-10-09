@@ -187,6 +187,9 @@ defmodule Cocktailparty.Accounts.User do
     |> validate_inclusion(:role, roles())
   end
 
+  @doc """
+  Returns the list for roles from the least trusted to the more trusted: order matters.
+  """
   def roles, do: [@uuser, @user_role, @poweruser_role]
 
   defimpl FunWithFlags.Actor, for: Cocktailparty.Accounts.User do

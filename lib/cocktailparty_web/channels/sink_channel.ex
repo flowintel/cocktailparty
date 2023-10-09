@@ -4,8 +4,9 @@ defmodule CocktailpartyWeb.SinkChannel do
 
   require Logger
 
-  # alias Cocktailparty.Catalog
-  # alias Cocktailparty.UserManagement
+  alias Cocktailparty.UserManagement
+
+  @minimim_role "user"
 
   @impl true
   def join("sink:lobby", _payload, socket) do
@@ -58,10 +59,12 @@ defmodule CocktailpartyWeb.SinkChannel do
     {:noreply, socket}
   end
 
-  # Check whether a used is authorized to subscribe to a feed
+  # Check whether a user is authorized to push into a feed
   defp authorized?(feed_id, user_id) do
-    Logger.info("Checking authorization for UserID: #{user_id} @ FeedId: #{feed_id}.")
-    # UserManagement.is_confirmed?(user_id) && Catalog.is_subscribed?(feed_id, user_id)
-    true
+    Logger.info(
+      "Checking authorization for UserID: #{user_id} to push into @ SinkId: #{feed_id}."
+    )
+
+    UserManagement.is_allowed?(user_id, @minimim_role)
   end
 end
