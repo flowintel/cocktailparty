@@ -27,7 +27,7 @@ defmodule CocktailpartyWeb.SinkController do
   end
 
   def show(conn, %{"id" => id}) do
-    sink = SinkCatalog.get_sink(id, conn.assigns.current_user.id)
+    sink = SinkCatalog.get_auth_sink(id, conn.assigns.current_user.id)
 
     case sink do
       {:ok, sink} ->
@@ -41,7 +41,7 @@ defmodule CocktailpartyWeb.SinkController do
   end
 
   def edit(conn, %{"id" => id}) do
-    sink = SinkCatalog.get_sink(id, conn.assigns.current_user.id)
+    sink = SinkCatalog.get_auth_sink(id, conn.assigns.current_user.id)
 
     case sink do
       {:ok, sink} ->
@@ -56,7 +56,7 @@ defmodule CocktailpartyWeb.SinkController do
   end
 
   def update(conn, %{"id" => id, "sink" => sink_params}) do
-    sink = SinkCatalog.get_sink(id, conn.assigns.current_user.id)
+    sink = SinkCatalog.get_auth_sink(id, conn.assigns.current_user.id)
 
     case sink do
       {:ok, sink} ->
@@ -78,7 +78,7 @@ defmodule CocktailpartyWeb.SinkController do
   end
 
   def delete(conn, %{"id" => id}) do
-    sink = SinkCatalog.get_sink(id, conn.assigns.current_user.id)
+    sink = SinkCatalog.get_auth_sink(id, conn.assigns.current_user.id)
 
     case sink do
       {:ok, sink} ->

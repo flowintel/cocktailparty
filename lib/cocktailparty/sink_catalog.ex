@@ -21,7 +21,6 @@ defmodule Cocktailparty.SinkCatalog do
   """
   def list_sinks do
     Repo.all(Sink)
-    |> Repo.preload(:user)
   end
 
   @doc """
@@ -51,7 +50,7 @@ defmodule Cocktailparty.SinkCatalog do
       {:error, "Unauthorized"}
 
   """
-  def get_sink(id, user_id) do
+  def get_auth_sink(id, user_id) do
     sink = Repo.get(Sink, id)
 
     case sink do
@@ -61,6 +60,24 @@ defmodule Cocktailparty.SinkCatalog do
       _ ->
         {:error, "Unauthorized"}
     end
+  end
+
+  @doc """
+  Gets a single sink.
+
+  Raises if the Sink does not exist
+
+  ## Examples
+
+      iex> get_sink!(123)
+      {:ok, %Sink{}}
+
+      iex> get_sink!(1234)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_sink!(id) do
+    Repo.get!(Sink, id)
   end
 
   @doc """
