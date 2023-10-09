@@ -6,7 +6,7 @@ defmodule Cocktailparty.UserManagementTest do
   alias Cocktailparty.UserManagement
 
   describe "users" do
-    alias Cocktailparty.UserManagement.User
+    alias Cocktailparty.Accounts.User
 
     import Cocktailparty.UserManagementFixtures
 
