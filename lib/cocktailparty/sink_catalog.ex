@@ -24,6 +24,20 @@ defmodule Cocktailparty.SinkCatalog do
   end
 
   @doc """
+  Returns the list of sinks / joined with its use
+
+  ## Examples
+
+      iex> list_sinks_with_user()
+      [%Sink{}, ...]
+
+  """
+  def list_sinks_with_user do
+    Repo.all(Sink)
+    |> Repo.preload(:user)
+  end
+
+  @doc """
   Returns the list of sinks for a given user
 
   ## Examples

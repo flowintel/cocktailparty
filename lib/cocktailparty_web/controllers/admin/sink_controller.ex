@@ -5,7 +5,7 @@ defmodule CocktailpartyWeb.Admin.SinkController do
   alias Cocktailparty.SinkCatalog.Sink
 
   def index(conn, _params) do
-    sinks = SinkCatalog.list_sinks()
+    sinks = SinkCatalog.list_sinks_with_user()
     render(conn, :index, sinks: sinks)
   end
 
