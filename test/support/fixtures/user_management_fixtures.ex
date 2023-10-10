@@ -13,7 +13,7 @@ defmodule Cocktailparty.UserManagementFixtures do
         email: "toto@test.com",
         password: "234324SDFdsag sdFGdsfgmypassword",
         is_admin: false,
-        role: "user"
+        role: "uuser"
       })
 
     user

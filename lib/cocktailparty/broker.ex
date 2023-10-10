@@ -71,6 +71,8 @@ defmodule Cocktailparty.Broker do
     {:noreply, state}
   end
 
+  # Coming from redix pubsub, messages contain %{channel: channel, payload: payload}
+  # https://hexdocs.pm/redix/Redix.PubSub.html#module-messages
   # Receiving a message from a source we are subscribed to.
   def handle_info({:redix_pubsub, _pid, ref, :message, message}, state) do
     current_sub = Enum.find(state.subscribed, fn subscribed -> subscribed.ref == ref end)

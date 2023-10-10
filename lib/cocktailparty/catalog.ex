@@ -172,6 +172,18 @@ defmodule Cocktailparty.Catalog do
     end
   end
 
+  @doc """
+  Subscribes a user to a source
+  returns
+    {:ok, struct}       -> # Updated with success
+    {:error, changeset} -> # Something went wrong
+
+  ## Examples
+
+      iex> subscribe(1,2)
+      %Ecto.Changeset{data: %Source{}}
+
+  """
   def subscribe(source_id, user_id) do
     src = get_source!(source_id)
     user = Accounts.get_user!(user_id)
