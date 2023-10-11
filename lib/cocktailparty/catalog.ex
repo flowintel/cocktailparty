@@ -100,10 +100,7 @@ defmodule Cocktailparty.Catalog do
         {:ok, source} = Repo.update(changeset)
 
         # And we ask the broker to subscribe to the updated source
-        GenServer.cast(
-          Cocktailparty.Broker,
-          {:new_source, source}
-        )
+        notify_broker({:new_source, source})
 
         {:ok, source}
 
