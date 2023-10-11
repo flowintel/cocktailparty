@@ -13,6 +13,8 @@ defmodule Cocktailparty.Catalog.Source do
       on_replace: :delete,
       on_delete: :delete_all
 
+    belongs_to :redisinstance, Cocktailparty.Input.RedisInstance
+
     timestamps()
   end
 

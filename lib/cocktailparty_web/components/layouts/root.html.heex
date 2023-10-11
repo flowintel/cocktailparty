@@ -65,13 +65,20 @@
             <li>
               <.link
                 :if={@is_admin}
+                href={~p"/admin/redisinstances"}
+                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+              >
+                Admin Redis
+              </.link>
+            </li>
+            <li>
+              <.link
+                :if={@is_admin}
                 href={~p"/admin/sources"}
                 class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
               >
                 Admin Sources
               </.link>
-            </li>
-            <li>
               <.link
                 :if={!@is_admin}
                 href={~p"/sources"}
@@ -96,7 +103,6 @@
                 Admin Sinks
               </.link>
             </li>
-
             <li>
               <.link
                 :if={@is_admin}
