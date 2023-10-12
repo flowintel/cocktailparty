@@ -3,6 +3,10 @@
   <:subtitle>Use this form to manage source records in your database.</:subtitle>
 </.header>
 
-<.source_form changeset={@changeset} action={~p"/admin/sources/#{@source}"} />
+<.source_form
+  changeset={@changeset}
+  action={~p"/admin/sources/#{@source}"}
+  redis_instances={@redis_instances}
+/>
 
 <.back navigate={~p"/admin/sources"}>Back to sources</.back>

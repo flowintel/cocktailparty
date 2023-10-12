@@ -6,6 +6,14 @@
   <.input field={f[:description]} type="text" label="Description" />
   <.input field={f[:type]} type="text" label="Type" />
   <.input field={f[:channel]} type="text" label="Channel" />
+  <.input
+    field={f[:redis_instance_id]}
+    type="select"
+    label="Redis instance"
+    options={
+      Enum.map(@redis_instances, fn redis_instance -> {redis_instance.name, redis_instance.id} end)
+    }
+  />
   <:actions>
     <.button>Save Source</.button>
   </:actions>

@@ -22,6 +22,19 @@ defmodule Cocktailparty.Input do
   end
 
   @doc """
+  Returns the list of redisinstances for feeding a select component
+
+  ## Examples
+
+      iex> list_redisinstances()
+      [{"name", 1}]
+
+  """
+  def list_redisinstances_for_select do
+    Repo.all(from r in "redis_instances", select: {r.name, r.id})
+  end
+
+  @doc """
   Gets a single redis_instance.
 
   Raises `Ecto.NoResultsError` if the Redis instance does not exist.

@@ -2,11 +2,13 @@ defmodule Cocktailparty.Input.RedisInstance do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "redisinstances" do
+  schema "redis_instances" do
     field :enabled, :boolean, default: false
     field :name, :string
     field :hostname, :string
     field :port, :integer
+
+    has_many :sources, Cocktailparty.Catalog.Source
 
     timestamps()
   end

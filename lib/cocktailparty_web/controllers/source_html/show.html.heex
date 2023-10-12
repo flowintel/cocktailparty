@@ -14,6 +14,7 @@
   <:item title="Description"><%= @source.description %></:item>
   <:item title="Type"><%= @source.type %></:item>
   <:item title="Channel"><%= @source.channel %></:item>
+  <:item :if={@is_admin} title="Redis instance"><%= @source.redis_instance.name %></:item>
 </.list>
 
 <div :if={@is_admin}>
