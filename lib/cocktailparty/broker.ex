@@ -77,6 +77,8 @@ defmodule Cocktailparty.Broker do
   def handle_info({:redix_pubsub, _pid, ref, :message, message}, state) do
     current_sub = Enum.find(state.subscribed, fn subscribed -> subscribed.ref == ref end)
 
+    # TODO message structure should be namespaced:
+    # feed:redisinstance:channel_id
     :ok =
       Phoenix.PubSub.broadcast!(
         Cocktailparty.PubSub,

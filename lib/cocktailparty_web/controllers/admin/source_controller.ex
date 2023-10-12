@@ -4,6 +4,7 @@ defmodule CocktailpartyWeb.Admin.SourceController do
   alias Cocktailparty.Catalog
   alias Cocktailparty.Catalog.Source
   alias CocktailpartyWeb.Presence
+  alias Cocktailparty.Input
 
   def index(conn, _params) do
     sources = Catalog.list_sources()
@@ -12,7 +13,18 @@ defmodule CocktailpartyWeb.Admin.SourceController do
 
   def new(conn, _params) do
     changeset = Catalog.change_source(%Source{})
-    render(conn, :new, changeset: changeset)
+    # get list of redis instances
+    instances = Input.list_redisinstances()
+
+    case instances do
+      [] ->
+        conn
+        |> put_flash(:error, "A redis instance is required to create a source.")
+        |> redirect(to: ~p"/admin/redisinstances")
+
+      _ ->
+        render(conn, :new, changeset: changeset, redis_instances: instances)
+    end
   end
 
   def create(conn, %{"source" => source_params}) do
@@ -23,7 +35,9 @@ defmodule CocktailpartyWeb.Admin.SourceController do
         |> redirect(to: ~p"/admin/sources/#{source}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :new, changeset: changeset)
+        # get list of redis instances
+        instances = Input.list_redisinstances()
+        render(conn, :new, changeset: changeset, redis_instances: instances)
     end
   end
 
@@ -46,11 +60,24 @@ defmodule CocktailpartyWeb.Admin.SourceController do
   def edit(conn, %{"id" => id}) do
     source = Catalog.get_source!(id)
     changeset = Catalog.change_source(source)
-    render(conn, :edit, source: source, changeset: changeset)
+    # get list of redis instances
+    instances = Input.list_redisinstances()
+
+    case instances do
+      [] ->
+        conn
+        |> put_flash(:error, "A redis instance is required to create a source.")
+        |> redirect(to: ~p"/admin/redisinstances")
+
+      _ ->
+        render(conn, :edit, source: source, changeset: changeset, redis_instances: instances)
+    end
   end
 
   def update(conn, %{"id" => id, "source" => source_params}) do
     source = Catalog.get_source!(id)
+    # get list of redis instances
+    instances = Input.list_redisinstances()
 
     case Catalog.update_source(source, source_params) do
       {:ok, source} ->
@@ -59,7 +86,7 @@ defmodule CocktailpartyWeb.Admin.SourceController do
         |> redirect(to: ~p"/admin/sources/#{source}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :edit, source: source, changeset: changeset)
+        render(conn, :edit, source: source, changeset: changeset, redis_instances: instances)
     end
   end
 

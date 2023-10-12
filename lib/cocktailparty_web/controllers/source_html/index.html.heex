@@ -17,6 +17,9 @@
   <:col :let={source} label="Description"><%= source.description %></:col>
   <:col :let={source} label="Type"><%= source.type %></:col>
   <:col :let={source} label="Channel"><%= source.channel %></:col>
+  <:col :let={source} :if={@is_admin} label="Redis instance">
+    <%= source.redis_instance.name %>
+  </:col>
 
   <:action :let={source}>
     <div class="sr-only">

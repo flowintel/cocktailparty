@@ -23,6 +23,7 @@ defmodule Cocktailparty.Catalog do
   def list_sources do
     Repo.all(Source)
     |> Repo.preload(:users)
+    |> Repo.preload(:redis_instance)
   end
 
   @doc """
@@ -42,6 +43,7 @@ defmodule Cocktailparty.Catalog do
   def get_source!(id) do
     Repo.get!(Source, id)
     |> Repo.preload(:users)
+    |> Repo.preload(:redis_instance)
   end
 
   @doc """
@@ -57,7 +59,8 @@ defmodule Cocktailparty.Catalog do
 
   """
   def create_source(attrs \\ %{}) do
-    %Source{}
+    Cocktailparty.Input.get_redis_instance!(attrs["redis_instance_id"])
+    |> Ecto.build_assoc(:sources)
     |> change_source(attrs)
     |> Repo.insert()
     |> case do
@@ -84,6 +87,7 @@ defmodule Cocktailparty.Catalog do
   """
   def update_source(%Source{} = source, attrs) do
     changeset = change_source(source, attrs)
+
     # Preserve the existing users association
     changeset = Ecto.Changeset.put_assoc(changeset, :users, source.users)
 
@@ -94,7 +98,7 @@ defmodule Cocktailparty.Catalog do
       }
       when source.channel != new_channel ->
         # We ask the broker to delete the source with the old channel
-        GenServer.cast(Cocktailparty.Broker, {:delete_source, source})
+        notify_broker({:delete_source, source})
 
         # We update the source
         {:ok, source} = Repo.update(changeset)

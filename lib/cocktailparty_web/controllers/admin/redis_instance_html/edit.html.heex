@@ -1,0 +1,11 @@
+<.header>
+  Edit Redis instance <%= @redis_instance.id %>
+  <:subtitle>Use this form to manage redis_instance records in your database.</:subtitle>
+</.header>
+
+<.redis_instance_form
+  changeset={@changeset}
+  action={~p"/admin/redisinstances/#{@redis_instance}"}
+/>
+
+<.back navigate={~p"/admin/redisinstances"}>Back to redisinstances</.back>

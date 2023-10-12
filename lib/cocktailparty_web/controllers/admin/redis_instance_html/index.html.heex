@@ -1,0 +1,34 @@
+<.header>
+  Listing Redisinstances
+  <:actions>
+    <.link href={~p"/admin/redisinstances/new"}>
+      <.button>New Redis instance</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="redisinstances"
+  rows={@redisinstances}
+  row_click={&JS.navigate(~p"/admin/redisinstances/#{&1}")}
+>
+  <:col :let={redis_instance} label="Name"><%= redis_instance.name %></:col>
+  <:col :let={redis_instance} label="Hostname"><%= redis_instance.hostname %></:col>
+  <:col :let={redis_instance} label="Port"><%= redis_instance.port %></:col>
+  <:col :let={redis_instance} label="Enabled"><%= redis_instance.enabled %></:col>
+  <:action :let={redis_instance}>
+    <div class="sr-only">
+      <.link navigate={~p"/admin/redisinstances/#{redis_instance}"}>Show</.link>
+    </div>
+    <.link navigate={~p"/admin/redisinstances/#{redis_instance}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={redis_instance}>
+    <.link
+      href={~p"/admin/redisinstances/#{redis_instance}"}
+      method="delete"
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
