@@ -5,7 +5,8 @@ defmodule Cocktailparty.Input.RedisInstance do
   schema "redisinstances" do
     field :enabled, :boolean, default: false
     field :name, :string
-    field :uri, :string
+    field :hostname, :string
+    field :port, :integer
 
     timestamps()
   end
@@ -13,9 +14,17 @@ defmodule Cocktailparty.Input.RedisInstance do
   @doc false
   def changeset(redis_instance, attrs) do
     redis_instance
-    |> cast(attrs, [:name, :uri, :enabled])
-    |> validate_required([:name, :uri, :enabled])
-    |> unique_constraint(:uri)
+    |> cast(attrs, [:name, :hostname, :port, :enabled])
+    |> validate_required([:name, :hostname, :port, :enabled])
     |> unique_constraint(:name)
+  end
+
+  @doc """
+  Starts the redis_instance Redix driver
+
+  TODO: could returns errors
+  """
+  def start(redis_instance) do
+    Cocktailparty.RedisInstancesDynamicSupervisor.start_child(redis_instance)
   end
 end

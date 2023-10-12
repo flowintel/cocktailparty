@@ -23,6 +23,7 @@ defmodule Cocktailparty.Catalog do
   def list_sources do
     Repo.all(Source)
     |> Repo.preload(:users)
+    |> Repo.preload(:redisinstance)
   end
 
   @doc """
@@ -42,6 +43,7 @@ defmodule Cocktailparty.Catalog do
   def get_source!(id) do
     Repo.get!(Source, id)
     |> Repo.preload(:users)
+    |> Repo.preload(:redisinstance)
   end
 
   @doc """
@@ -94,7 +96,7 @@ defmodule Cocktailparty.Catalog do
       }
       when source.channel != new_channel ->
         # We ask the broker to delete the source with the old channel
-        GenServer.cast(Cocktailparty.Broker, {:delete_source, source})
+        notify_broker({:delete_source, source})
 
         # We update the source
         {:ok, source} = Repo.update(changeset)

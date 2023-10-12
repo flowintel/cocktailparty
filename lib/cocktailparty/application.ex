@@ -25,23 +25,26 @@ defmodule Cocktailparty.Application do
         # Start a worker by calling: Cocktailparty.Worker.start_link(arg)
         # {Cocktailparty.Worker, arg}
         # Fun with Flags
-        FunWithFlags.Supervisor
+        FunWithFlags.Supervisor,
+        # This guy uses Tasks to init DynamicSupervisors
+        Cocktailparty.DynamicSupervisorBoot
       ]
       |> append_if_true(
         !Application.get_env(:cocktailparty, :standalone),
         {Cluster.Supervisor,
          [Application.get_env(:libcluster, :topologies), [name: Cocktailparty.ClusterSupervisor]]}
       )
-      |> append_if_true(
-        Application.get_env(:cocktailparty, :standalone) ||
-          Application.get_env(:cocktailparty, :broker),
-        {Redix, {Application.get_env(:cocktailparty, :redix_uri), [name: :redix]}}
-      )
-      |> append_if_true(
-        Application.get_env(:cocktailparty, :standalone) ||
-          Application.get_env(:cocktailparty, :broker),
-        Cocktailparty.Broker
-      )
+
+    # |> append_if_true(
+    #   Application.get_env(:cocktailparty, :standalone) ||
+    #     Application.get_env(:cocktailparty, :broker),
+    #   {Redix, {Application.get_env(:cocktailparty, :redix_uri), [name: :redix]}}
+    # )
+    # |> append_if_true(
+    #   Application.get_env(:cocktailparty, :standalone) ||
+    #     Application.get_env(:cocktailparty, :broker),
+    #   Cocktailparty.Broker
+    # )
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

@@ -41,7 +41,10 @@ defmodule CocktailpartyWeb.RedisInstanceControllerTest do
   describe "edit redis_instance" do
     setup [:create_redis_instance]
 
-    test "renders form for editing chosen redis_instance", %{conn: conn, redis_instance: redis_instance} do
+    test "renders form for editing chosen redis_instance", %{
+      conn: conn,
+      redis_instance: redis_instance
+    } do
       conn = get(conn, ~p"/redisinstances/#{redis_instance}/edit")
       assert html_response(conn, 200) =~ "Edit Redis instance"
     end

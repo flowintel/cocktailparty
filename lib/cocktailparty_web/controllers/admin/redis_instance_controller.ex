@@ -17,6 +17,8 @@ defmodule CocktailpartyWeb.Admin.RedisInstanceController do
   def create(conn, %{"redis_instance" => redis_instance_params}) do
     case Input.create_redis_instance(redis_instance_params) do
       {:ok, redis_instance} ->
+        Cocktailparty.Input.RedisInstance.start(redis_instance)
+
         conn
         |> put_flash(:info, "Redis instance created successfully.")
         |> redirect(to: ~p"/admin/redisinstances/#{redis_instance}")
