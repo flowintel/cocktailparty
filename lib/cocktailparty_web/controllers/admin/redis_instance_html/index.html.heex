@@ -16,6 +16,7 @@
   <:col :let={redis_instance} label="Hostname"><%= redis_instance.hostname %></:col>
   <:col :let={redis_instance} label="Port"><%= redis_instance.port %></:col>
   <:col :let={redis_instance} label="Enabled"><%= redis_instance.enabled %></:col>
+  <:col :let={redis_instance} label="Sink"><%= redis_instance.sink %></:col>
   <:action :let={redis_instance}>
     <div class="sr-only">
       <.link navigate={~p"/admin/redisinstances/#{redis_instance}"}>Show</.link>

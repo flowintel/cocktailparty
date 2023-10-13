@@ -6,9 +6,15 @@ defmodule Cocktailparty.SinkCatalog do
   require Logger
 
   import Ecto.Query, warn: false
+  import Ecto.Changeset
+  alias Cocktailparty.UserManagement
+  alias Cocktailparty.Input.RedisInstance
   alias Cocktailparty.Repo
-
   alias Cocktailparty.SinkCatalog.Sink
+  alias Cocktailparty.Accounts.User
+
+  # improve this, it also appears in channels/sinkchannel
+  @minimim_role "user"
 
   @doc """
   Returns the list of sinks.
@@ -21,6 +27,7 @@ defmodule Cocktailparty.SinkCatalog do
   """
   def list_sinks do
     Repo.all(Sink)
+    |> Repo.preload(:redis_instance)
   end
 
   @doc """
@@ -34,7 +41,27 @@ defmodule Cocktailparty.SinkCatalog do
   """
   def list_sinks_with_user do
     Repo.all(Sink)
+    |> Repo.preload(:redis_instance)
     |> Repo.preload(:user)
+  end
+
+  @doc """
+  Returns the list of sinks for a redis instance
+
+  ## Examples
+
+      iex> list_redis_instance_sinks(redis_instance_id)
+      [%Sink{}, ...]
+
+  """
+  def list_redis_instance_sinks(redis_instance_id) do
+    Repo.all(
+      from s in Sink,
+        join: r in RedisInstance,
+        on: s.redis_instance_id == r.id,
+        where: r.id == ^redis_instance_id,
+        preload: [:user]
+    )
   end
 
   @doc """
@@ -92,6 +119,8 @@ defmodule Cocktailparty.SinkCatalog do
   """
   def get_sink!(id) do
     Repo.get!(Sink, id)
+    |> Repo.preload(:user)
+    |> Repo.preload(:redis_instance)
   end
 
   @doc """
@@ -107,9 +136,21 @@ defmodule Cocktailparty.SinkCatalog do
 
   """
   def create_sink(attrs \\ %{}, user_id) do
-    %Sink{user_id: user_id}
+    ri_id = attrs["redis_instance_id"]
+
+    redis_instance =
+      case ri_id do
+        nil -> Cocktailparty.Input.get_first_default_sink()
+        _ -> Cocktailparty.Input.get_redis_instance!(attrs["redis_instance_id"])
+      end
+
+    redis_instance
+    |> Ecto.build_assoc(:sinks)
     |> change_sink(attrs)
+    |> put_change(:user_id, user_id)
     |> Repo.insert()
+
+    # TODO broker magic on insert
   end
 
   @doc """
@@ -157,5 +198,10 @@ defmodule Cocktailparty.SinkCatalog do
   def change_sink(%Sink{} = sink, attrs \\ %{}) do
     sink
     |> Sink.changeset(attrs)
+  end
+
+  def list_authorized_users do
+    Repo.all(User)
+    |> Enum.filter(fn user -> UserManagement.is_allowed?(user.id, @minimim_role) end)
   end
 end

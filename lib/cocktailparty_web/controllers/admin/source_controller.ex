@@ -66,7 +66,7 @@ defmodule CocktailpartyWeb.Admin.SourceController do
     case instances do
       [] ->
         conn
-        |> put_flash(:error, "A redis instance is required to create a source.")
+        |> put_flash(:error, "A redis instance is required to edit a source.")
         |> redirect(to: ~p"/admin/redisinstances")
 
       _ ->

@@ -3,6 +3,11 @@
   <:subtitle>Use this form to manage sink records in your database.</:subtitle>
 </.header>
 
-<.sink_form changeset={@changeset} action={~p"/admin/sinks/#{@sink}"} />
+<.sink_form
+  changeset={@changeset}
+  action={~p"/admin/sinks/#{@sink}"}
+  redis_instances={@redis_instances}
+  users={@users}
+/>
 
 <.back navigate={~p"/admin/sinks"}>Back to sinks</.back>

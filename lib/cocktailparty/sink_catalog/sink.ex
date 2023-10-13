@@ -9,6 +9,7 @@ defmodule Cocktailparty.SinkCatalog.Sink do
     field :type, :string
 
     belongs_to :user, Cocktailparty.Accounts.User
+    belongs_to :redis_instance, Cocktailparty.Input.RedisInstance
 
     timestamps()
   end
@@ -16,7 +17,7 @@ defmodule Cocktailparty.SinkCatalog.Sink do
   @doc false
   def changeset(sink, attrs) do
     sink
-    |> cast(attrs, [:name, :description, :type, :channel])
+    |> cast(attrs, [:name, :description, :type, :channel, :redis_instance_id])
     |> validate_required([:name, :description, :type, :channel])
     |> unique_constraint(:name)
   end

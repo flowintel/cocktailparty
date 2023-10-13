@@ -21,6 +21,10 @@ defmodule Cocktailparty.Input do
     Repo.all(RedisInstance)
   end
 
+  def get_first_default_sink do
+    Repo.one(from r in RedisInstance, where: r.sink == true)
+  end
+
   @doc """
   Returns the list of redisinstances for feeding a select component
 

@@ -7,8 +7,10 @@ defmodule Cocktailparty.Input.RedisInstance do
     field :name, :string
     field :hostname, :string
     field :port, :integer
+    field :sink, :boolean, default: false
 
     has_many :sources, Cocktailparty.Catalog.Source
+    has_many :sinks, Cocktailparty.SinkCatalog.Sink
 
     timestamps()
   end
@@ -16,7 +18,7 @@ defmodule Cocktailparty.Input.RedisInstance do
   @doc false
   def changeset(redis_instance, attrs) do
     redis_instance
-    |> cast(attrs, [:name, :hostname, :port, :enabled])
+    |> cast(attrs, [:name, :hostname, :port, :enabled, :sink])
     |> validate_required([:name, :hostname, :port, :enabled])
     |> unique_constraint(:name)
   end

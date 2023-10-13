@@ -25,10 +25,4 @@ defmodule Cocktailparty.Catalog.Source do
     |> validate_required([:name, :description, :type, :channel])
     |> unique_constraint(:name)
   end
-
-  def set_redis_intance_changeset(struct, attrs \\ %{}) do
-    struct
-    |> cast(attrs, [:redis_instance])
-    |> cast_assoc(:redis_instance)
-  end
 end

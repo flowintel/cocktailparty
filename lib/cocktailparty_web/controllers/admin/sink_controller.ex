@@ -3,6 +3,7 @@ defmodule CocktailpartyWeb.Admin.SinkController do
 
   alias Cocktailparty.SinkCatalog
   alias Cocktailparty.SinkCatalog.Sink
+  alias Cocktailparty.Input
 
   def index(conn, _params) do
     sinks = SinkCatalog.list_sinks_with_user()
@@ -11,7 +12,20 @@ defmodule CocktailpartyWeb.Admin.SinkController do
 
   def new(conn, _params) do
     changeset = SinkCatalog.change_sink(%Sink{})
-    render(conn, :new, changeset: changeset)
+    # get list of redis instances
+    instances = Input.list_redisinstances()
+    # get list of users
+    users = SinkCatalog.list_authorized_users()
+
+    case instances do
+      [] ->
+        conn
+        |> put_flash(:error, "A redis instance is required to create a sink.")
+        |> redirect(to: ~p"/admin/redisinstances")
+
+      _ ->
+        render(conn, :new, changeset: changeset, redis_instances: instances, users: users)
+    end
   end
 
   def create(conn, %{"sink" => sink_params, user_id: user_id}) do
@@ -22,10 +36,16 @@ defmodule CocktailpartyWeb.Admin.SinkController do
         |> redirect(to: ~p"/admin/sinks/#{sink}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :new, changeset: changeset)
+        # get list of redis instances
+        instances = Input.list_redisinstances()
+        # get list of users
+        users = SinkCatalog.list_authorized_users()
+
+        render(conn, :new, changeset: changeset, redis_instances: instances, users: users)
     end
   end
 
+  # TODO presence on sinks
   def show(conn, %{"id" => id}) do
     sink = SinkCatalog.get_sink!(id)
     render(conn, :show, sink: sink)
@@ -34,12 +54,24 @@ defmodule CocktailpartyWeb.Admin.SinkController do
   def edit(conn, %{"id" => id}) do
     sink = SinkCatalog.get_sink!(id)
     changeset = SinkCatalog.change_sink(sink)
-    render(conn, :edit, sink: sink, changeset: changeset)
+    # get list of redis instances
+    instances = Input.list_redisinstances()
+    # get list of users
+    users = SinkCatalog.list_authorized_users()
+
+    case instances do
+      [] ->
+        conn
+        |> put_flash(:error, "A redis instance is required to edit a sink.")
+        |> redirect(to: ~p"/admin/redisinstances")
+
+      _ ->
+        render(conn, :edit, sink: sink, changeset: changeset, redis_instances: instances, users: users)
+    end
   end
 
   def update(conn, %{"id" => id, "sink" => sink_params}) do
     sink = SinkCatalog.get_sink!(id)
-
     case SinkCatalog.update_sink(sink, sink_params) do
       {:ok, sink} ->
         conn
@@ -47,7 +79,11 @@ defmodule CocktailpartyWeb.Admin.SinkController do
         |> redirect(to: ~p"/admin/sinks/#{sink}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :edit, sink: sink, changeset: changeset)
+      # get list of redis instances
+      instances = Input.list_redisinstances()
+      # get list of users
+      users = SinkCatalog.list_authorized_users()
+        render(conn, :edit, sink: sink, changeset: changeset, redis_instances: instances, users: users)
     end
   end
 
