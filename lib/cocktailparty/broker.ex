@@ -3,23 +3,31 @@ defmodule Cocktailparty.Broker do
   alias Redix.PubSub
 
   alias Cocktailparty.Catalog
+  require Logger
 
   defstruct [
     :pubsub,
+    :redis_instance,
     subscribed: [%{source: nil, ref: nil}],
     subscribing: [%{source: nil, ref: nil}]
   ]
 
-  require Logger
-
-  def start_link(_opts \\ []) do
-    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
+  def start_link(redis_instance: rc, name: name) do
+    GenServer.start_link(__MODULE__, redis_instance: rc, name: name)
   end
 
-  def init(:ok) do
-    {:ok, pubsub} = PubSub.start_link(Application.get_env(:cocktailparty, :redix_uri))
+  def init(redis_instance: redis_instance, name: _) do
+    {:ok, pubsub} =
+      PubSub.start_link(
+        host: redis_instance.hostname,
+        port: redis_instance.port,
+        name: {:global, "pubsub" <> redis_instance.name}
+      )
+
+    Logger.info("Starting pubsub for #{redis_instance.name}")
+
     # Get sources from the catalog
-    sources = Catalog.list_sources()
+    sources = Catalog.list_redis_instance_sources(redis_instance.id)
 
     subscribing =
       Enum.reduce(sources, [], fn source, subscribing ->
@@ -29,7 +37,8 @@ defmodule Cocktailparty.Broker do
         [%{source: source, ref: ref} | subscribing]
       end)
 
-    {:ok, %{subscribing: subscribing, pubsub: pubsub, subscribed: []}}
+    {:ok,
+     %{subscribing: subscribing, pubsub: pubsub, subscribed: [], redis_instance: redis_instance}}
   end
 
   # Receiving a connection notification from Redix about source we are subscribing to.
@@ -44,7 +53,8 @@ defmodule Cocktailparty.Broker do
     state = %{
       subscribing: subscribing,
       subscribed: subscribed,
-      pubsub: state.pubsub
+      pubsub: state.pubsub,
+      redis_instance: state.redis_instance
     }
 
     # Log the subscription
@@ -64,7 +74,8 @@ defmodule Cocktailparty.Broker do
     state = %{
       subscribing: subscribing,
       subscribed: subscribed,
-      pubsub: state.pubsub
+      pubsub: state.pubsub,
+      redis_instance: state.redis_instance
     }
 
     Logger.info("Disconnected from #{inspect(current_sub.source.name)}")
@@ -77,8 +88,9 @@ defmodule Cocktailparty.Broker do
   def handle_info({:redix_pubsub, _pid, ref, :message, message}, state) do
     current_sub = Enum.find(state.subscribed, fn subscribed -> subscribed.ref == ref end)
 
-    # TODO message structure should be namespaced:
-    # feed:redisinstance:channel_id
+    # brokers are listening only to on redis.pubsub
+    # so there is no channel name collisions
+    # feed:channel_id
     :ok =
       Phoenix.PubSub.broadcast!(
         Cocktailparty.PubSub,
@@ -112,7 +124,8 @@ defmodule Cocktailparty.Broker do
      %{
        subscribing: subscribing,
        pubsub: state.pubsub,
-       subscribed: subscribed
+       subscribed: subscribed,
+       redis_instance: state.redis_instance
      }}
   end
 
@@ -126,7 +139,8 @@ defmodule Cocktailparty.Broker do
      %{
        subscribing: subscribing,
        pubsub: state.pubsub,
-       subscribed: state.subscribed
+       subscribed: state.subscribed,
+       redis_instance: state.redis_instance
      }}
   end
 
@@ -159,7 +173,8 @@ defmodule Cocktailparty.Broker do
      %{
        subscribing: state.subscribing,
        pubsub: state.pubsub,
-       subscribed: state.subscribed
+       subscribed: state.subscribed,
+       redis_instance: state.redis_instance
      }}
   end
 end

@@ -5,6 +5,7 @@ defmodule Cocktailparty.Catalog do
   require Logger
 
   import Ecto.Query, warn: false
+  alias Cocktailparty.Input.RedisInstance
   alias Cocktailparty.Repo
 
   alias Cocktailparty.Catalog.Source
@@ -24,6 +25,24 @@ defmodule Cocktailparty.Catalog do
     Repo.all(Source)
     |> Repo.preload(:users)
     |> Repo.preload(:redis_instance)
+  end
+
+  @doc """
+  Returns the list of sources for a redis instance
+
+  ## Examples
+
+      iex> list_redis_instance_sources(redis_instance_id)
+      [%Source{}, ...]
+
+  """
+  def list_redis_instance_sources(redis_instance_id) do
+    Repo.all(
+      from s in Source,
+        join: r in RedisInstance,
+        on: s.redis_instance_id == r.id,
+        where: r.id == ^redis_instance_id
+    )
   end
 
   @doc """

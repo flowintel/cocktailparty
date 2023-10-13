@@ -1,6 +1,6 @@
 defmodule Cocktailparty.RedisInstancesDynamicSupervisor do
   alias Cocktailparty.Input.RedisInstance
-  # Automatically defines child_spec/1
+  alias Cocktailparty.Broker
   use DynamicSupervisor
 
   require Logger
@@ -10,14 +10,35 @@ defmodule Cocktailparty.RedisInstancesDynamicSupervisor do
   end
 
   def start_child(rc = %RedisInstance{}) do
-    # If MyWorker is not using the new child specs, we need to pass a map:
-    # spec = %{id: MyWorker, start: {MyWorker, :start_link, [foo, bar, baz]}}
-    Logger.info("Supervisor Starting #{rc.name}")
-    spec = {Redix, host: rc.hostname, port: rc.port, name: {:global, rc.name}}
+    Logger.info("Supervisor Starting #{rc.name} redix driver")
+    spec_redix = {Redix, host: rc.hostname, port: rc.port, name: {:global, "redix_" <> rc.name}}
+    spec_broker = {Broker, redis_instance: rc, name: {:global, "broker_" <> rc.name}}
     # TODO check errors and propagate (we should get {:ok, pid})
-    case DynamicSupervisor.start_child(__MODULE__, spec) do
+    case DynamicSupervisor.start_child(__MODULE__, spec_redix) do
       {:ok, pid} ->
         Logger.info("Redix driver alive for #{rc.name} with pid #{pid_to_string(pid)}")
+
+        case DynamicSupervisor.start_child(__MODULE__, spec_broker) do
+          {:ok, pid_broker} ->
+            Logger.info("Broker alive for #{rc.name} with pid #{pid_to_string(pid_broker)}")
+
+          {:ok, pid_broker, info} ->
+            Logger.info(
+              "Broker alive for #{rc.name} with pid #{pid_to_string(pid_broker)}, info: #{info}"
+            )
+
+          {:error, :ignore} ->
+            Logger.error("Broker #{rc.name} has been ignored")
+            {:error, :max_children}
+            Logger.error("Broker #{rc.name} not started :max_children reached")
+
+          {:error, {:already_started, pid_broker}} ->
+            Logger.error("Broker #{rc.name} is already started as #{pid_to_string(pid_broker)}")
+
+          {:error, err} ->
+            Logger.error("Broker starting error #{inspect(err)}.")
+            {:error, err}
+        end
 
       {:ok, pid, info} ->
         Logger.info(
@@ -33,7 +54,7 @@ defmodule Cocktailparty.RedisInstancesDynamicSupervisor do
         Logger.error("Redix driver #{rc.name} is already started as #{pid_to_string(pid)}")
 
       {:error, err} ->
-        Logger.error("Redix driver error.")
+        Logger.error("Redix driver #{inspect(err)}")
         {:error, err}
     end
   end
