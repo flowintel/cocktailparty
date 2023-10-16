@@ -124,7 +124,7 @@ defmodule Cocktailparty.SinkCatalog do
   end
 
   @doc """
-  Creates a sink.
+  Creates a sink by admin, all fields are provided
 
   ## Examples
 
@@ -135,16 +135,29 @@ defmodule Cocktailparty.SinkCatalog do
       {:error, ...}
 
   """
-  def create_sink(attrs \\ %{}, user_id) do
-    ri_id = attrs["redis_instance_id"]
+  def create_sink(attrs \\ %{}) do
+    Cocktailparty.Input.get_redis_instance!(attrs["redis_instance_id"])
+    |> Ecto.build_assoc(:sinks)
+    |> change_sink(attrs)
+    |> Repo.insert()
 
-    redis_instance =
-      case ri_id do
-        nil -> Cocktailparty.Input.get_first_default_sink()
-        _ -> Cocktailparty.Input.get_redis_instance!(attrs["redis_instance_id"])
-      end
+    # TODO broker magic on insert
+  end
 
-    redis_instance
+  @doc """
+  Creates a sink by users, no clues about available sinks
+
+  ## Examples
+
+      iex> create_sink(%{field: value}, user_id)
+      {:ok, %Sink{}}
+
+      iex> create_sink(%{field: bad_value})
+      {:error, ...}
+
+  """
+  def create_sink(attrs, user_id) do
+    Cocktailparty.Input.get_one_sink_redisinstance()
     |> Ecto.build_assoc(:sinks)
     |> change_sink(attrs)
     |> put_change(:user_id, user_id)
@@ -152,6 +165,7 @@ defmodule Cocktailparty.SinkCatalog do
 
     # TODO broker magic on insert
   end
+
 
   @doc """
   Updates a sink.

@@ -17,7 +17,7 @@ defmodule Cocktailparty.SinkCatalog.Sink do
   @doc false
   def changeset(sink, attrs) do
     sink
-    |> cast(attrs, [:name, :description, :type, :channel, :redis_instance_id])
+    |> cast(attrs, [:name, :description, :type, :channel, :redis_instance_id, :user_id])
     |> validate_required([:name, :description, :type, :channel])
     |> unique_constraint(:name)
   end

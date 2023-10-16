@@ -21,7 +21,29 @@ defmodule Cocktailparty.Input do
     Repo.all(RedisInstance)
   end
 
-  def get_first_default_sink do
+  @doc """
+  Returns the list of redis intances that can be used to push data in
+
+  ## Examples
+
+      iex> list_redisinstances()
+      [%RedisInstance{}, ...]
+
+  """
+  def list_sink_redisinstances do
+    Repo.all(from r in RedisInstance, where: r.sink == true)
+  end
+
+  @doc """
+  Returns the list of redis intances that can be used to push data in
+
+  ## Examples
+
+      iex> list_redisinstances()
+      [%RedisInstance{}, ...]
+
+  """
+  def get_one_sink_redisinstance do
     Repo.one(from r in RedisInstance, where: r.sink == true)
   end
 
