@@ -66,12 +66,18 @@ defmodule CocktailpartyWeb.Admin.SinkController do
         |> redirect(to: ~p"/admin/redisinstances")
 
       _ ->
-        render(conn, :edit, sink: sink, changeset: changeset, redis_instances: instances, users: users)
+        render(conn, :edit,
+          sink: sink,
+          changeset: changeset,
+          redis_instances: instances,
+          users: users
+        )
     end
   end
 
   def update(conn, %{"id" => id, "sink" => sink_params}) do
     sink = SinkCatalog.get_sink!(id)
+
     case SinkCatalog.update_sink(sink, sink_params) do
       {:ok, sink} ->
         conn
@@ -79,11 +85,17 @@ defmodule CocktailpartyWeb.Admin.SinkController do
         |> redirect(to: ~p"/admin/sinks/#{sink}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-      # get list of redis instances
-      instances = Input.list_sink_redisinstances()
-      # get list of users
-      users = SinkCatalog.list_authorized_users()
-        render(conn, :edit, sink: sink, changeset: changeset, redis_instances: instances, users: users)
+        # get list of redis instances
+        instances = Input.list_sink_redisinstances()
+        # get list of users
+        users = SinkCatalog.list_authorized_users()
+
+        render(conn, :edit,
+          sink: sink,
+          changeset: changeset,
+          redis_instances: instances,
+          users: users
+        )
     end
   end
 

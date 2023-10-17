@@ -5,6 +5,7 @@ defmodule Cocktailparty.UserManagement do
 
   import Ecto.Query, warn: false
   import Ecto.Changeset
+  alias Cocktailparty.SinkCatalog.Sink
   alias Cocktailparty.Repo
 
   # we reuse Accounts.User schema
@@ -44,7 +45,6 @@ defmodule Cocktailparty.UserManagement do
   Gets a single user.
 
   Returns nil if the User does not exist
-
 
   ## Examples
 
@@ -196,7 +196,7 @@ defmodule Cocktailparty.UserManagement do
   Check whether a users'role is above a threshold role
   """
   def is_allowed?(user_id, trole) do
-    user = get_user(user_id)
+    user = get_user!(user_id)
 
     # first check whether the role exists
     if Enum.member?(User.roles(), trole) do
@@ -215,5 +215,24 @@ defmodule Cocktailparty.UserManagement do
     else
       false
     end
+  end
+
+  @doc """
+  Check whether a user has access right to a sink?
+  """
+  def has_access_to_sink?(user_id, sink_id) do
+    query =
+      from s in Sink,
+        where: s.user_id == ^user_id,
+        where: s.id == ^sink_id,
+        select: s.id
+
+    case Repo.all(query) do
+      [] ->
+        false
+      _ ->
+        true
+    end
+
   end
 end

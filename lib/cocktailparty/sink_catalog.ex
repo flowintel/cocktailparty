@@ -84,10 +84,10 @@ defmodule Cocktailparty.SinkCatalog do
 
   ## Examples
 
-      iex> get_sink(123)
+      iex> get_auth_sink(123)
       {:ok, %Sink{}}
 
-      iex> get_sink(1234)
+      iex> get_auth_sink(1234)
       {:error, "Unauthorized"}
 
   """
@@ -119,6 +119,24 @@ defmodule Cocktailparty.SinkCatalog do
   """
   def get_sink!(id) do
     Repo.get!(Sink, id)
+    |> Repo.preload(:user)
+    |> Repo.preload(:redis_instance)
+  end
+
+  @doc """
+  Gets a single sink.
+
+  ## Examples
+
+      iex> get_sink(123)
+      {:ok, %Sink{}}
+
+      iex> get_sink!(1234)
+      {:error, error}
+
+  """
+  def get_sink(id) do
+    Repo.get(Sink, id)
     |> Repo.preload(:user)
     |> Repo.preload(:redis_instance)
   end
@@ -165,7 +183,6 @@ defmodule Cocktailparty.SinkCatalog do
 
     # TODO broker magic on insert
   end
-
 
   @doc """
   Updates a sink.

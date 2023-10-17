@@ -11,8 +11,10 @@ defmodule Cocktailparty.RedisInstancesDynamicSupervisor do
 
   def start_child(rc = %RedisInstance{}) do
     Logger.info("Supervisor Starting #{rc.name} redix driver")
-    spec_redix = {Redix, host: rc.hostname, port: rc.port, name: {:global, "redix_" <> rc.name}}
-    spec_broker = {Broker, redis_instance: rc, name: {:global, "broker_" <> rc.name}}
+    spec_redix = {Redix, host: rc.hostname, port: rc.port, name: {:global, "redix_" <> Integer.to_string(rc.id)}}
+    # spec_redix = {Redix, host: rc.hostname, port: rc.port, name: {:global, "redix_" <> rc.name}}
+    spec_broker = {Broker, redis_instance: rc, name: {:global, "broker_" <> Integer.to_string(rc.id)}}
+    # spec_broker = {Broker, redis_instance: rc, name: {:global, "broker_" <> rc.name}}
     # TODO check errors and propagate (we should get {:ok, pid})
     case DynamicSupervisor.start_child(__MODULE__, spec_redix) do
       {:ok, pid} ->

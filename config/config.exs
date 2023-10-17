@@ -64,7 +64,7 @@ config :logger, :default_handler,
 
 # Configures Elixir's Log formatter
 config :logger, :default_formatter,
-  format: "$node $date $time #level $message $metadata",
+  format: "$node $date $time $level $message $metadata",
   metadata: [:request_id, :remote_ip, :websocket_token, :current_user]
 
 # Use Jason for JSON parsing in Phoenix

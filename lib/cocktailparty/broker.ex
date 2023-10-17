@@ -21,10 +21,12 @@ defmodule Cocktailparty.Broker do
       PubSub.start_link(
         host: redis_instance.hostname,
         port: redis_instance.port,
-        name: {:global, "pubsub" <> redis_instance.name}
+        name: {:global, "pubsub" <> Integer.to_string(redis_instance.id)}
+        # name: {:global, "pubsub" <> redis_instance.name}
       )
 
-    Logger.info("Starting pubsub for #{redis_instance.name}")
+    # Logger.info("Starting pubsub for #{redis_instance.name}")
+    Logger.info("Starting pubsub for #{redis_instance.id}")
 
     # Get sources from the catalog
     sources = Catalog.list_redis_instance_sources(redis_instance.id)
