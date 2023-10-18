@@ -230,9 +230,9 @@ defmodule Cocktailparty.UserManagement do
     case Repo.all(query) do
       [] ->
         false
+
       _ ->
         true
     end
-
   end
 end

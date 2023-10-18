@@ -11,9 +11,15 @@ defmodule Cocktailparty.RedisInstancesDynamicSupervisor do
 
   def start_child(rc = %RedisInstance{}) do
     Logger.info("Supervisor Starting #{rc.name} redix driver")
-    spec_redix = {Redix, host: rc.hostname, port: rc.port, name: {:global, "redix_" <> Integer.to_string(rc.id)}}
+
+    spec_redix =
+      {Redix,
+       host: rc.hostname, port: rc.port, name: {:global, "redix_" <> Integer.to_string(rc.id)}}
+
     # spec_redix = {Redix, host: rc.hostname, port: rc.port, name: {:global, "redix_" <> rc.name}}
-    spec_broker = {Broker, redis_instance: rc, name: {:global, "broker_" <> Integer.to_string(rc.id)}}
+    spec_broker =
+      {Broker, redis_instance: rc, name: {:global, "broker_" <> Integer.to_string(rc.id)}}
+
     # spec_broker = {Broker, redis_instance: rc, name: {:global, "broker_" <> rc.name}}
     # TODO check errors and propagate (we should get {:ok, pid})
     case DynamicSupervisor.start_child(__MODULE__, spec_redix) do
@@ -22,11 +28,11 @@ defmodule Cocktailparty.RedisInstancesDynamicSupervisor do
 
         case DynamicSupervisor.start_child(__MODULE__, spec_broker) do
           {:ok, pid_broker} ->
-            Logger.info("Broker alive for #{rc.name} with pid #{pid_to_string(pid_broker)}")
+            Logger.info("Broker initialized for #{rc.name} with pid #{pid_to_string(pid_broker)}")
 
           {:ok, pid_broker, info} ->
             Logger.info(
-              "Broker alive for #{rc.name} with pid #{pid_to_string(pid_broker)}, info: #{info}"
+              "Broker initialized for #{rc.name} with pid #{pid_to_string(pid_broker)}, info: #{info}"
             )
 
           {:error, :ignore} ->

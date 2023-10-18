@@ -62,7 +62,7 @@ defmodule Cocktailparty.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:redix, "~>1.2.2"},
+      {:redix, "~>1.2.4"},
       {:remote_ip, "~>1.1.0"},
       # runtime: false because we don't want to start the FunWithFlags.Supervisor automatically
       {:fun_with_flags, "~> 1.10.1", runtime: false},

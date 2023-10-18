@@ -25,7 +25,7 @@ defmodule CocktailpartyWeb.SinkChannel do
     else
       # check authorization
       if authorized?(sink_id, user_id) do
-        socket= assign(socket, :sink, sink)
+        socket = assign(socket, :sink, sink)
         send(self(), :after_join)
         Logger.info("user #{user_id} connected to sink: sink:#{sink_id}")
         {:ok, socket}
@@ -38,13 +38,17 @@ defmodule CocktailpartyWeb.SinkChannel do
   # Channels can be used in a request/response fashion
   # by sending replies to requests from the client
   @impl true
-  #TODO find a better verb
+  # TODO find a better verb
   def handle_in("client_push", payload, socket) do
     Logger.info("Handling message from {#socket.assigns.user_id} on #{socket.assigns.sink.id}")
     # push into redis instance corresponding to the sink channel
     # TODO: we could push in phoenix.pubsub to create chatroom
     # get the corresponding redix instance client
-    client = GenServer.whereis({:global, "redix_" <> Integer.to_string(socket.assigns.sink.redis_instance_id)})
+    client =
+      GenServer.whereis(
+        {:global, "redix_" <> Integer.to_string(socket.assigns.sink.redis_instance_id)}
+      )
+
     Redix.command!(client, ["PUBLISH", socket.assigns.sink.channel, payload])
     {:reply, {:ok, payload}, socket}
   end
@@ -86,6 +90,7 @@ defmodule CocktailpartyWeb.SinkChannel do
     )
 
     # TODO write access test
-    UserManagement.is_allowed?(user_id, @minimim_role) && UserManagement.has_access_to_sink?(user_id, sink_id)
+    UserManagement.is_allowed?(user_id, @minimim_role) &&
+      UserManagement.has_access_to_sink?(user_id, sink_id)
   end
 end
