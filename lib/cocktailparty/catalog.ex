@@ -84,7 +84,7 @@ defmodule Cocktailparty.Catalog do
     |> Repo.insert()
     |> case do
       {:ok, source} ->
-        _ = notify_broker({:new_source, source})
+        _ = notify_broker(source, {:new_source, source})
         {:ok, source}
 
       {:error, msg} ->
@@ -117,13 +117,13 @@ defmodule Cocktailparty.Catalog do
       }
       when source.channel != new_channel ->
         # We ask the broker to delete the source with the old channel
-        notify_broker({:delete_source, source})
+        notify_broker(source, {:delete_source, source})
 
         # We update the source
         {:ok, source} = Repo.update(changeset)
 
         # And we ask the broker to subscribe to the updated source
-        notify_broker({:new_source, source})
+        notify_broker(source, {:new_source, source})
 
         {:ok, source}
 
@@ -148,7 +148,7 @@ defmodule Cocktailparty.Catalog do
     Repo.delete(source)
     |> case do
       {:ok, source} ->
-        _ = notify_broker({:delete_source, source})
+        _ = notify_broker(source, {:delete_source, source})
         {:ok, source}
 
       {:error, msg} ->
@@ -226,7 +226,27 @@ defmodule Cocktailparty.Catalog do
     Repo.delete_all(query)
   end
 
-  defp notify_broker(msg) do
-    GenServer.cast(Cocktailparty.Broker, msg)
+  def get_broker(%Source{} = source) do
+    # locate the reponsible broker process
+    case  GenServer.whereis(
+        {:global, {:name, "broker_" <> Integer.to_string(source.redis_instance_id)}}
+      ) do
+        {name, node} ->
+          # TODO
+          Logger.error("TODO: contacting remote broker in  the cluster: #{node}/#{name}")
+          {name, node}
+
+        nil ->
+          # TODO
+          Logger.error("looks like broker_" <> Integer.to_string(source.redis_instance_id) <>" is dead - should not happen")
+          nil
+
+        pid ->
+          pid
+      end
+  end
+
+  defp notify_broker(%Source{} = source, msg) do
+    GenServer.cast(get_broker(source), msg)
   end
 end

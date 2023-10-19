@@ -12,17 +12,18 @@ defmodule Cocktailparty.Broker do
     subscribing: []
   ]
 
-  def start_link(redis_instance: rc, name: name) do
-    GenServer.start_link(__MODULE__, redis_instance: rc, name: name)
+
+  def start_link(opts) when is_list(opts) do
+    GenServer.start_link(__MODULE__, opts, [name: opts[:name]])
   end
 
-  def init(redis_instance: redis_instance, name: _) do
+  def init(opts) do
+    redis_instance = opts[:redis_instance]
     {:ok, pubsub} =
       PubSub.start_link(
         host: redis_instance.hostname,
         port: redis_instance.port,
-        name: {:global, "pubsub" <> Integer.to_string(redis_instance.id)}
-        # name: {:global, "pubsub" <> redis_instance.name}
+        name: {:global, "pubsub_" <> Integer.to_string(redis_instance.id)}
       )
 
     # Logger.info("Starting pubsub for #{redis_instance.name}")
@@ -44,6 +45,7 @@ defmodule Cocktailparty.Broker do
   end
 
   # Receiving a connection notification from Redix about source we are subscribing to.
+  # we don't filter on pid and ref, we started the pubsub process so it only talks to the present process
   def handle_info({:redix_pubsub, _, _, :subscribed, message}, state) do
     # Find the source that we are subscribing to
     current_sub =
