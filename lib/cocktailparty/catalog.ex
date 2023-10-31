@@ -228,22 +228,26 @@ defmodule Cocktailparty.Catalog do
 
   def get_broker(%Source{} = source) do
     # locate the reponsible broker process
-    case  GenServer.whereis(
-        {:global, {:name, "broker_" <> Integer.to_string(source.redis_instance_id)}}
-      ) do
-        {name, node} ->
-          # TODO
-          Logger.error("TODO: contacting remote broker in  the cluster: #{node}/#{name}")
-          {name, node}
+    case GenServer.whereis(
+           {:global, {:name, "broker_" <> Integer.to_string(source.redis_instance_id)}}
+         ) do
+      {name, node} ->
+        # TODO
+        Logger.error("TODO: contacting remote broker in  the cluster: #{node}/#{name}")
+        {name, node}
 
-        nil ->
-          # TODO
-          Logger.error("looks like broker_" <> Integer.to_string(source.redis_instance_id) <>" is dead - should not happen")
-          nil
+      nil ->
+        # TODO
+        Logger.error(
+          "looks like broker_" <>
+            Integer.to_string(source.redis_instance_id) <> " is dead - should not happen"
+        )
 
-        pid ->
-          pid
-      end
+        nil
+
+      pid ->
+        pid
+    end
   end
 
   defp notify_broker(%Source{} = source, msg) do

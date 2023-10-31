@@ -12,13 +12,13 @@ defmodule Cocktailparty.Broker do
     subscribing: []
   ]
 
-
   def start_link(opts) when is_list(opts) do
-    GenServer.start_link(__MODULE__, opts, [name: opts[:name]])
+    GenServer.start_link(__MODULE__, opts, name: opts[:name])
   end
 
   def init(opts) do
     redis_instance = opts[:redis_instance]
+
     {:ok, pubsub} =
       PubSub.start_link(
         host: redis_instance.hostname,
@@ -105,12 +105,17 @@ defmodule Cocktailparty.Broker do
     # brokers are listening only to on redis.pubsub
     # so there is no channel name collisions
     # feed:channel_id
+    # TODO don't raise, log and add metric of failures
     :ok =
       Phoenix.PubSub.broadcast!(
         Cocktailparty.PubSub,
         "feed:" <> Integer.to_string(current_sub.id),
         message
       )
+
+    :telemetry.execute([:cocktailparty, :broker], %{count: 1}, %{
+      feed: "feed:" <> Integer.to_string(current_sub.id)
+    })
 
     {:noreply, state}
   end

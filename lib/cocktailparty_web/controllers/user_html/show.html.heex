@@ -12,11 +12,19 @@
   <:item title="Email"><%= @user.email %></:item>
   <:item title="Role"><%= @user.role %></:item>
   <:item title="Admin"><%= @user.is_admin %></:item>
-  <:item title="Status">
-    <div :if={@user.is_present} class="badge badge-success">
+  <:item title="Feed connection status">
+    <div :if={@user.is_present_feed} class="badge badge-success">
       online
     </div>
-    <div :if={!@user.is_present} class="badge badge-warning">
+    <div :if={!@user.is_present_feed} class="badge badge-warning">
+      offline
+    </div>
+  </:item>
+  <:item title="Sink connection status">
+    <div :if={@user.is_present_sink} class="badge badge-success">
+      online
+    </div>
+    <div :if={!@user.is_present_sink} class="badge badge-warning">
       offline
     </div>
   </:item>

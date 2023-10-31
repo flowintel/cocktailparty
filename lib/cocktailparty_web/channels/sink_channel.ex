@@ -1,6 +1,5 @@
 defmodule CocktailpartyWeb.SinkChannel do
   use CocktailpartyWeb, :channel
-  alias CocktailpartyWeb.Presence
 
   require Logger
   require Redix
@@ -63,23 +62,9 @@ defmodule CocktailpartyWeb.SinkChannel do
     {:noreply, socket}
   end
 
-  # Presence tracking
-  @impl true
+  # Tracker tracking
   def handle_info(:after_join, socket) do
-    {:ok, _} =
-      Presence.track(socket, socket.assigns.current_user, %{
-        online_at: inspect(System.system_time(:second)),
-        current_ip: inspect(socket)
-      })
-
-    {:noreply, socket}
-  end
-
-  # intercept presence_diff
-  intercept(["presence_diff"])
-
-  @impl true
-  def handle_out("presence_diff", _msg, socket) do
+    {:ok, _} = CocktailpartyWeb.Tracker.track(socket)
     {:noreply, socket}
   end
 

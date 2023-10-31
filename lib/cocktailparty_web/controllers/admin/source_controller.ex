@@ -3,7 +3,7 @@ defmodule CocktailpartyWeb.Admin.SourceController do
 
   alias Cocktailparty.Catalog
   alias Cocktailparty.Catalog.Source
-  alias CocktailpartyWeb.Presence
+  alias CocktailpartyWeb.Tracker
   alias Cocktailparty.Input
 
   def index(conn, _params) do
@@ -44,7 +44,7 @@ defmodule CocktailpartyWeb.Admin.SourceController do
   def show(conn, %{"id" => id}) do
     source = Catalog.get_source!(id)
 
-    connected_users = Presence.get_all_connected_users()
+    connected_users = Tracker.get_all_connected_users_feeds()
 
     updated_users =
       Enum.reduce(source.users, [], fn user, updated_users ->

@@ -8,13 +8,26 @@
 </.header>
 
 <.table id="users" rows={@users} row_click={&JS.navigate(~p"/admin/users/#{&1}")}>
-  <:col :let={user} label="email">
-    <div class="indicator">
-      <span :if={user.is_present} class="indicator-item badge badge-success"></span>
-      <span :if={!user.is_present} class="indicator-item badge badge-ghost"></span>
-      <span><%= user.email %></span>
+  <:col :let={user} label="email"><%= user.email %></:col>
+
+  <:col :let={user} label="feed">
+    <div :if={user.is_present_feed} class="badge badge-success">
+      online
+    </div>
+    <div :if={!user.is_present_feed} class="badge badge-warning">
+      offline
     </div>
   </:col>
+
+  <:col :let={user} label="sink">
+    <div :if={user.is_present_sink} class="badge badge-success">
+      online
+    </div>
+    <div :if={!user.is_present_sink} class="badge badge-warning">
+      offline
+    </div>
+  </:col>
+
   <:col :let={user} label="role"><%= user.role %></:col>
   <:col :let={user} label="admin"><%= user.is_admin %></:col>
   <:action :let={user}>

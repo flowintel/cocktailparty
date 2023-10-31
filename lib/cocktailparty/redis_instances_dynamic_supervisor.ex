@@ -17,7 +17,8 @@ defmodule Cocktailparty.RedisInstancesDynamicSupervisor do
        host: rc.hostname, port: rc.port, name: {:global, "redix_" <> Integer.to_string(rc.id)}}
 
     spec_broker =
-      {Broker, redis_instance: rc, name: {:global, {:name, "broker_" <> Integer.to_string(rc.id)}}}
+      {Broker,
+       redis_instance: rc, name: {:global, {:name, "broker_" <> Integer.to_string(rc.id)}}}
 
     # TODO check errors and propagate (we should get {:ok, pid})
     case DynamicSupervisor.start_child(__MODULE__, spec_redix) do

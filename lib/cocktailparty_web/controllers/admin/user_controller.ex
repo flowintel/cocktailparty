@@ -3,18 +3,22 @@ defmodule CocktailpartyWeb.Admin.UserController do
 
   alias Cocktailparty.UserManagement
   alias Cocktailparty.Accounts.User
-  alias CocktailpartyWeb.Presence
+  alias CocktailpartyWeb.Tracker
 
   require Logger
 
   def index(conn, _params) do
     users = UserManagement.list_users()
     # List connected user
-    connected_users = Presence.get_all_connected_users()
+    connected_users_feeds = Tracker.get_all_connected_users_feeds()
+    connected_users_sinks = Tracker.get_all_connected_users_sinks()
 
     updated_users =
       Enum.reduce(users, [], fn user, updated_users ->
-        updated_user = Map.put(user, :is_present, Enum.member?(connected_users, user.id))
+        updated_user =
+        user
+        |> Map.put(:is_present_feed, Enum.member?(connected_users_feeds, user.id))
+        |> Map.put(:is_present_sink, Enum.member?(connected_users_sinks, user.id))
         [updated_user | updated_users]
       end)
 
@@ -40,10 +44,13 @@ defmodule CocktailpartyWeb.Admin.UserController do
 
   def show(conn, %{"id" => id}) do
     user = UserManagement.get_user!(id)
-    connected_users = Presence.get_all_connected_users()
+    connected_users_feeds = Tracker.get_all_connected_users_feeds()
+    user = Map.put(user, :is_present_feed, Enum.member?(connected_users_feeds, String.to_integer(id)))
+    connected_users_sinks = Tracker.get_all_connected_users_sinks()
+    user = Map.put(user, :is_present_sink, Enum.member?(connected_users_sinks, String.to_integer(id)))
 
     render(conn, :show,
-      user: Map.put(user, :is_present, Enum.member?(connected_users, String.to_integer(id)))
+      user: user
     )
   end
 

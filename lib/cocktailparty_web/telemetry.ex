@@ -73,6 +73,10 @@ defmodule CocktailpartyWeb.Telemetry do
         description:
           "The time the connection spent waiting before being checked out for the query"
       ),
+      counter("cocktailparty.broker.count",
+        tags: [:feed],
+        description: "The total number of messages received - across all input connections"
+      ),
 
       # VM Metrics
       summary("vm.memory.total", unit: {:byte, :kilobyte}),
