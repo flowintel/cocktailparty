@@ -276,13 +276,6 @@ defmodule Cocktailparty.SinkCatalog do
     |> Enum.filter(fn user -> UserManagement.is_allowed?(user.id, @minimim_role) end)
   end
 
-  def get_sample(sink_id) when is_integer(sink_id) do
-    GenServer.call(
-      {:global, Cocktailparty.PubSubMonitor},
-      {:get, "sink:" <> Integer.to_string(sink_id)}
-    )
-  end
-
   def get_sample(sink_id) when is_binary(sink_id) do
     samples = GenServer.call({:global, Cocktailparty.PubSubMonitor}, {:get, "sink:" <> sink_id})
 

@@ -230,13 +230,6 @@ defmodule Cocktailparty.Catalog do
     Repo.delete_all(query)
   end
 
-  def get_sample(source_id) when is_integer(source_id) do
-    GenServer.call(
-      {:global, Cocktailparty.PubSubMonitor},
-      {:get, "feed:" <> Integer.to_string(source_id)}
-    )
-  end
-
   def get_sample(source_id) when is_binary(source_id) do
     samples = GenServer.call({:global, Cocktailparty.PubSubMonitor}, {:get, "feed:" <> source_id})
 
