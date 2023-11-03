@@ -22,8 +22,7 @@ defmodule CocktailpartyWeb.Tracker do
     {:ok, %{pubsub_server: server}}
   end
 
-  def handle_diff(changes, state) do
-    Logger.info(inspect({"tracked changes", changes}))
+  def handle_diff(_, state) do
     {:ok, state}
   end
 

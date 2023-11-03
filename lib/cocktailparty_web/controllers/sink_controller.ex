@@ -31,7 +31,8 @@ defmodule CocktailpartyWeb.SinkController do
 
     case sink do
       {:ok, sink} ->
-        render(conn, :show, sink: sink)
+        sample = SinkCatalog.get_sample(id)
+        render(conn, :show, sink: sink, sample: sample)
 
       {:error, "Unauthorized"} ->
         conn

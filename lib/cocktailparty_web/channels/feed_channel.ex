@@ -27,17 +27,16 @@ defmodule CocktailpartyWeb.FeedChannel do
     {:reply, {:ok, payload}, socket}
   end
 
-  # Broadcast messages from the broker to all clients
-  # broadcast to everyone in the current topic (room:lobby).
+  # as messages are broadcasted from the broker, we intercept
+  intercept [:new_redis_message]
   @impl true
-  def handle_info(%{channel: channel, payload: payload}, socket) do
-    # hash = :crypto.hash(:sha256, payload) |> Base.encode16()
-    # push(socket, channel, %{hash: hash})
-    push(socket, channel, %{body: payload})
+  def handle_out(:new_redis_message, payload, socket) do
+    push(socket, "new_redis_message", payload)
     {:noreply, socket}
   end
 
   # Tracker tracking
+  @impl true
   def handle_info(:after_join, socket) do
     {:ok, _} = CocktailpartyWeb.Tracker.track(socket)
     {:noreply, socket}

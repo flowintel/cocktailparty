@@ -158,8 +158,14 @@ defmodule Cocktailparty.SinkCatalog do
     |> Ecto.build_assoc(:sinks)
     |> change_sink(attrs)
     |> Repo.insert()
+    |> case do
+      {:ok, sink} ->
+        notify_monitor({:subscribe, "sink:" <> Integer.to_string(sink.id)})
+        {:ok, sink}
 
-    # TODO broker magic on insert
+      {:error, msg} ->
+        {:error, msg}
+    end
   end
 
   @doc """
@@ -180,8 +186,14 @@ defmodule Cocktailparty.SinkCatalog do
     |> change_sink(attrs)
     |> put_change(:user_id, user_id)
     |> Repo.insert()
+    |> case do
+      {:ok, sink} ->
+        notify_monitor({:subscribe, "sink:" <> Integer.to_string(sink.id)})
+        {:ok, sink}
 
-    # TODO broker magic on insert
+      {:error, msg} ->
+        {:error, msg}
+    end
   end
 
   @doc """
@@ -198,7 +210,27 @@ defmodule Cocktailparty.SinkCatalog do
   """
   def update_sink(%Sink{} = sink, attrs) do
     changeset = change_sink(sink, attrs)
-    Repo.update(changeset)
+
+    case changeset do
+      %Ecto.Changeset{
+        changes: %{channel: new_channel},
+        data: %Sink{} = sink
+      }
+      when sink.channel != new_channel ->
+        # We notify the monitor
+        notify_monitor({:unsubscribe, "sink:" <> Integer.to_string(sink.id)})
+
+        # We update the sink
+        {:ok, sink} = Repo.update(changeset)
+
+        # And we ask the pubsubmonitor to subscribe to the updated sink
+        notify_monitor({:subscribe, "sink:" <> Integer.to_string(sink.id)})
+
+        {:ok, sink}
+
+      _ ->
+        Repo.update(changeset)
+    end
   end
 
   @doc """
@@ -215,6 +247,14 @@ defmodule Cocktailparty.SinkCatalog do
   """
   def delete_sink(%Sink{} = sink) do
     Repo.delete(sink)
+    |> case do
+      {:ok, sink} ->
+        notify_monitor({:unsubscribe, "sink:" <> Integer.to_string(sink.id)})
+        {:ok, sink}
+
+      {:error, msg} ->
+        {:error, msg}
+    end
   end
 
   @doc """
@@ -234,5 +274,35 @@ defmodule Cocktailparty.SinkCatalog do
   def list_authorized_users do
     Repo.all(User)
     |> Enum.filter(fn user -> UserManagement.is_allowed?(user.id, @minimim_role) end)
+  end
+
+  def get_sample(sink_id) when is_integer(sink_id) do
+    GenServer.call(
+      {:global, Cocktailparty.PubSubMonitor},
+      {:get, "sink:" <> Integer.to_string(sink_id)}
+    )
+  end
+
+  def get_sample(sink_id) when is_binary(sink_id) do
+    samples = GenServer.call({:global, Cocktailparty.PubSubMonitor}, {:get, "sink:" <> sink_id})
+
+    case samples do
+      [] ->
+        []
+
+      _ ->
+        Enum.reduce(samples, [], fn sample, acc ->
+          case Jason.encode(sample.payload, [escape: :html_safe]) do
+            {:ok, string} ->
+              acc ++ [string]
+            {:error, _} ->
+              [acc]
+          end
+      end)
+    end
+  end
+
+  defp notify_monitor(msg) do
+    GenServer.cast({:global, Cocktailparty.PubSubMonitor}, msg)
   end
 end

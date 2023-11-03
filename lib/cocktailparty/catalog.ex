@@ -7,7 +7,6 @@ defmodule Cocktailparty.Catalog do
   import Ecto.Query, warn: false
   alias Cocktailparty.Input.RedisInstance
   alias Cocktailparty.Repo
-
   alias Cocktailparty.Catalog.Source
   alias Cocktailparty.Accounts.User
   alias Cocktailparty.Accounts
@@ -85,6 +84,7 @@ defmodule Cocktailparty.Catalog do
     |> case do
       {:ok, source} ->
         _ = notify_broker(source, {:new_source, source})
+        notify_monitor({:subscribe, "feed:" <> Integer.to_string(source.id)})
         {:ok, source}
 
       {:error, msg} ->
@@ -118,12 +118,15 @@ defmodule Cocktailparty.Catalog do
       when source.channel != new_channel ->
         # We ask the broker to delete the source with the old channel
         notify_broker(source, {:delete_source, source})
+        # We notify the monitor
+        notify_monitor({:unsubscribe, "feed:" <> Integer.to_string(source.id)})
 
         # We update the source
         {:ok, source} = Repo.update(changeset)
 
-        # And we ask the broker to subscribe to the updated source
+        # And we ask the broker and the pubsubmonitor to subscribe to the updated source
         notify_broker(source, {:new_source, source})
+        notify_monitor({:subscribe, "feed:" <> Integer.to_string(source.id)})
 
         {:ok, source}
 
@@ -149,6 +152,7 @@ defmodule Cocktailparty.Catalog do
     |> case do
       {:ok, source} ->
         _ = notify_broker(source, {:delete_source, source})
+        notify_monitor({:unsubscribe, "feed:" <> Integer.to_string(source.id)})
         {:ok, source}
 
       {:error, msg} ->
@@ -226,6 +230,32 @@ defmodule Cocktailparty.Catalog do
     Repo.delete_all(query)
   end
 
+  def get_sample(source_id) when is_integer(source_id) do
+    GenServer.call(
+      {:global, Cocktailparty.PubSubMonitor},
+      {:get, "feed:" <> Integer.to_string(source_id)}
+    )
+  end
+
+  def get_sample(source_id) when is_binary(source_id) do
+    samples = GenServer.call({:global, Cocktailparty.PubSubMonitor}, {:get, "feed:" <> source_id})
+
+    case samples do
+      [] ->
+        []
+
+      _ ->
+        Enum.reduce(samples, [], fn sample, acc ->
+          case Jason.encode(sample.payload, [escape: :html_safe]) do
+            {:ok, string} ->
+              acc ++ [string]
+            {:error, _} ->
+              [acc]
+          end
+      end)
+    end
+  end
+
   def get_broker(%Source{} = source) do
     # locate the reponsible broker process
     case GenServer.whereis(
@@ -252,5 +282,9 @@ defmodule Cocktailparty.Catalog do
 
   defp notify_broker(%Source{} = source, msg) do
     GenServer.cast(get_broker(source), msg)
+  end
+
+  defp notify_monitor(msg) do
+    GenServer.cast({:global, Cocktailparty.PubSubMonitor}, msg)
   end
 end

@@ -6,6 +6,7 @@ defmodule CocktailpartyWeb.SinkChannel do
 
   alias Cocktailparty.UserManagement
   alias Cocktailparty.SinkCatalog
+  alias Phoenix.Socket.Broadcast
 
   @minimim_role "user"
 
@@ -39,7 +40,11 @@ defmodule CocktailpartyWeb.SinkChannel do
   @impl true
   # TODO find a better verb
   def handle_in("client_push", payload, socket) do
-    Logger.info("Handling message from {#socket.assigns.user_id} on #{socket.assigns.sink.id}")
+    Logger.info(
+      "handling message from #{socket.assigns.current_user} on #{socket.assigns.sink.id}"
+    )
+
+    # we fastlane message into redix
     # push into redis instance corresponding to the sink channel
     # TODO: we could push in phoenix.pubsub to create chatroom
     # get the corresponding redix instance client
@@ -49,20 +54,40 @@ defmodule CocktailpartyWeb.SinkChannel do
       )
 
     Redix.command!(client, ["PUBLISH", socket.assigns.sink.channel, payload])
+
+    # still, we also push on the pubsub so pubsubmonitor
+    # can keep a sample of what is coming from the client
+    # wrap messages into %Broadcast{} to keep metadata about the payload
+    broadcast = %Broadcast{
+      topic: "sink:" <> Integer.to_string(socket.assigns.sink.id),
+      event: :new_client_message,
+      payload: payload
+    }
+
+    :ok =
+      Phoenix.PubSub.broadcast(
+        Cocktailparty.PubSub,
+        "sink:" <> Integer.to_string(socket.assigns.sink.id),
+        broadcast
+      )
+
     {:reply, {:ok, payload}, socket}
   end
 
-  # Broadcast messages from the broker to all clients
-  # broadcast to everyone in the current topic (room:lobby).
+  def handle_in(_, _, socket) do
+    {:reply, {:error, "Unknown command", socket}}
+  end
+
+  # don't propagate push message pubblished on the pubsub
+  # for pubsubmonitor to be sent to other clients
+  [intercept :new_client_message]
   @impl true
-  def handle_info(%{channel: channel, payload: payload}, socket) do
-    # hash = :crypto.hash(:sha256, payload) |> Base.encode16()
-    # push(socket, channel, %{hash: hash})
-    push(socket, channel, %{body: payload})
+  def handle_out(:new_client_message, _, socket) do
     {:noreply, socket}
   end
 
   # Tracker tracking
+  @impl true
   def handle_info(:after_join, socket) do
     {:ok, _} = CocktailpartyWeb.Tracker.track(socket)
     {:noreply, socket}

@@ -52,9 +52,11 @@ defmodule CocktailpartyWeb.Admin.SourceController do
         [updated_user | updated_users]
       end)
 
+    sample = Catalog.get_sample(id)
+
     source = %{source | users: updated_users}
 
-    render(conn, :show, source: source)
+    render(conn, :show, source: source, sample: sample)
   end
 
   def edit(conn, %{"id" => id}) do

@@ -3,6 +3,7 @@ defmodule Cocktailparty.Broker do
   alias Redix.PubSub
 
   alias Cocktailparty.Catalog
+  alias Phoenix.Socket.Broadcast
   require Logger
 
   defstruct [
@@ -102,15 +103,22 @@ defmodule Cocktailparty.Broker do
     current_sub =
       Enum.find(state.subscribed, fn subscribed -> subscribed.channel == message.channel end)
 
-    # brokers are listening only to on redis.pubsub
+    # wrap messages into %Broadcast{} to keep metadata about the payload
+    broadcast = %Broadcast{
+      topic: "feed:" <> Integer.to_string(current_sub.id),
+      event: :new_redis_message,
+      payload: message
+    }
+
+    # brokers are listening only to one redis.pubsub
     # so there is no channel name collisions
     # feed:channel_id
     # TODO don't raise, log and add metric of failures
     :ok =
-      Phoenix.PubSub.broadcast!(
+      Phoenix.PubSub.broadcast(
         Cocktailparty.PubSub,
         "feed:" <> Integer.to_string(current_sub.id),
-        message
+        broadcast
       )
 
     :telemetry.execute([:cocktailparty, :broker], %{count: 1}, %{

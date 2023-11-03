@@ -48,7 +48,8 @@ defmodule CocktailpartyWeb.Admin.SinkController do
   # TODO presence on sinks
   def show(conn, %{"id" => id}) do
     sink = SinkCatalog.get_sink!(id)
-    render(conn, :show, sink: sink)
+    sample = SinkCatalog.get_sample(id)
+    render(conn, :show, sink: sink, sample: sample)
   end
 
   def edit(conn, %{"id" => id}) do

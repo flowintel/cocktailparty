@@ -18,4 +18,10 @@
   <:item title="User"><%= @sink.user.email %></:item>
 </.list>
 
+<br />
+<h1 class="text-lg font-semibold leading-8 text-zinc-800">Last messages</h1>
+<.table id="sample" rows={@sample}>
+  <:col :let={event} label="event"><%= event %></:col>
+</.table>
+
 <.back navigate={~p"/admin/sinks"}>Back to sinks</.back>

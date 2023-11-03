@@ -16,6 +16,8 @@ defmodule Cocktailparty.Application do
         Cocktailparty.Repo,
         # Start the PubSub system
         {Phoenix.PubSub, name: Cocktailparty.PubSub},
+        # Start the PubSub monitoring
+        {Cocktailparty.PubSubMonitor, name: {:global, Cocktailparty.PubSubMonitor}},
         # Start Finch
         {Finch, name: Cocktailparty.Finch},
         # Start the presence tracking module

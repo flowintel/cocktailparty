@@ -25,7 +25,8 @@ defmodule CocktailpartyWeb.SourceController do
 
   def show(conn, %{"id" => id}) do
     source = Catalog.get_source!(id)
-    render(conn, :show, source: source)
+    sample = Catalog.get_sample(id)
+    render(conn, :show, source: source, sample: sample)
   end
 
   def subscribe(conn, params) do

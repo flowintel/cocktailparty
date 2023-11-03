@@ -33,14 +33,18 @@
 </div>
 
 <br />
-<h1 class="text-lg font-semibold leading-8 text-zinc-800">Instructions</h1>
+<h1 class="text-lg font-semibold leading-8 text-zinc-800">Last messages</h1>
+<.table id="sample" rows={@sample}>
+  <:col :let={event} label="event"><%= event %></:col>
+</.table>
 
+<br />
+<h1 class="text-lg font-semibold leading-8 text-zinc-800">Instructions</h1>
 <div class="w-full border-opacity-50">
   In order to collect the data from the websocket, one can use <a
     href="https://github.com/vi/websocat"
     class="link"
   >websocat</a>. Simply download the latest release for your platform and start receiving data with the following command:<br />
-
   <div class="grid h-80 place-items-center">
     <div class="mockup-code">
       <pre><code>./websocat.x86_64-unknown-linux-musl \

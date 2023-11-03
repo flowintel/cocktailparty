@@ -16,6 +16,7 @@ defmodule Cocktailparty.RedisInstancesDynamicSupervisor do
       {Redix,
        host: rc.hostname, port: rc.port, name: {:global, "redix_" <> Integer.to_string(rc.id)}}
 
+    # TODO remove the nested name (impacts catalog.ex)
     spec_broker =
       {Broker,
        redis_instance: rc, name: {:global, {:name, "broker_" <> Integer.to_string(rc.id)}}}
