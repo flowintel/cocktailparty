@@ -8,7 +8,7 @@ defmodule CocktailpartyWeb.SinkChannel do
   alias Cocktailparty.SinkCatalog
   alias Phoenix.Socket.Broadcast
 
-  @minimim_role "user"
+  @action ":create_sink"
 
   @impl true
   def join("sink:lobby", _payload, socket) do
@@ -80,7 +80,7 @@ defmodule CocktailpartyWeb.SinkChannel do
 
   # don't propagate push message pubblished on the pubsub
   # for pubsubmonitor to be sent to other clients
-  [intercept :new_client_message]
+  [intercept(:new_client_message)]
   @impl true
   def handle_out(:new_client_message, _, socket) do
     {:noreply, socket}
@@ -100,7 +100,7 @@ defmodule CocktailpartyWeb.SinkChannel do
     )
 
     # TODO write access test
-    UserManagement.is_allowed?(user_id, @minimim_role) &&
+    UserManagement.can?(user_id, @action) &&
       UserManagement.has_access_to_sink?(user_id, sink_id)
   end
 end

@@ -239,13 +239,14 @@ defmodule Cocktailparty.Catalog do
 
       _ ->
         Enum.reduce(samples, [], fn sample, acc ->
-          case Jason.encode(sample.payload, [escape: :html_safe]) do
+          case Jason.encode(sample.payload, escape: :html_safe) do
             {:ok, string} ->
               acc ++ [string]
+
             {:error, _} ->
               [acc]
           end
-      end)
+        end)
     end
   end
 

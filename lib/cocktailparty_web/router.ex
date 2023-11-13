@@ -54,6 +54,7 @@ defmodule CocktailpartyWeb.Router do
     resources "/sources", SourceController
     resources "/sinks", SinkController
     resources "/redisinstances", RedisInstanceController
+    resources "/roles", RoleController
   end
 
   scope path: "/feature-flags" do

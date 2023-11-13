@@ -1,0 +1,12 @@
+<.header>
+  New Role
+  <:subtitle>Use this form to manage role records in your database.</:subtitle>
+</.header>
+
+<.role_form
+  changeset={@changeset}
+  action={~p"/admin/roles"}
+  permissions_labels={@permissions_labels}
+/>
+
+<.back navigate={~p"/admin/roles"}>Back to roles</.back>

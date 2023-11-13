@@ -22,6 +22,7 @@ defmodule Cocktailparty.UserManagement do
   """
   def list_users do
     Repo.all(User)
+    |> Repo.preload(:role)
   end
 
   @doc """
@@ -39,6 +40,7 @@ defmodule Cocktailparty.UserManagement do
     Repo.get!(User, id)
     |> Repo.preload(:sources)
     |> Repo.preload(:sinks)
+    |> Repo.preload(:role)
   end
 
   @doc """
@@ -56,6 +58,7 @@ defmodule Cocktailparty.UserManagement do
     Repo.get(User, id)
     |> Repo.preload(:sources)
     |> Repo.preload(:sinks)
+    |> Repo.preload(:role)
   end
 
   @doc """
@@ -184,7 +187,7 @@ defmodule Cocktailparty.UserManagement do
         false
 
       _ ->
-        if Enum.member?(User.roles(), user.role) do
+        if user.role.name != "unverified" do
           true
         else
           false
@@ -193,27 +196,26 @@ defmodule Cocktailparty.UserManagement do
   end
 
   @doc """
-  Check whether a users'role is above a threshold role
+  check whether a user has a given permission
+  return true if the user is_admin, unless the
+  permission does not exist
   """
-  def is_allowed?(user_id, trole) do
+  def can?(user_id, action) do
     user = get_user!(user_id)
 
-    # first check whether the role exists
-    if Enum.member?(User.roles(), trole) do
-      if !user.is_admin do
-        tindex = Enum.find_index(User.roles(), fn x -> x == trole end)
-        uindex = Enum.find_index(User.roles(), fn x -> x == user.role end)
-
-        if uindex >= tindex do
-          true
-        else
-          false
-        end
-      else
+    case Map.fetch(user.role.permissions, action) do
+      {:ok, true} ->
         true
-      end
-    else
-      false
+
+      # an admin can perform any actions unless it does not exist
+      {:ok, false} ->
+        false || user.is_admin
+
+      :error ->
+        false
+
+      _ ->
+        false
     end
   end
 

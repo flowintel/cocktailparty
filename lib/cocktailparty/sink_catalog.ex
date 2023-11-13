@@ -13,8 +13,7 @@ defmodule Cocktailparty.SinkCatalog do
   alias Cocktailparty.SinkCatalog.Sink
   alias Cocktailparty.Accounts.User
 
-  # improve this, it also appears in channels/sinkchannel
-  @minimim_role "user"
+  @action :create_sink
 
   @doc """
   Returns the list of sinks.
@@ -273,7 +272,7 @@ defmodule Cocktailparty.SinkCatalog do
 
   def list_authorized_users do
     Repo.all(User)
-    |> Enum.filter(fn user -> UserManagement.is_allowed?(user.id, @minimim_role) end)
+    |> Enum.filter(fn user -> UserManagement.can?(user.id, @action) end)
   end
 
   def get_sample(sink_id) when is_binary(sink_id) do
@@ -285,13 +284,14 @@ defmodule Cocktailparty.SinkCatalog do
 
       _ ->
         Enum.reduce(samples, [], fn sample, acc ->
-          case Jason.encode(sample.payload, [escape: :html_safe]) do
+          case Jason.encode(sample.payload, escape: :html_safe) do
             {:ok, string} ->
               acc ++ [string]
+
             {:error, _} ->
               [acc]
           end
-      end)
+        end)
     end
   end
 

@@ -28,7 +28,7 @@
     </div>
   </:col>
 
-  <:col :let={user} label="role"><%= user.role %></:col>
+  <:col :let={user} label="role"><%= user.role.name %></:col>
   <:col :let={user} label="admin"><%= user.is_admin %></:col>
   <:action :let={user}>
     <div class="sr-only">

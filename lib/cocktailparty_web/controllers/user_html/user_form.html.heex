@@ -4,7 +4,12 @@
   </.error>
   <.input field={f[:email]} type="email" label="Email" required />
   <.input field={f[:password]} type="text" label="Password" />
-  <.input field={f[:role]} type="select" label="Role" options={@roles} />
+  <.input
+    field={f[:role_id]}
+    type="select"
+    label="Role"
+    options={Enum.map(@roles, fn role -> {role.name, role.id} end)}
+  />
   <.input field={f[:is_admin]} type="select" label="Admin" options={["true", "false"]} />
   <:actions>
     <.button>Save User</.button>

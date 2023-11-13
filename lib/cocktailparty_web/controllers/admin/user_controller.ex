@@ -3,6 +3,7 @@ defmodule CocktailpartyWeb.Admin.UserController do
 
   alias Cocktailparty.UserManagement
   alias Cocktailparty.Accounts.User
+  alias Cocktailparty.Roles
   alias CocktailpartyWeb.Tracker
 
   require Logger
@@ -28,7 +29,8 @@ defmodule CocktailpartyWeb.Admin.UserController do
 
   def new(conn, _params) do
     changeset = UserManagement.change_user(%User{})
-    render(conn, :new, changeset: changeset, roles: User.roles())
+    # render(conn, :new, changeset: changeset, roles: User.roles())
+    render(conn, :new, changeset: changeset)
   end
 
   def create(conn, %{"user" => user_params}) do
@@ -39,7 +41,7 @@ defmodule CocktailpartyWeb.Admin.UserController do
         |> redirect(to: ~p"/admin/users/#{user}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :new, changeset: changeset, roles: User.roles())
+        render(conn, :new, changeset: changeset, roles: Roles.list_roles())
     end
   end
 
@@ -61,7 +63,7 @@ defmodule CocktailpartyWeb.Admin.UserController do
   def edit(conn, %{"id" => id}) do
     user = UserManagement.get_user!(id)
     changeset = UserManagement.change_user(user)
-    render(conn, :edit, user: user, changeset: changeset, roles: User.roles())
+    render(conn, :edit, user: user, changeset: changeset, roles: Roles.list_roles())
   end
 
   @spec update(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -75,7 +77,7 @@ defmodule CocktailpartyWeb.Admin.UserController do
         |> redirect(to: ~p"/admin/users/#{user}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :edit, user: user, changeset: changeset, roles: User.roles())
+        render(conn, :edit, user: user, changeset: changeset, roles: Roles.list_roles())
     end
   end
 

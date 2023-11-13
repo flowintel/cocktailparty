@@ -3,23 +3,19 @@ defmodule Cocktailparty.Accounts.User do
 
   import Ecto.Changeset
 
-  @uuser "uuser"
-  @user_role "user"
-  @poweruser_role "poweruser"
-
   schema "users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
     field :is_admin, :boolean, default: false
-    field :role, :string, default: "unconfirmed"
 
     many_to_many :sources, Cocktailparty.Catalog.Source,
       join_through: "sources_subscriptions",
       on_replace: :delete
 
     has_many :sinks, Cocktailparty.SinkCatalog.Sink
+    belongs_to :role, Cocktailparty.Roles.Role
 
     timestamps()
   end
@@ -27,10 +23,9 @@ defmodule Cocktailparty.Accounts.User do
   @doc false
   def changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :is_admin, :role])
+    |> cast(attrs, [:email, :is_admin, :role_id])
     |> validate_required([:email, :is_admin, :role])
     |> validate_email(opts)
-    |> validate_inclusion(:role, roles())
     |> unique_constraint(:email)
   end
 
@@ -176,21 +171,6 @@ defmodule Cocktailparty.Accounts.User do
       add_error(changeset, :current_password, "is not valid")
     end
   end
-
-  @doc """
-  A user changeset for promoting the user to a new role
-
-  """
-  def promote_changeset(user, attrs, _opts \\ []) do
-    user
-    |> cast(attrs, [:role])
-    |> validate_inclusion(:role, roles())
-  end
-
-  @doc """
-  Returns the list for roles from the least trusted to the more trusted: order matters.
-  """
-  def roles, do: [@uuser, @user_role, @poweruser_role]
 
   defimpl FunWithFlags.Actor, for: Cocktailparty.Accounts.User do
     def id(%Cocktailparty.Accounts.User{id: id}), do: "user:#{id}"

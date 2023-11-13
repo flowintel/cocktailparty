@@ -1,0 +1,38 @@
+<.header>
+  Listing Roles
+  <:actions>
+    <.link href={~p"/admin/roles/new"}>
+      <.button>New Role</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="roles" rows={@roles} row_click={&JS.navigate(~p"/admin/roles/#{&1}/edit")}>
+  <:col :let={role} label="Name"><%= role.name %></:col>
+
+  <:col :let={role} label="Permissions">
+    <table class="sm:w-full">
+      <thead class="text-left text-[0.8125rem] leading-6 text-zinc-500">
+        <tr>
+          <%= for {perm, _} <- Map.from_struct(role.permissions) do %>
+            <th class="p-0 pr-6 font-normal text-center"><%= @permissions_labels[perm] %></th>
+          <% end %>
+        </tr>
+      </thead>
+
+      <tr>
+        <td :for={{_, allowed} <- Map.from_struct(role.permissions)}>
+          <div class="block pr-6 text-center">
+            <%= if allowed, do: "🗹", else: "☐" %>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </:col>
+
+  <:action :let={role}>
+    <.link href={~p"/admin/roles/#{role}"} method="delete" data-confirm="Are you sure?">
+      Delete
+    </.link>
+  </:action>
+</.table>

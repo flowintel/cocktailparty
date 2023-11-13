@@ -1,0 +1,38 @@
+<.simple_form :let={f} for={@changeset} action={@action}>
+  <.error :if={@changeset.action}>
+    Oops, something went wrong! Please check the errors below.
+  </.error>
+  <.input field={f[:name]} type="text" label="Name" />
+
+  <table class="mt-11 w-[40rem] sm:w-full">
+    <thead class="text-left text-[0.8125rem] leading-6 text-zinc-500">
+      <tr>
+        <%= for {_, label} <- @permissions_labels do %>
+          <th class="p-0 pb-4 pr-6 font-normal"><%= label %></th>
+        <% end %>
+      </tr>
+    </thead>
+
+    <label for="role_name" class="block text-sm font-semibold leading-6 text-zinc-800">
+      Permissions
+    </label>
+
+    <tr>
+      <.inputs_for :let={perm_form} field={f[:permissions]}>
+        <%= for {perm_atom, _} <- @permissions_labels do %>
+          <td>
+            <div class="block py-4 pr-6">
+              <span class={["relative", "font-semibold text-zinc-900"]}>
+                <.input type="checkbox" field={perm_form[perm_atom]} />
+              </span>
+            </div>
+          </td>
+        <% end %>
+      </.inputs_for>
+    </tr>
+  </table>
+
+  <:actions>
+    <.button>Save Role</.button>
+  </:actions>
+</.simple_form>

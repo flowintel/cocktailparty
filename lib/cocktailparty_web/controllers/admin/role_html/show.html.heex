@@ -1,0 +1,34 @@
+<.header>
+  Role <%= @role.id %>
+  <:subtitle>This is a role record from your database.</:subtitle>
+  <:actions>
+    <.link href={~p"/admin/roles/#{@role}/edit"}>
+      <.button>Edit role</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @role.name %></:item>
+  <:item title="Permissions">
+    <table class="sm:w-full">
+      <thead class="text-left text-[0.8125rem] leading-6 text-zinc-500">
+        <tr>
+          <%= for {perm, _} <- Map.from_struct(@role.permissions) do %>
+            <th class="p-0 pr-6 font-normal text-center"><%= @permissions_labels[perm] %></th>
+          <% end %>
+        </tr>
+      </thead>
+
+      <tr>
+        <td :for={{_, allowed} <- Map.from_struct(@role.permissions)}>
+          <div class="block pr-6 text-center">
+            <%= if allowed, do: "🗹", else: "☐" %>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </:item>
+</.list>
+
+<.back navigate={~p"/admin/roles"}>Back to roles</.back>
