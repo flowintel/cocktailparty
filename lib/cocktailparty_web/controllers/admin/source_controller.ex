@@ -1,6 +1,8 @@
 defmodule CocktailpartyWeb.Admin.SourceController do
   use CocktailpartyWeb, :controller
+  require Logger
 
+  alias Cocktailparty.UserManagement
   alias Cocktailparty.Catalog
   alias Cocktailparty.Catalog.Source
   alias CocktailpartyWeb.Tracker
@@ -53,10 +55,32 @@ defmodule CocktailpartyWeb.Admin.SourceController do
       end)
 
     sample = Catalog.get_sample(id)
-
     source = %{source | users: updated_users}
 
-    render(conn, :show, source: source, sample: sample)
+    # we add edition logic here for the subscribtion modal
+    # potential_subscribers = UserManagement.list_users_short()
+    all_users = UserManagement.list_users_short()
+
+    get_src_users = Enum.reduce(source.users, [], fn user, acc ->
+      acc ++ [%{id: user.id, email: user.email}]
+    end)
+
+    potential_subscribers = Enum.reduce(all_users, [], fn user, acc ->
+      if !Enum.member?(get_src_users, user) do
+        acc ++ [user]
+      else
+        acc
+      end
+    end)
+
+    changeset = Catalog.change_source(source)
+
+    render(conn, :show,
+      source: source,
+      sample: sample,
+      potential_subscribers: potential_subscribers,
+      changeset: changeset
+    )
   end
 
   def edit(conn, %{"id" => id}) do
@@ -99,5 +123,40 @@ defmodule CocktailpartyWeb.Admin.SourceController do
     conn
     |> put_flash(:info, "Source deleted successfully.")
     |> redirect(to: ~p"/admin/sources")
+  end
+
+  def subscribe(conn, %{"source" => %{"user_id" => user_id}, "source_id" => source_id}) do
+    Logger.debug("Subscribing user #{user_id} to source #{source_id}")
+
+    case Catalog.subscribe(source_id, user_id) do
+      {:ok, _source} ->
+        conn
+        |> put_flash(:info, "User subscribed")
+        |> redirect(to: ~p"/admin/sources/#{source_id}")
+
+      {:error, changeset} ->
+        conn
+        |> put_flash(:error, changeset)
+        |> redirect(to: ~p"/admin/sources")
+    end
+  end
+
+  def unsubscribe(conn, %{"user_id" => user_id, "source_id" => source_id}) do
+    Logger.debug("Unsubscribing user #{user_id} from source #{source_id}")
+
+    case Catalog.unsubscribe(
+           String.to_integer(source_id),
+           String.to_integer(user_id)
+         ) do
+      {1, _deleted} ->
+        conn
+        |> put_flash(:info, "User unsubscribed")
+        |> redirect(to: ~p"/admin/sources/#{source_id}")
+
+      {0, _deleted} ->
+        conn
+        |> put_flash(:error, "Unsubscribing user failed")
+        |> redirect(to: ~p"/admin/sources/#{source_id}")
+    end
   end
 end

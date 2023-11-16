@@ -23,7 +23,8 @@
       <tr>
         <td :for={{_, allowed} <- Map.from_struct(role.permissions)}>
           <div class="block pr-6 text-center">
-            <%= if allowed, do: "🗹", else: "☐" %>
+            <.icon :if={allowed} name="hero-check" />
+            <.icon :if={!allowed} name="hero-x-mark" />
           </div>
         </td>
       </tr>

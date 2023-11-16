@@ -13,7 +13,7 @@ defmodule Cocktailparty.SinkCatalog do
   alias Cocktailparty.SinkCatalog.Sink
   alias Cocktailparty.Accounts.User
 
-  @action :create_sink
+  @action :create_sinks
 
   @doc """
   Returns the list of sinks.

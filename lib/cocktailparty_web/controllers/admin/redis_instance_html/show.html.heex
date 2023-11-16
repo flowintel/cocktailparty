@@ -12,8 +12,14 @@
   <:item title="Name"><%= @redis_instance.name %></:item>
   <:item title="Hostname"><%= @redis_instance.hostname %></:item>
   <:item title="Port"><%= @redis_instance.port %></:item>
-  <:item title="Enabled"><%= @redis_instance.enabled %></:item>
-  <:item title="Sink"><%= @redis_instance.sink %></:item>
+  <:item title="Enable">
+    <.icon :if={@redis_instance.enabled} name="hero-check" />
+    <.icon :if={!@redis_instance.enabled} name="hero-x-mark" />
+  </:item>
+  <:item title="Sink">
+    <.icon :if={@redis_instance.sink} name="hero-check" />
+    <.icon :if={!@redis_instance.sink} name="hero-x-mark" />
+  </:item>
 </.list>
 
 <.back navigate={~p"/admin/redisinstances"}>Back to redisinstances</.back>

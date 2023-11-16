@@ -7,6 +7,7 @@ defmodule Cocktailparty.Catalog.Source do
     field :description, :string
     field :name, :string
     field :type, :string
+    field :public, :boolean
 
     many_to_many :users, Cocktailparty.Accounts.User,
       join_through: "sources_subscriptions",
@@ -21,7 +22,7 @@ defmodule Cocktailparty.Catalog.Source do
   @doc false
   def changeset(source, attrs) do
     source
-    |> cast(attrs, [:name, :description, :type, :channel, :redis_instance_id])
+    |> cast(attrs, [:name, :description, :type, :channel, :redis_instance_id, :public])
     |> validate_required([:name, :description, :type, :channel])
     |> unique_constraint(:name)
   end

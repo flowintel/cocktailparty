@@ -43,8 +43,6 @@ defmodule CocktailpartyWeb.Router do
     get "/", PageController, :home
     get "/sources", SourceController, :index
     get "/sources/:id", SourceController, :show
-    post "/sources/:id", SourceController, :subscribe
-    delete "/sources/:id", SourceController, :unsubscribe
     resources "/sinks", SinkController
   end
 
@@ -52,6 +50,8 @@ defmodule CocktailpartyWeb.Router do
     pipe_through [:browser, :auth, :require_admin]
     resources "/users", UserController
     resources "/sources", SourceController
+    post "/sources/subscribe/:source_id", SourceController, :subscribe
+    delete "/sources/unsubscribe/:source_id/:user_id", SourceController, :unsubscribe
     resources "/sinks", SinkController
     resources "/redisinstances", RedisInstanceController
     resources "/roles", RoleController

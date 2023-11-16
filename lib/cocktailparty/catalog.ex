@@ -10,6 +10,7 @@ defmodule Cocktailparty.Catalog do
   alias Cocktailparty.Catalog.Source
   alias Cocktailparty.Accounts.User
   alias Cocktailparty.Accounts
+  alias Cocktailparty.UserManagement
 
   @doc """
   Returns the list of sources.
@@ -22,6 +23,39 @@ defmodule Cocktailparty.Catalog do
   """
   def list_sources do
     Repo.all(Source)
+    |> Repo.preload(:users)
+    |> Repo.preload(:redis_instance)
+  end
+
+  @doc """
+  Returns the list of sources for a user:
+  - admin can list all sources,
+  - can :list_all_sources can list all sources,
+  - everyone can list public sources,
+  - users can list sources they are subscribed to.
+
+  ## Examples
+
+      iex> list_sources(1)
+      [%Source{}, ...]
+
+  """
+  def list_sources(user_id) do
+    user = UserManagement.get_user!(user_id)
+
+    query_public = from s in Source, where: s.public == true
+
+    query =
+      if user.is_admin || UserManagement.can?(user_id, :list_all_sources) do
+        from(s in Source)
+      else
+        from s in Source,
+          join: u in assoc(s, :users),
+          where: u.id == ^user_id,
+          union: ^query_public
+      end
+
+    Repo.all(query)
     |> Repo.preload(:users)
     |> Repo.preload(:redis_instance)
   end

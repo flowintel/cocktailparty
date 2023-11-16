@@ -15,8 +15,14 @@
   <:col :let={redis_instance} label="Name"><%= redis_instance.name %></:col>
   <:col :let={redis_instance} label="Hostname"><%= redis_instance.hostname %></:col>
   <:col :let={redis_instance} label="Port"><%= redis_instance.port %></:col>
-  <:col :let={redis_instance} label="Enabled"><%= redis_instance.enabled %></:col>
-  <:col :let={redis_instance} label="Sink"><%= redis_instance.sink %></:col>
+  <:col :let={redis_instance} label="Enabled">
+    <.icon :if={redis_instance.enabled} name="hero-check" />
+    <.icon :if={!redis_instance.enabled} name="hero-x-mark" />
+  </:col>
+  <:col :let={redis_instance} label="Sink">
+    <.icon :if={redis_instance.sink} name="hero-check" />
+    <.icon :if={!redis_instance.sink} name="hero-x-mark" />
+  </:col>
   <:action :let={redis_instance}>
     <div class="sr-only">
       <.link navigate={~p"/admin/redisinstances/#{redis_instance}"}>Show</.link>

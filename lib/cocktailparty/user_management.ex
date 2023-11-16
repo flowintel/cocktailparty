@@ -26,6 +26,19 @@ defmodule Cocktailparty.UserManagement do
   end
 
   @doc """
+  Returns the list of users shortened to name / id
+
+  ## Examples
+
+      iex> list_users()
+      [%User{id: 1, name: "asdfa"}, ...]
+
+  """
+  def list_users_short do
+    Repo.all(from u in User, select: %{id: u.id, email: u.email})
+  end
+
+  @doc """
   Gets a single user.
 
   Raises if the User does not exist.

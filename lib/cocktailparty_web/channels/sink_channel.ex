@@ -8,7 +8,7 @@ defmodule CocktailpartyWeb.SinkChannel do
   alias Cocktailparty.SinkCatalog
   alias Phoenix.Socket.Broadcast
 
-  @action ":create_sink"
+  @action :create_sinks
 
   @impl true
   def join("sink:lobby", _payload, socket) do

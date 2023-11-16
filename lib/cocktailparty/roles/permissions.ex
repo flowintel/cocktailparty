@@ -5,7 +5,7 @@ defmodule Cocktailparty.Roles.Permissions do
   @primary_key false
   embedded_schema do
     field :list_all_sources, :boolean, default: false
-    field :create_sink, :boolean, default: false
+    field :create_sinks, :boolean, default: false
     field :test, :boolean, default: false
     # more permission to come
   end
@@ -33,7 +33,7 @@ defmodule Cocktailparty.Roles.Permissions do
 
   def changeset(permissions, attrs) do
     permissions
-    |> cast(attrs, [:list_all_sources, :create_sink, :test])
-    |> validate_required([:list_all_sources, :create_sink, :test])
+    |> cast(attrs, [:list_all_sources, :create_sinks, :test])
+    |> validate_required([:list_all_sources, :create_sinks, :test])
   end
 end

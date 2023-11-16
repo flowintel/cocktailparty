@@ -21,11 +21,12 @@
     <%= source.redis_instance.name %>
   </:col>
 
+  <:col :let={source} label="Public">
+    <.icon :if={source.public} name="hero-check" />
+    <.icon :if={!source.public} name="hero-x-mark" />
+  </:col>
+
   <:action :let={source}>
-    <div class="sr-only">
-      <%!-- <.link navigate={~p"/sources/#{source}/subscribe"}>Show</.link> --%>
-      <.link navigate={~p"/admin/sources/#{source}"}>Show</.link>
-    </div>
     <.link navigate={~p"/admin/sources/#{source}/edit"}>Edit</.link>
   </:action>
 
@@ -36,20 +37,14 @@
   </:action>
 </.table>
 
-<.table :if={!@is_admin} id="sources" rows={@sources}>
+<.table :if={!@is_admin} id="sources" rows={@sources} row_click={&JS.navigate(~p"/sources/#{&1}")}>
   <:col :let={source} label="Name"><%= source.name %></:col>
   <:col :let={source} label="Description"><%= source.description %></:col>
   <:col :let={source} label="Type"><%= source.type %></:col>
   <:col :let={source} label="Channel"><%= source.channel %></:col>
+  <:col :let={source} label="Public"><%= if source.public, do: "🗹", else: "☐" %></:col>
+  <%!-- TODO REMOVE --%>
   <:col :let={source} label="Subscribed">
-    <%= source.users %>
+    <%= if source.users, do: "🗹", else: "☐" %>
   </:col>
-
-  <:action :let={source}>
-    <.link href={~p"/sources/#{source}"} method="delete">Unsubcribe</.link>
-  </:action>
-
-  <:action :let={source}>
-    <.link href={~p"/sources/#{source}"} method="post">Subcribe</.link>
-  </:action>
 </.table>

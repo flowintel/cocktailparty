@@ -8,6 +8,23 @@
   </:actions>
 </.header>
 
+<.modal :if={@is_admin} id="subscriber">
+  <.simple_form :let={f} for={@changeset} phx-change="validate" phx-submit="save" method="post" action={~p"/admin/sources/subscribe/#{@source}"} > 
+    <.error :if={@changeset.action}>
+      Oops, something went wrong! Please check the errors below.
+    </.error>
+    <.input
+      field={f[:user_id]}
+      type="select"
+      label="User"
+      options={Enum.map(@potential_subscribers, fn user -> {user.email, user.id} end)}
+    />
+    <:actions>
+      <.button>Subscribe user</.button>
+    </:actions>
+  </.simple_form>
+</.modal>
+
 <.list>
   <:item title="Name"><%= @source.name %></:item>
   <:item title="Id"><%= @source.id %></:item>
@@ -15,11 +32,24 @@
   <:item title="Type"><%= @source.type %></:item>
   <:item title="Channel"><%= @source.channel %></:item>
   <:item :if={@is_admin} title="Redis instance"><%= @source.redis_instance.name %></:item>
+
+  <:item title="Public">
+    <.icon :if={@source.public} name="hero-check" />
+    <.icon :if={!@source.public} name="hero-x-mark" />
+  </:item>
 </.list>
 
+<br />
 <div :if={@is_admin}>
-  <br />
-  <h1 class="text-lg font-semibold leading-8 text-zinc-800">Subscribed users</h1>
+  <.header>
+    Subscribers
+    <:subtitle>Users that can receive message from this source</:subtitle>
+    <:actions>
+      <.link phx-click={show_modal("subscriber")}>
+        <.button>Add subscribers</.button>
+      </.link>
+    </:actions>
+  </.header>
 
   <.table id="users" rows={@source.users} row_click={&JS.navigate(~p"/admin/users/#{&1}")}>
     <:col :let={user} label="email">
@@ -29,6 +59,16 @@
         <span><%= user.email %></span>
       </div>
     </:col>
+
+    <:action :let={user}>
+      <.link
+        href={~p"/admin/sources/unsubscribe/#{@source}/#{user}"}
+        method="delete"
+        data-confirm="Are you sure?"
+      >
+        Unsubscribe
+      </.link>
+    </:action>
   </.table>
 </div>
 
@@ -49,7 +89,7 @@
     <div class="mockup-code">
       <pre><code>./websocat.x86_64-unknown-linux-musl \
     --ping-interval 5 \
-    "wss://<%= @conn.host %>/socket/websocket?token=<%= @user_token %>&vsn=2.0.0" \
+    "wss://<%= @conn.host <> ":" <>Integer.to_string(@conn.port) %>/feedsocket/websocket?token=<%= @user_token %>&vsn=2.0.0" \
     -p '["3","3","feed:<%= @source.id %>","phx_join",{}]'
   </code></pre>
     </div>
@@ -58,3 +98,13 @@
 
 <.back :if={!@is_admin} navigate={~p"/sources"}>Back to sources</.back>
 <.back :if={@is_admin} navigate={~p"/admin/sources"}>Back to sources</.back>
+" href={~p" href={~p"/posts
+<.modal
+  id="subscribe"
+  on_confirm={JS.push("delete")}
+  on_cancel={JS.navigate(~p"/admin/sources/#{@source}")}
+>
+  html content
+  <:confirm>Add user</:confirm>
+  <:cancel>Cancel</:cancel>
+</.modal>
