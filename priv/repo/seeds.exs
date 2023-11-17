@@ -28,3 +28,12 @@ Cocktailparty.Repo.insert!(%Cocktailparty.Accounts.User{
   email: "huynenjl@gmail.com",
   hashed_password: Argon2.hash_pwd_salt("password")
 })
+
+Cocktailparty.Repo.insert!(%Cocktailparty.Roles.Role{
+  name: "default",
+  permissions: %Cocktailparty.Roles.Permissions{
+    list_all_sources: false,
+    create_sinks: false,
+    test: false
+  }
+})

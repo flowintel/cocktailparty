@@ -29,7 +29,7 @@
   </:col>
   <:col :let={user} label="role"><%= user.role.name %></:col>
 
-  <:col :let={user} label="Public">
+  <:col :let={user} label="Admin">
     <.icon :if={user.is_admin} name="hero-check" />
     <.icon :if={!user.is_admin} name="hero-x-mark" />
   </:col>

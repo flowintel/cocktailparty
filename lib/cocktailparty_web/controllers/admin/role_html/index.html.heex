@@ -32,7 +32,11 @@
   </:col>
 
   <:action :let={role}>
-    <.link href={~p"/admin/roles/#{role}"} method="delete" data-confirm="Are you sure?">
+    <.link
+      href={~p"/admin/roles/#{role}"}
+      method="delete"
+      data-confirm="Are you sure? Affected users will get the default role."
+    >
       Delete
     </.link>
   </:action>

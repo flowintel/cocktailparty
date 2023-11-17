@@ -59,10 +59,17 @@ defmodule CocktailpartyWeb.Admin.RoleController do
 
   def delete(conn, %{"id" => id}) do
     role = Roles.get_role!(id)
-    {:ok, _role} = Roles.delete_role(role)
 
-    conn
-    |> put_flash(:info, "Role deleted successfully.")
-    |> redirect(to: ~p"/admin/roles")
+    case Roles.delete_role(role) do
+      {:ok, _role} ->
+        conn
+        |> put_flash(:info, "Role deleted successfully.")
+        |> redirect(to: ~p"/admin/roles")
+
+      {:error, _role} ->
+        conn
+        |> put_flash(:info, "Error deleting role.")
+        |> redirect(to: ~p"/admin/roles")
+    end
   end
 end

@@ -29,8 +29,7 @@ defmodule CocktailpartyWeb.Admin.UserController do
 
   def new(conn, _params) do
     changeset = UserManagement.change_user(%User{})
-    # render(conn, :new, changeset: changeset, roles: User.roles())
-    render(conn, :new, changeset: changeset)
+    render(conn, :new, changeset: changeset, roles: Roles.list_roles())
   end
 
   def create(conn, %{"user" => user_params}) do

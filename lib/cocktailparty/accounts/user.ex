@@ -54,7 +54,7 @@ defmodule Cocktailparty.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:email, :password, :role_id])
     |> validate_email(opts)
     |> validate_password(opts)
   end

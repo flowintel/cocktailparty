@@ -61,17 +61,19 @@ defmodule CocktailpartyWeb.Admin.SourceController do
     # potential_subscribers = UserManagement.list_users_short()
     all_users = UserManagement.list_users_short()
 
-    get_src_users = Enum.reduce(source.users, [], fn user, acc ->
-      acc ++ [%{id: user.id, email: user.email}]
-    end)
+    get_src_users =
+      Enum.reduce(source.users, [], fn user, acc ->
+        acc ++ [%{id: user.id, email: user.email}]
+      end)
 
-    potential_subscribers = Enum.reduce(all_users, [], fn user, acc ->
-      if !Enum.member?(get_src_users, user) do
-        acc ++ [user]
-      else
-        acc
-      end
-    end)
+    potential_subscribers =
+      Enum.reduce(all_users, [], fn user, acc ->
+        if !Enum.member?(get_src_users, user) do
+          acc ++ [user]
+        else
+          acc
+        end
+      end)
 
     changeset = Catalog.change_source(source)
 

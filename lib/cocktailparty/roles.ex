@@ -7,6 +7,7 @@ defmodule Cocktailparty.Roles do
   alias Cocktailparty.Repo
 
   alias Cocktailparty.Roles.Role
+  alias Cocktailparty.Accounts.User
 
   @doc """
   Returns the list of roles.
@@ -16,9 +17,24 @@ defmodule Cocktailparty.Roles do
       iex> list_roles()
       [%Role{}, ...]
 
+  |> Repo.
   """
   def list_roles do
     Repo.all(Role)
+  end
+
+  @doc """
+  Returns the list of user with a specified role.
+
+  ## Examples
+
+      iex> list_users_with_role()
+      [%User{}, ...]
+
+  """
+  def list_users_with_role(role_id) do
+    Repo.all(from u in User, where: u.role_id == ^role_id)
+    |> Repo.preload(:role)
   end
 
   @doc """
@@ -74,7 +90,7 @@ defmodule Cocktailparty.Roles do
   end
 
   @doc """
-  Deletes a role.
+  Use a transaction to delete a role and assign the default role the associated users.
 
   ## Examples
 
@@ -86,7 +102,20 @@ defmodule Cocktailparty.Roles do
 
   """
   def delete_role(%Role{} = role) do
-    Repo.delete(role)
+    # get users associated with this role
+    users = list_users_with_role(role.id)
+    # release the foreign key constraint by mapping associated users' role to default
+    Enum.reduce(users, Ecto.Multi.new(), fn user, acc ->
+      # update users
+      Ecto.Multi.update(
+        acc,
+        "update:" <> Integer.to_string(user.id),
+        User.changeset(user, %{role_id: get_default_role_id!()})
+      )
+    end)
+    # delete role
+    |> Ecto.Multi.delete("delete:" <> Integer.to_string(role.id), role)
+    |> Repo.transaction()
   end
 
   @doc """
@@ -100,5 +129,17 @@ defmodule Cocktailparty.Roles do
   """
   def change_role(%Role{} = role, attrs \\ %{}) do
     Role.changeset(role, attrs)
+  end
+
+  @doc """
+  Return the default role, raise on error
+  ## Examples
+
+      iex> get_default_role!()
+      %Role{}
+
+  """
+  def get_default_role_id!() do
+    Repo.one(from r in Role, where: r.name == "default", select: r.id)
   end
 end

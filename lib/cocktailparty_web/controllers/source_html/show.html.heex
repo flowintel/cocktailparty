@@ -9,7 +9,14 @@
 </.header>
 
 <.modal :if={@is_admin} id="subscriber">
-  <.simple_form :let={f} for={@changeset} phx-change="validate" phx-submit="save" method="post" action={~p"/admin/sources/subscribe/#{@source}"} > 
+  <.simple_form
+    :let={f}
+    for={@changeset}
+    phx-change="validate"
+    phx-submit="save"
+    method="post"
+    action={~p"/admin/sources/subscribe/#{@source}"}
+  >
     <.error :if={@changeset.action}>
       Oops, something went wrong! Please check the errors below.
     </.error>
