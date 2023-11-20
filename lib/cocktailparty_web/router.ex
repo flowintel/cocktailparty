@@ -51,7 +51,9 @@ defmodule CocktailpartyWeb.Router do
     resources "/users", UserController
     resources "/sources", SourceController
     post "/sources/subscribe/:source_id", SourceController, :subscribe
+    post "/sources/mass_subscribe/:source_id", SourceController, :mass_subscribe
     delete "/sources/unsubscribe/:source_id/:user_id", SourceController, :unsubscribe
+    delete "/sources/mass_unsubscribe/:source_id", SourceController, :mass_unsubscribe
     resources "/sinks", SinkController
     resources "/redisinstances", RedisInstanceController
     resources "/roles", RoleController

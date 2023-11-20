@@ -28,8 +28,16 @@
     />
     <:actions>
       <.button>Subscribe user</.button>
+      <.link
+        href={~p"/admin/sources/mass_subscribe/#{@source}"}
+        method="post"
+        data-confirm="Are you sure?"
+      >
+       <.button>Subscribe all users.</.button>
+      </.link>
     </:actions>
   </.simple_form>
+  
 </.modal>
 
 <.list>
@@ -54,6 +62,13 @@
     <:actions>
       <.link phx-click={show_modal("subscriber")}>
         <.button>Add subscribers</.button>
+      </.link>
+      <.link
+        href={~p"/admin/sources/mass_unsubscribe/#{@source}"}
+        method="delete"
+        data-confirm="Are you sure?"
+      >
+       <.button>Unsubscribe all</.button>
       </.link>
     </:actions>
   </.header>

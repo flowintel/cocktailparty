@@ -143,6 +143,23 @@ defmodule CocktailpartyWeb.Admin.SourceController do
     end
   end
 
+  def mass_subscribe(conn, %{"source_id" => source_id}) do
+    Logger.debug("Subscribing all potential users to source #{source_id}")
+
+    case Catalog.mass_subscribe(source_id) do
+      {:ok, _source} ->
+        conn
+        |> put_flash(:info, "Users subscribed")
+        |> redirect(to: ~p"/admin/sources/#{source_id}")
+
+      {:error, _} ->
+        conn
+        |> put_flash(:error, "Users not subscribed")
+        |> redirect(to: ~p"/admin/sources/#{source_id}")
+    end
+  end
+
+  @spec unsubscribe(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def unsubscribe(conn, %{"user_id" => user_id, "source_id" => source_id}) do
     Logger.debug("Unsubscribing user #{user_id} from source #{source_id}")
 
@@ -158,6 +175,22 @@ defmodule CocktailpartyWeb.Admin.SourceController do
       {0, _deleted} ->
         conn
         |> put_flash(:error, "Unsubscribing user failed")
+        |> redirect(to: ~p"/admin/sources/#{source_id}")
+    end
+  end
+
+  def mass_unsubscribe(conn, %{"source_id" => source_id}) do
+    Logger.debug("Unsubscribing all users from source #{source_id}")
+
+    case Catalog.mass_unsubscribe(source_id) do
+      {number, nil} ->
+        conn
+        |> put_flash(:info, "#{number} Users unsubscribed")
+        |> redirect(to: ~p"/admin/sources/#{source_id}")
+
+      {:error, _} ->
+        conn
+        |> put_flash(:error, "Users not unsubscribed")
         |> redirect(to: ~p"/admin/sources/#{source_id}")
     end
   end

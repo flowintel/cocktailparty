@@ -252,6 +252,47 @@ defmodule Cocktailparty.Catalog do
     Repo.update(src_with_user)
   end
 
+  @doc """
+  Subscribes a list of users to a source
+  returns
+    {:ok, struct}       -> # Updated with success
+    {:error, changeset} -> # Something went wrong
+
+  ## Examples
+
+      iex> mass_subscribe(1, [1,2,3])
+      %Ecto.Changeset{data: %Source{}}
+
+  """
+  def mass_subscribe(source_id) do
+    source = get_source!(source_id)
+    all_users = UserManagement.list_users_short()
+
+    get_src_users =
+      Enum.reduce(source.users, [], fn user, acc ->
+        acc ++ [%{id: user.id, email: user.email}]
+      end)
+
+    potential_subscribers =
+      Enum.reduce(all_users, [], fn user, acc ->
+        if !Enum.member?(get_src_users, user) do
+          acc ++ [user]
+        else
+          acc
+        end
+      end)
+
+    user_list = Enum.reduce(potential_subscribers, source.users, fn user, acc ->
+      u = Accounts.get_user!(user.id)
+      acc ++ [u]
+    end )
+
+    src_chgst = Ecto.Changeset.change(source)
+    src_with_user = Ecto.Changeset.put_assoc(src_chgst, :users, user_list)
+    Repo.update(src_with_user)
+  end
+
+
   def unsubscribe(source_id, user_id) do
     # straight forward way
     query =
@@ -260,6 +301,16 @@ defmodule Cocktailparty.Catalog do
           s.source_id == ^source_id and
             s.user_id == ^user_id,
         select: s.id
+
+    Repo.delete_all(query)
+  end
+
+  def mass_unsubscribe(source_id) do
+    # straight forward way
+    query =
+      from s in "sources_subscriptions",
+        where:
+          s.source_id == ^String.to_integer(source_id)
 
     Repo.delete_all(query)
   end
