@@ -1,9 +1,10 @@
 defmodule Cocktailparty.Roles do
   @moduledoc """
-  The Roles context.
+  The role context is used to managed roles and permissions
   """
 
   import Ecto.Query, warn: false
+  alias Cocktailparty.Roles.Permissions
   alias Cocktailparty.Repo
 
   alias Cocktailparty.Roles.Role
@@ -72,7 +73,9 @@ defmodule Cocktailparty.Roles do
   end
 
   @doc """
-  Updates a role.
+  Updates a role and check whether permissions has changed.
+  In such case, update_role attempts to trigger the corresponding
+  callback in the Permissions module.
 
   ## Examples
 
@@ -84,9 +87,25 @@ defmodule Cocktailparty.Roles do
 
   """
   def update_role(%Role{} = role, attrs) do
-    role
-    |> Role.changeset(attrs)
-    |> Repo.update()
+    changeset = Role.changeset(role, attrs)
+    # if a permission has been changed, we trigger the corresponding callback
+    if Map.has_key?(changeset.changes, :permissions) do
+      Enum.each(changeset.changes.permissions.changes, fn x ->
+        case x do
+          {permission, false} ->
+            if function_exported?(Permissions, permission, 2) do
+              apply(Permissions, permission, [role, "demotion"])
+            end
+
+          {permission, true} ->
+            if function_exported?(Permissions, permission, 2) do
+              apply(Permissions, permission, [role, "promotion"])
+            end
+        end
+      end)
+    end
+
+    Repo.update(changeset)
   end
 
   @doc """

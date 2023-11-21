@@ -28,11 +28,19 @@ defmodule CocktailpartyWeb.FeedChannel do
   end
 
   # as messages are broadcasted from the broker, we intercept
-  intercept [:new_redis_message]
+  intercept [:new_redis_message, :kick]
   @impl true
-  def handle_out(:new_redis_message, payload, socket) do
-    push(socket, "new_redis_message", payload)
-    {:noreply, socket}
+  def handle_out(msg, payload, socket) do
+    case msg do
+      :new_redis_message ->
+        push(socket, "new_redis_message", payload)
+        {:noreply, socket}
+
+      :kick ->
+        Logger.info("KICK")
+        push(socket, "kicked", %{})
+        {:stop, {:shutdown, :kicked}, socket}
+    end
   end
 
   # Tracker tracking

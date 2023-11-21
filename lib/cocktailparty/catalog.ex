@@ -282,16 +282,16 @@ defmodule Cocktailparty.Catalog do
         end
       end)
 
-    user_list = Enum.reduce(potential_subscribers, source.users, fn user, acc ->
-      u = Accounts.get_user!(user.id)
-      acc ++ [u]
-    end )
+    user_list =
+      Enum.reduce(potential_subscribers, source.users, fn user, acc ->
+        u = Accounts.get_user!(user.id)
+        acc ++ [u]
+      end)
 
     src_chgst = Ecto.Changeset.change(source)
     src_with_user = Ecto.Changeset.put_assoc(src_chgst, :users, user_list)
     Repo.update(src_with_user)
   end
-
 
   def unsubscribe(source_id, user_id) do
     # straight forward way
@@ -309,10 +309,49 @@ defmodule Cocktailparty.Catalog do
     # straight forward way
     query =
       from s in "sources_subscriptions",
-        where:
-          s.source_id == ^String.to_integer(source_id)
+        where: s.source_id == ^String.to_integer(source_id)
 
     Repo.delete_all(query)
+  end
+
+  @doc """
+  unsubscribe_nonpublic unsubscribe a list of users from a source
+
+  """
+  def unsubscribe_nonpublic(users) when is_list(users) do
+    query =
+      from ss in "sources_subscriptions",
+        join: s in Source,
+        on: ss.source_id == s.id,
+        where:
+          s.public == false and
+            ss.user_id in ^users
+
+    query_get =
+      from ss in query,
+        select: {ss.user_id, ss.source_id}
+
+    query_delete =
+      from ss in query,
+        select: ss.id
+
+    Repo.all(query_get)
+    |> Enum.each(fn {user_id, source_id} ->
+      # kick them from the associated channels
+      Phoenix.PubSub.broadcast(
+        Cocktailparty.PubSub,
+        "feed:" <> Integer.to_string(source_id),
+        %Phoenix.Socket.Broadcast{
+          topic: "feed:" <> Integer.to_string(source_id),
+          event: :kick,
+          payload: user_id
+        }
+      )
+
+      :ok
+    end)
+
+    Repo.delete_all(query_delete)
   end
 
   def get_sample(source_id) when is_binary(source_id) do
