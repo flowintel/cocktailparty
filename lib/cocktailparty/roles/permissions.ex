@@ -33,6 +33,7 @@ defmodule Cocktailparty.Roles.Permissions do
   @primary_key false
   embedded_schema do
     field :access_all_sources, :boolean, default: false
+    field :list_all_sources, :boolean, default: false
     field :create_sinks, :boolean, default: false
     field :test, :boolean, default: false
     # more permission to come
@@ -61,8 +62,8 @@ defmodule Cocktailparty.Roles.Permissions do
 
   def changeset(permissions, attrs) do
     permissions
-    |> cast(attrs, [:access_all_sources, :create_sinks, :test])
-    |> validate_required([:access_all_sources, :create_sinks, :test])
+    |> cast(attrs, [:access_all_sources, :list_all_sources, :create_sinks, :test])
+    |> validate_required([:access_all_sources, :list_all_sources, :create_sinks, :test])
   end
 
   def access_all_sources(role = %Cocktailparty.Roles.Role{}, direction) do
@@ -75,16 +76,9 @@ defmodule Cocktailparty.Roles.Permissions do
           acc ++ [x.id]
         end)
 
-      # get all non-public sources they are subscribed to, and unsubscribe them
-      case Cocktailparty.Catalog.unsubscribe_nonpublic(affected_users_id) do
-        {:error, _} ->
-          Logger.error("Cannot unsubscribed users from sources")
-
-        {x, _} ->
-          Logger.debug(
-            "Unsubscribed #{x} user(s) from various sources due to a change in their role's permissions."
-          )
-      end
+      # kick all users that were granted access to a source thanks to
+      # the :access_all_sources permission
+      Cocktailparty.Catalog.kick_non_subscribed(affected_users_id)
     end
   end
 end

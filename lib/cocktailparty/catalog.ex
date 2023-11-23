@@ -11,6 +11,7 @@ defmodule Cocktailparty.Catalog do
   alias Cocktailparty.Accounts.User
   alias Cocktailparty.Accounts
   alias Cocktailparty.UserManagement
+  alias CocktailpartyWeb.Tracker
 
   @doc """
   Returns the list of sources.
@@ -28,9 +29,23 @@ defmodule Cocktailparty.Catalog do
   end
 
   @doc """
+  Returns the list of non-public sources
+
+  ## Examples
+
+      iex> list__non_public_sources()
+      [%Source{}, ...]
+
+  """
+  def list_non_public_sources() do
+    query_non_public = from s in Source, where: s.public != true
+    Repo.all(query_non_public)
+  end
+
+  @doc """
   Returns the list of sources for a user:
   - admin can list all sources,
-  - can :list_all_sources can list all sources,
+  - can :list_all_sources and :access_all_sources can list all sources,
   - everyone can list public sources,
   - users can list sources they are subscribed to.
 
@@ -46,7 +61,8 @@ defmodule Cocktailparty.Catalog do
     query_public = from s in Source, where: s.public == true
 
     query =
-      if user.is_admin || UserManagement.can?(user_id, :list_all_sources) do
+      if user.is_admin || UserManagement.can?(user_id, :list_all_sources) ||
+           UserManagement.can?(user_id, :access_all_sources) do
         from(s in Source)
       else
         from s in Source,
@@ -311,11 +327,13 @@ defmodule Cocktailparty.Catalog do
       from s in "sources_subscriptions",
         where: s.source_id == ^String.to_integer(source_id)
 
+    # TODO kick them all from the channel
+
     Repo.delete_all(query)
   end
 
   @doc """
-  unsubscribe_nonpublic unsubscribe a list of users from a source
+  unsubscribe_nonpublic unsubscribe a list of users from all non-public sources
 
   """
   def unsubscribe_nonpublic(users) when is_list(users) do
@@ -352,6 +370,45 @@ defmodule Cocktailparty.Catalog do
     end)
 
     Repo.delete_all(query_delete)
+  end
+
+  @doc """
+  kick_non_subscribed kick a list of users from all non public sources
+
+  """
+  def kick_non_subscribed(users) when is_list(users) do
+    # Get a list of users subscriptions
+    query =
+      from ss in "sources_subscriptions",
+        join: s in Source,
+        on: ss.source_id == s.id,
+        where: ss.user_id in ^users,
+        select: {ss.user_id, ss.source_id}
+
+    subs = Repo.all(query)
+
+    # Get the list of connections with restricted access to which
+    # users currently connected to
+    connected_users = Tracker.get_all_connected_users_to_private_feeds()
+    illegitimate_connection = Enum.filter(connected_users, fn x -> !Enum.member?(subs, x) end)
+
+    dbg(illegitimate_connection)
+
+    illegitimate_connection
+    |> Enum.each(fn %{"source_id" => source_id, "user_id" => user_id} ->
+      # kick them from the associated channels
+      Phoenix.PubSub.broadcast(
+        Cocktailparty.PubSub,
+        "feed:" <> Integer.to_string(source_id),
+        %Phoenix.Socket.Broadcast{
+          topic: "feed:" <> Integer.to_string(source_id),
+          event: :kick,
+          payload: user_id
+        }
+      )
+
+      :ok
+    end)
   end
 
   def get_sample(source_id) when is_binary(source_id) do
@@ -396,6 +453,30 @@ defmodule Cocktailparty.Catalog do
       pid ->
         pid
     end
+  end
+
+  @doc """
+  returns true if a feed is public
+  """
+  def is_public?(feed_id) when is_bitstring(feed_id) do
+    source_id = String.trim_leading(feed_id, "feed:")
+
+    query =
+      from s in Source,
+        where: s.id == ^source_id,
+        select: s.public
+
+    Repo.one(query)
+  end
+
+  # Check whether a used is authorized to :show a source
+  def authorized_show?(source_id, user_id) do
+    Logger.info("Checking authorization for UserID: #{user_id} @ FeedId: #{source_id}.")
+
+    (UserManagement.is_confirmed?(user_id) && is_subscribed?(source_id, user_id)) ||
+      (UserManagement.is_confirmed?(user_id) && UserManagement.can?(user_id, :access_all_sources) &&
+         UserManagement.can?(user_id, :list_all_sources)) ||
+      (UserManagement.is_confirmed?(user_id) && is_public?(source_id))
   end
 
   defp notify_broker(%Source{} = source, msg) do

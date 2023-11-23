@@ -53,6 +53,9 @@ defmodule CocktailpartyWeb.FeedChannel do
   # Check whether a used is authorized to subscribe to a feed
   defp authorized?(feed_id, user_id) do
     Logger.info("Checking authorization for UserID: #{user_id} @ FeedId: #{feed_id}.")
-    UserManagement.is_confirmed?(user_id) && Catalog.is_subscribed?(feed_id, user_id)
+
+    (UserManagement.is_confirmed?(user_id) && Catalog.is_subscribed?(feed_id, user_id)) ||
+      (UserManagement.is_confirmed?(user_id) && UserManagement.can?(user_id, :access_all_sources)) ||
+      (UserManagement.is_confirmed?(user_id) && Catalog.is_public?(feed_id))
   end
 end

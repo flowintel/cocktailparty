@@ -102,4 +102,42 @@ defmodule CocktailpartyWeb.Tracker do
 
     Enum.dedup(connected_clients)
   end
+
+  @doc """
+  Returns the list of connected users per non-public feed
+
+  ## Examples
+
+      iex> get_all_connected_users_to_private_feeds()
+      ["8"]
+  """
+  def get_all_connected_users_to_private_feeds() do
+    sources = Catalog.list_non_public_sources()
+
+    feeds =
+      Enum.reduce(sources, [], fn source, feeds ->
+        ["feed:" <> Integer.to_string(source.id) | feeds]
+      end)
+
+    connected_clients =
+      Enum.reduce(feeds, [], fn feed, accs ->
+        feed_users = list(feed)
+
+        feedu =
+          Enum.reduce(feed_users, [], fn user, acc ->
+            %{current_user: u} = elem(user, 1)
+            [%{"source_id" => feed_to_source(feed), "user_id" => u} | acc]
+          end)
+
+        feedu ++ accs
+      end)
+
+    Enum.dedup(connected_clients)
+  end
+
+  def feed_to_source(feed) when is_bitstring(feed) do
+    feed
+    |> String.trim_leading("feed:")
+    |> String.to_integer()
+  end
 end

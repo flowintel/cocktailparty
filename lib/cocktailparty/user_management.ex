@@ -200,7 +200,7 @@ defmodule Cocktailparty.UserManagement do
         false
 
       _ ->
-        if user.role.name != "unverified" do
+        if user.role.name != "default" do
           true
         else
           false
