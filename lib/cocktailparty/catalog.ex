@@ -392,8 +392,6 @@ defmodule Cocktailparty.Catalog do
     connected_users = Tracker.get_all_connected_users_to_private_feeds()
     illegitimate_connection = Enum.filter(connected_users, fn x -> !Enum.member?(subs, x) end)
 
-    dbg(illegitimate_connection)
-
     illegitimate_connection
     |> Enum.each(fn %{"source_id" => source_id, "user_id" => user_id} ->
       # kick them from the associated channels
