@@ -8,7 +8,7 @@ defmodule CocktailpartyWeb.SourceController do
 
   plug :show_source_access_control when action in [:show]
   plug :index_source_access_control when action in [:index]
-  # plug :source_access_control when action == :index
+  # other actions are not exposed
 
   def index(conn, _params) do
     sources = Catalog.list_sources(conn.assigns.current_user.id)

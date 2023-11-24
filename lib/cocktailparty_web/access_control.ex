@@ -52,4 +52,17 @@ defmodule CocktailpartyWeb.AccessControl do
   defp index_source_authorized?(conn) do
     UserManagement.is_confirmed?(conn.assigns.current_user.id)
   end
+
+  @doc """
+  Access to most routes are linked to :create_sinks
+  """
+  def sink_access_control(conn, _opts) do
+    if UserManagement.can?(conn.assigns.current_user.id, :create_sinks) do
+      conn
+    else
+      conn
+      |> put_flash(:error, "Unauthorized")
+      |> redirect(to: ~p"/")
+    end
+  end
 end

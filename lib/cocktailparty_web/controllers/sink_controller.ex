@@ -3,6 +3,10 @@ defmodule CocktailpartyWeb.SinkController do
 
   alias Cocktailparty.SinkCatalog
   alias Cocktailparty.SinkCatalog.Sink
+  import CocktailpartyWeb.AccessControl
+
+  plug :sink_access_control when action in [:new, :create, :index, :update, :delete]
+  # :show and :edit access control is the controller to avoid duplicating DB request
 
   def index(conn, _params) do
     sinks = SinkCatalog.list_user_sinks(conn.assigns.current_user.id)
