@@ -66,6 +66,11 @@ defmodule Cocktailparty.Roles.Permissions do
     |> validate_required([:access_all_sources, :list_all_sources, :create_sinks, :test])
   end
 
+  @doc """
+  Callback for :access_all_sources:
+    - demotion:
+      - kick all users from channel joined thanks to this permission
+  """
   def access_all_sources(role = %Cocktailparty.Roles.Role{}, direction) do
     if direction == "demotion" do
       # get all users affected by the change
@@ -79,6 +84,27 @@ defmodule Cocktailparty.Roles.Permissions do
       # kick all users that were granted access to a source thanks to
       # the :access_all_sources permission
       Cocktailparty.Catalog.kick_non_subscribed(affected_users_id)
+    end
+  end
+
+  @doc """
+  Call back for :create_sinks
+    - demotion:
+      - we kill the socket linked to the sink that users created when they had the permission
+      - delete said sinks from Repo
+  """
+  def create_sinks(role = %Cocktailparty.Roles.Role{}, direction) do
+    if direction == "demotion" do
+      # get all users affected by the change
+      affected_users = Cocktailparty.Roles.list_users_with_role(role.id)
+
+      affected_users_id =
+        Enum.reduce(affected_users, [], fn x, acc ->
+          acc ++ [x.id]
+        end)
+
+      # we kill the socket and delete the created sinks
+      Cocktailparty.SinkCatalog.destroy_sinks_for_users(affected_users_id)
     end
   end
 end

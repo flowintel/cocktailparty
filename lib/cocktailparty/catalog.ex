@@ -334,7 +334,6 @@ defmodule Cocktailparty.Catalog do
 
   @doc """
   unsubscribe_nonpublic unsubscribe a list of users from all non-public sources
-
   """
   def unsubscribe_nonpublic(users) when is_list(users) do
     query =

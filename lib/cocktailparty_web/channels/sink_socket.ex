@@ -33,5 +33,5 @@ defmodule CocktailpartyWeb.SinkSocket do
   end
 
   @impl true
-  def id(socket), do: "current_user:#{socket.assigns.current_user}"
+  def id(socket), do: "sink:user:#{socket.assigns.current_user}"
 end

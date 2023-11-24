@@ -33,5 +33,5 @@ defmodule CocktailpartyWeb.FeedSocket do
   end
 
   @impl true
-  def id(socket), do: "current_user:#{socket.assigns.current_user}"
+  def id(socket), do: "feed:user:#{socket.assigns.current_user}"
 end

@@ -12,6 +12,7 @@ defmodule Cocktailparty.SinkCatalog do
   alias Cocktailparty.Repo
   alias Cocktailparty.SinkCatalog.Sink
   alias Cocktailparty.Accounts.User
+  alias CocktailpartyWeb.Endpoint
 
   @action :create_sinks
 
@@ -293,6 +294,28 @@ defmodule Cocktailparty.SinkCatalog do
           end
         end)
     end
+  end
+
+  @doc """
+  destroy_sinks_for_users unsubscribe a list of users from all non-public sources
+  """
+  def destroy_sinks_for_users(users) when is_list(users) do
+    # kick users from the sink channels we are about to destroy
+    # they won't be able to rejoin without the :create_sinks permission
+    Enum.each(users, fn user_id ->
+      Endpoint.broadcast("sink:user:" <> Integer.to_string(user_id), "disconnect", %{})
+      :ok
+    end)
+
+    # we delete the corresponding sinks
+    query =
+      from s in Sink,
+        join: u in User,
+        on: s.user_id == u.id,
+        where: u.id in ^users
+
+    Repo.all(query)
+    |> Enum.each(&delete_sink(&1))
   end
 
   defp notify_monitor(msg) do
