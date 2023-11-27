@@ -98,7 +98,13 @@
             </li>
             <li>
               <.link
-                :if={!@is_admin && Cocktailparty.UserManagement.can?(@conn.assigns.current_user.id, :create_sinks)} 
+                :if={
+                  !@is_admin &&
+                    Cocktailparty.UserManagement.can?(
+                      @conn.assigns.current_user.id,
+                      :create_sinks
+                    )
+                }
                 href={~p"/sinks"}
                 class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
               >

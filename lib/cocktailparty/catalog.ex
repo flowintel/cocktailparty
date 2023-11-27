@@ -332,6 +332,7 @@ defmodule Cocktailparty.Catalog do
     Repo.delete_all(query)
   end
 
+  # TODO remove - it's not used
   @doc """
   unsubscribe_nonpublic unsubscribe a list of users from all non-public sources
   """
@@ -369,6 +370,26 @@ defmodule Cocktailparty.Catalog do
     end)
 
     Repo.delete_all(query_delete)
+  end
+
+  @doc """
+  kick_users_from kicks a list of users from a source
+  """
+  def kick_users_from_source(user_ids, source_id)
+      when is_list(user_ids) and is_integer(source_id) do
+    Enum.each(user_ids, fn user_id ->
+      Phoenix.PubSub.broadcast(
+        Cocktailparty.PubSub,
+        "feed:" <> Integer.to_string(source_id),
+        %Phoenix.Socket.Broadcast{
+          topic: "feed:" <> Integer.to_string(source_id),
+          event: :kick,
+          payload: user_id
+        }
+      )
+
+      :ok
+    end)
   end
 
   @doc """

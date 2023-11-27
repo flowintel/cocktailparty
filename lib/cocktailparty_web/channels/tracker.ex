@@ -104,6 +104,17 @@ defmodule CocktailpartyWeb.Tracker do
   end
 
   @doc """
+  Returns the list of connected users to a feed
+  """
+  def get_all_connected_users_to_feed(source_id) when is_integer(source_id) do
+    list("feed:" <> Integer.to_string(source_id))
+    |> Enum.reduce([], fn user, acc ->
+      %{current_user: u} = elem(user, 1)
+      [u | acc]
+    end)
+  end
+
+  @doc """
   Returns the list of connected users per non-public feed
 
   ## Examples
