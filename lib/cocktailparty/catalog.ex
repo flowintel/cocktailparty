@@ -318,18 +318,26 @@ defmodule Cocktailparty.Catalog do
             s.user_id == ^user_id,
         select: s.id
 
+    kick_users_from_source([user_id], source_id)
+
     Repo.delete_all(query)
   end
 
   def mass_unsubscribe(source_id) do
     # straight forward way
-    query =
+    query_delete =
       from s in "sources_subscriptions",
         where: s.source_id == ^String.to_integer(source_id)
 
-    # TODO kick them all from the channel
+    query_select =
+      from s in "sources_subscriptions",
+        where: s.source_id == ^String.to_integer(source_id),
+        select: s.user_id
 
-    Repo.delete_all(query)
+    user_ids = Repo.all(query_select)
+    kick_users_from_source(user_ids, String.to_integer(source_id))
+
+    Repo.delete_all(query_delete)
   end
 
   # TODO remove - it's not used

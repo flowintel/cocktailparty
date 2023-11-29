@@ -6,6 +6,7 @@ defmodule Cocktailparty.PubSubMonitor do
   alias Cocktailparty.Catalog
 
   @max_messages 5
+  @control_messages [:kick]
 
   @type queue_map :: %{optional(any()) => :queue.queue(any())}
 
@@ -49,7 +50,11 @@ defmodule Cocktailparty.PubSubMonitor do
     {:noreply, %{q: sq}}
   end
 
-  def handle_info(%Phoenix.Socket.Broadcast{topic: topic} = broadcast, state) do
+  def handle_info(
+        %Phoenix.Socket.Broadcast{topic: topic, event: event, payload: _} = broadcast,
+        state
+      )
+      when event not in @control_messages do
     {:ok, tq} = Map.fetch(state.q, topic)
 
     tq =
@@ -63,8 +68,16 @@ defmodule Cocktailparty.PubSubMonitor do
       end
 
     q = Map.put(state.q, topic, tq)
-
     {:noreply, %{q: q}}
+  end
+
+  def handle_info(
+        %Phoenix.Socket.Broadcast{topic: _, event: event, payload: _},
+        state
+      )
+      when event in @control_messages do
+    # we do nothing for now but we could centralize observation here.
+    {:noreply, state}
   end
 
   def handle_call({:get, topic}, _, state) do

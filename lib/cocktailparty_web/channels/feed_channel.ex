@@ -31,8 +31,6 @@ defmodule CocktailpartyWeb.FeedChannel do
   intercept [:new_redis_message, :kick]
   @impl true
   def handle_out(msg, payload, socket) do
-    dbg(socket)
-
     case msg do
       :new_redis_message ->
         push(socket, "new_redis_message", payload)
@@ -40,12 +38,15 @@ defmodule CocktailpartyWeb.FeedChannel do
 
       :kick ->
         if socket.assigns.current_user == payload do
-          Logger.info("KICK")
+          Logger.info("User #{payload} has been kicked from feed #{socket.topic}.")
           push(socket, "kicked", %{})
           {:stop, {:shutdown, :kicked}, socket}
         else
           {:noreply, socket}
         end
+
+      _ ->
+        {:noreply, socket}
     end
   end
 
