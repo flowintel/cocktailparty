@@ -58,7 +58,6 @@ defmodule CocktailpartyWeb.Admin.SourceController do
     source = %{source | users: updated_users}
 
     # we add edition logic here for the subscribtion modal
-    # potential_subscribers = UserManagement.list_users_short()
     all_users = UserManagement.list_users_short()
 
     get_src_users =

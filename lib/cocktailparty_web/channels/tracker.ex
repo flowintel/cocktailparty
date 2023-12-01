@@ -72,6 +72,52 @@ defmodule CocktailpartyWeb.Tracker do
   end
 
   @doc """
+  Returns the map containing the list of current user connections for each feed
+
+  ## Examples
+
+      iex> get_all_connections_by_feeds()
+      %{
+        "feed:38" => [
+          {9,
+          %{
+            remote_ip: {127, 0, 0, 1},
+            current_user: 9,
+            online_at: ~U[2023-11-30 10:51:16.124340Z],
+            phx_ref: "F5xhDvYIT3i_3gBE"
+          }}
+        ],
+        "feed:41" => [
+          {9,
+          %{
+            remote_ip: {127, 0, 0, 1},
+            current_user: 9,
+            online_at: ~U[2023-11-30 10:51:16.131619Z],
+            phx_ref: "F5xhDvZ3MtW2xAOl"
+          }}
+        ]
+      }
+  """
+  def get_all_connections_by_feeds() do
+    sources = Catalog.list_sources()
+
+    feeds =
+      Enum.reduce(sources, [], fn source, feeds ->
+        ["feed:" <> Integer.to_string(source.id) | feeds]
+      end)
+
+      Enum.reduce(feeds, %{}, fn feed, accs ->
+        feed_users = list(feed)
+        sinku =
+          Enum.reduce(feed_users, [], fn user, acc ->
+            [elem(user, 1) | acc]
+          efee
+
+        Map.put(accs, feed, feedu)
+      end)
+  end
+
+  @doc """
   Returns the list of id of the users connected to sinks
 
   ## Examples
