@@ -5,8 +5,10 @@ defmodule Cocktailparty.UserManagement do
 
   import Ecto.Query, warn: false
   import Ecto.Changeset
+  alias Ecto.Multi
   alias Cocktailparty.SinkCatalog.Sink
   alias Cocktailparty.Repo
+  alias Cocktailparty.Catalog
 
   # we reuse Accounts.User schema
   alias Cocktailparty.Accounts.User
@@ -134,7 +136,7 @@ defmodule Cocktailparty.UserManagement do
   end
 
   @doc """
-  Deletes a User.
+  Deletes and kick a User from the system.
 
   ## Examples
 
@@ -146,22 +148,20 @@ defmodule Cocktailparty.UserManagement do
 
   """
   def delete_user(%User{} = user) do
-    # TODO make this a transaction
     query =
       from s in "sources_subscriptions",
         where: s.user_id == ^user.id,
         select: s.id
 
-    Repo.delete_all(query)
+    source_list = Repo.all(query)
 
-    Repo.delete(user)
-    |> case do
-      {:ok, user} ->
-        {:ok, user}
+    Enum.each(source_list, &Catalog.kick_users_from_source([user.id], &1))
+    Catalog.kick_users_from_public_sources([user.id])
 
-      {:error, msg} ->
-        {:error, msg}
-    end
+    Multi.new()
+    |> Multi.delete_all("subscriptions:delete:user" <> Integer.to_string(user.id), query)
+    |> Multi.delete("user:delete:" <> Integer.to_string(user.id), user)
+    |> Repo.transaction()
   end
 
   @doc """

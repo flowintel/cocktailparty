@@ -33,13 +33,27 @@ defmodule Cocktailparty.Catalog do
 
   ## Examples
 
-      iex> list__non_public_sources()
+      iex> list_non_public_sources()
       [%Source{}, ...]
 
   """
   def list_non_public_sources() do
     query_non_public = from s in Source, where: s.public != true
     Repo.all(query_non_public)
+  end
+
+  @doc """
+  Returns the list of public sources
+
+  ## Examples
+
+      iex> list_public_sources()
+      [%Source{}, ...]
+
+  """
+  def list_public_sources() do
+    query_public = from s in Source, where: s.public == true
+    Repo.all(query_public)
   end
 
   @doc """
@@ -398,6 +412,31 @@ defmodule Cocktailparty.Catalog do
 
       :ok
     end)
+  end
+
+  @doc """
+  kick_users_from_public_sources kicks a list of users from all public source
+  """
+  def kick_users_from_public_sources(user_ids) when is_list(user_ids) do
+    public_sources = list_public_sources()
+
+    # we don't query the tracker, we spray kick commands on public sources
+    Enum.each(
+      public_sources,
+      &Enum.each(user_ids, fn user_id ->
+        Phoenix.PubSub.broadcast(
+          Cocktailparty.PubSub,
+          "feed:" <> Integer.to_string(&1.id),
+          %Phoenix.Socket.Broadcast{
+            topic: "feed:" <> Integer.to_string(&1.id),
+            event: :kick,
+            payload: user_id
+          }
+        )
+
+        :ok
+      end)
+    )
   end
 
   @doc """
