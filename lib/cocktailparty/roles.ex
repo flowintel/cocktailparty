@@ -88,18 +88,25 @@ defmodule Cocktailparty.Roles do
   """
   def update_role(%Role{} = role, attrs) do
     changeset = Role.changeset(role, attrs)
+
     # if a permission has been changed, we trigger the corresponding callback
+    affected_users = Cocktailparty.Roles.list_users_with_role(role.id)
+    affected_users_id =
+      Enum.reduce(affected_users, [], fn x, acc ->
+        acc ++ [x.id]
+      end)
+
     if Map.has_key?(changeset.changes, :permissions) do
       Enum.each(changeset.changes.permissions.changes, fn x ->
         case x do
           {permission, false} ->
             if function_exported?(Permissions, permission, 2) do
-              apply(Permissions, permission, [role, "demotion"])
+              apply(Permissions, permission, ["demotion", affected_users_id])
             end
 
           {permission, true} ->
             if function_exported?(Permissions, permission, 2) do
-              apply(Permissions, permission, [role, "promotion"])
+              apply(Permissions, permission, ["promotion", affected_users_id])
             end
         end
       end)

@@ -9,6 +9,10 @@ defmodule Cocktailparty.UserManagement do
   alias Cocktailparty.SinkCatalog.Sink
   alias Cocktailparty.Repo
   alias Cocktailparty.Catalog
+  alias Cocktailparty.Roles
+  alias Cocktailparty.Roles.Permissions
+
+  require Logger
 
   # we reuse Accounts.User schema
   alias Cocktailparty.Accounts.User
@@ -95,7 +99,8 @@ defmodule Cocktailparty.UserManagement do
   end
 
   @doc """
-  Updates a user.
+  Updates a user and checks whether its permissions has changed, in which case
+  we use the corresponding permission callback to act accordingly.
 
   ## Examples
 
@@ -108,8 +113,46 @@ defmodule Cocktailparty.UserManagement do
   """
 
   def update_user(%User{} = user, attrs) do
-    user
-    |> change_user(attrs)
+    # keep track of present role
+    original_role_id = user.role_id
+
+    # build the user changeset
+    changeset = change_user(user, attrs)
+
+    # if the user's role changed, we trigger the corresponding callbacks:
+    # to know witch permissions changed between roles, we create a changeset
+    if Map.has_key?(changeset.changes, :role_id) do
+      Logger.info("Role changed for #{user.id}, triggering permission callbacks.")
+      # let's get the original role
+      original_role = Roles.get_role!(original_role_id)
+      # get the new_role from the changeset
+      new_role = Roles.get_role!(Map.get(changeset.changes, :role_id))
+
+      # create a changeset from the new_role's permissions
+      changeset_or =
+        Roles.change_role(original_role, %{
+          "permissions" => Map.from_struct(new_role.permissions)
+        })
+
+      # rumble
+      if Map.has_key?(changeset_or.changes, :permissions) do
+        Enum.each(changeset_or.changes.permissions.changes, fn x ->
+          case x do
+            {permission, false} ->
+              if function_exported?(Permissions, permission, 2) do
+                apply(Permissions, permission, ["demotion", [user.id]])
+              end
+
+            {permission, true} ->
+              if function_exported?(Permissions, permission, 2) do
+                apply(Permissions, permission, ["promotion", [user.id]])
+              end
+          end
+        end)
+      end
+    end
+
+    changeset
     |> validate_email_if_set()
     |> validate_password_if_set()
     |> Repo.update()
