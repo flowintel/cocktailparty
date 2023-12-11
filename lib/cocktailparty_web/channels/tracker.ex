@@ -106,15 +106,16 @@ defmodule CocktailpartyWeb.Tracker do
         ["feed:" <> Integer.to_string(source.id) | feeds]
       end)
 
-      Enum.reduce(feeds, %{}, fn feed, accs ->
-        feed_users = list(feed)
-        sinku =
-          Enum.reduce(feed_users, [], fn user, acc ->
-            [elem(user, 1) | acc]
-          efee
+    Enum.reduce(feeds, %{}, fn feed, accs ->
+      feed_users = list(feed)
 
-        Map.put(accs, feed, feedu)
-      end)
+      feedu =
+        Enum.reduce(feed_users, [], fn user, acc ->
+          [elem(user, 1) | acc]
+        end)
+
+      Map.put(accs, feed, feedu)
+    end)
   end
 
   @doc """

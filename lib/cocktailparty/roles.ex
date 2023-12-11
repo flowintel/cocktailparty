@@ -91,6 +91,7 @@ defmodule Cocktailparty.Roles do
 
     # if a permission has been changed, we trigger the corresponding callback
     affected_users = Cocktailparty.Roles.list_users_with_role(role.id)
+
     affected_users_id =
       Enum.reduce(affected_users, [], fn x, acc ->
         acc ++ [x.id]

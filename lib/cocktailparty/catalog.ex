@@ -217,7 +217,13 @@ defmodule Cocktailparty.Catalog do
       {:ok, source} ->
         _ = notify_broker(source, {:delete_source, source})
         notify_monitor({:unsubscribe, "feed:" <> Integer.to_string(source.id)})
+
+        # kick users who subscribed to the source
+        mass_unsubscribe(source.id)
         {:ok, source}
+
+        # kick the rest (users who joined as public source or permission)
+        kick_all_users_from_source(source.id)
 
       {:error, msg} ->
         {:error, msg}
@@ -462,6 +468,29 @@ defmodule Cocktailparty.Catalog do
     illegitimate_connection
     |> Enum.each(fn %{"source_id" => source_id, "user_id" => user_id} ->
       # kick them from the associated channels
+      Phoenix.PubSub.broadcast(
+        Cocktailparty.PubSub,
+        "feed:" <> Integer.to_string(source_id),
+        %Phoenix.Socket.Broadcast{
+          topic: "feed:" <> Integer.to_string(source_id),
+          event: :kick,
+          payload: user_id
+        }
+      )
+
+      :ok
+    end)
+  end
+
+  @doc """
+  kick_all_users_from_source kicks all users from a source
+  """
+  def kick_all_users_from_source(source_id) when is_integer(source_id) do
+    # query the tracker to get the list of users present on the source's channel
+    users_id = Tracker.get_all_connected_users_to_feed(source_id)
+
+    # kick commands
+    Enum.each(users_id, fn user_id ->
       Phoenix.PubSub.broadcast(
         Cocktailparty.PubSub,
         "feed:" <> Integer.to_string(source_id),
