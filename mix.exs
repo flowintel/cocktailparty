@@ -26,9 +26,12 @@ defmodule Cocktailparty.MixProject do
   def application do
     [
       mod: {Cocktailparty.Application, []},
-      extra_applications: [:logger, :runtime_tools, :observer, :wx]
+      extra_applications: extra_applications(Mix.env()) ++ [:logger, :runtime_tools]
     ]
   end
+
+  defp extra_applications(:dev), do: [:observer, :wx]
+  defp extra_applications(_), do: []
 
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]

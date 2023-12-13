@@ -129,7 +129,6 @@ if config_env() == :prod do
     end
 
   config :cocktailparty,
-    redix_uri: System.get_env("REDIS_URI") || "redis://127.0.0.1:6379/0",
     # won't start libcluster unless this is true
     standalone: standalone,
     # won't start the broker and redis connection unless this is true
