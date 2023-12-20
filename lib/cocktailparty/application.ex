@@ -16,8 +16,6 @@ defmodule Cocktailparty.Application do
         Cocktailparty.Repo,
         # Start the PubSub system
         {Phoenix.PubSub, name: Cocktailparty.PubSub},
-        # Start the PubSub monitoring
-        {Cocktailparty.PubSubMonitor, name: {:global, Cocktailparty.PubSubMonitor}},
         # Start Finch
         {Finch, name: Cocktailparty.Finch},
         # Start the presence tracking module
@@ -27,26 +25,25 @@ defmodule Cocktailparty.Application do
         # Start a worker by calling: Cocktailparty.Worker.start_link(arg)
         # {Cocktailparty.Worker, arg}
         # Fun with Flags
-        FunWithFlags.Supervisor,
-        # This guy uses Tasks to init DynamicSupervisors
-        Cocktailparty.DynamicSupervisorBoot
+        FunWithFlags.Supervisor
       ]
       |> append_if_true(
         !Application.get_env(:cocktailparty, :standalone),
         {Cluster.Supervisor,
          [Application.get_env(:libcluster, :topologies), [name: Cocktailparty.ClusterSupervisor]]}
       )
-
-    # |> append_if_true(
-    #   Application.get_env(:cocktailparty, :standalone) ||
-    #     Application.get_env(:cocktailparty, :broker),
-    #   {Redix, {Application.get_env(:cocktailparty, :redix_uri), [name: :redix]}}
-    # )
-    # |> append_if_true(
-    #   Application.get_env(:cocktailparty, :standalone) ||
-    #     Application.get_env(:cocktailparty, :broker),
-    #   Cocktailparty.Broker
-    # )
+      |> append_if_true(
+        Application.get_env(:cocktailparty, :standalone) ||
+          Application.get_env(:cocktailparty, :broker),
+        # This guy uses Tasks to init DynamicSupervisors
+        Cocktailparty.DynamicSupervisorBoot
+      )
+      |> append_if_true(
+        Application.get_env(:cocktailparty, :standalone) ||
+          Application.get_env(:cocktailparty, :broker),
+        # Start the PubSub monitoring
+        {Cocktailparty.PubSubMonitor, name: {:global, Cocktailparty.PubSubMonitor}}
+      )
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
