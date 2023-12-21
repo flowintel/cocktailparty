@@ -219,11 +219,11 @@ defmodule Cocktailparty.Catalog do
         notify_monitor({:unsubscribe, "feed:" <> Integer.to_string(source.id)})
 
         # kick users who subscribed to the source
-        mass_unsubscribe(source.id)
-        {:ok, source}
+        mass_unsubscribe(Integer.to_string(source.id))
 
         # kick the rest (users who joined as public source or permission)
         kick_all_users_from_source(source.id)
+        {:ok, source}
 
       {:error, msg} ->
         {:error, msg}
@@ -343,6 +343,7 @@ defmodule Cocktailparty.Catalog do
     Repo.delete_all(query)
   end
 
+  @spec mass_unsubscribe(binary()) :: any()
   def mass_unsubscribe(source_id) do
     # straight forward way
     query_delete =
@@ -527,9 +528,7 @@ defmodule Cocktailparty.Catalog do
 
   def get_broker(%Source{} = source) do
     # locate the reponsible broker process
-    case GenServer.whereis(
-           {:global, {:name, "broker_" <> Integer.to_string(source.redis_instance_id)}}
-         ) do
+    case GenServer.whereis({:global, "broker_" <> Integer.to_string(source.redis_instance_id)}) do
       {name, node} ->
         # TODO
         Logger.error("TODO: contacting remote broker in  the cluster: #{node}/#{name}")

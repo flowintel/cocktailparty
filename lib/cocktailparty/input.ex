@@ -4,6 +4,7 @@ defmodule Cocktailparty.Input do
   """
 
   import Ecto.Query, warn: false
+  import Ecto.Changeset
   alias Cocktailparty.Repo
 
   alias Cocktailparty.Input.RedisInstance
@@ -107,9 +108,17 @@ defmodule Cocktailparty.Input do
 
   """
   def update_redis_instance(%RedisInstance{} = redis_instance, attrs) do
-    redis_instance
-    |> RedisInstance.changeset(attrs)
-    |> Repo.update()
+    changeset = change_redis_instance(redis_instance, attrs)
+
+    # We restart related processes if needed
+    if changed?(changeset, :hostname) or changed?(changeset, :port) do
+      RedisInstance.terminate(redis_instance)
+      {:ok, redis_instance} = Repo.update(changeset)
+      RedisInstance.start(redis_instance)
+      {:ok, redis_instance}
+    else
+      Repo.update(changeset)
+    end
   end
 
   @doc """

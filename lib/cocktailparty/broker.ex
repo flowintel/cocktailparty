@@ -14,7 +14,7 @@ defmodule Cocktailparty.Broker do
   ]
 
   def start_link(opts) when is_list(opts) do
-    GenServer.start_link(__MODULE__, opts, name: opts[:name])
+    GenServer.start_link(__MODULE__, opts, name: Keyword.get(opts, :name, __MODULE__))
   end
 
   def init(opts) do

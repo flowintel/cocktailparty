@@ -17,6 +17,7 @@ defmodule CocktailpartyWeb.Admin.RedisInstanceController do
   def create(conn, %{"redis_instance" => redis_instance_params}) do
     case Input.create_redis_instance(redis_instance_params) do
       {:ok, redis_instance} ->
+        # TODO: handle errors
         Cocktailparty.Input.RedisInstance.start(redis_instance)
 
         conn
@@ -56,6 +57,7 @@ defmodule CocktailpartyWeb.Admin.RedisInstanceController do
   def delete(conn, %{"id" => id}) do
     redis_instance = Input.get_redis_instance!(id)
     {:ok, _redis_instance} = Input.delete_redis_instance(redis_instance)
+    Input.RedisInstance.terminate(redis_instance)
 
     conn
     |> put_flash(:info, "Redis instance deleted successfully.")

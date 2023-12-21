@@ -1,4 +1,5 @@
 defmodule Cocktailparty.DynamicSupervisorBoot do
+  alias Cocktailparty.Input.RedisInstance
   use Supervisor
 
   require Logger
@@ -12,14 +13,15 @@ defmodule Cocktailparty.DynamicSupervisorBoot do
     children = [
       # We start the dynamic supervisor, then we use a Task
       # to start its children
-      {Cocktailparty.RedisInstancesDynamicSupervisor, []},
+      {Cocktailparty.RedisInstancesDynamicSupervisor,
+       name: {:global, Cocktailparty.RedisInstancesDynamicSupervisor}},
       {Task,
        fn ->
          Logger.info("Redis Instances Dynamic Supervisor Task started")
          # When starting we check what inputs are available
          # for each instance, we start a redix connection along with a broker gen_server
          list_redisinstances()
-         |> Enum.each(fn x -> Cocktailparty.RedisInstancesDynamicSupervisor.start_child(x) end)
+         |> Enum.each(fn x -> RedisInstance.start(x) end)
        end}
     ]
 
