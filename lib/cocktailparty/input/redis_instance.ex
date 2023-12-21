@@ -43,19 +43,31 @@ defmodule Cocktailparty.Input.RedisInstance do
     spec_broker =
       {Broker, redis_instance: rc, name: {:global, "broker_" <> Integer.to_string(rc.id)}}
 
-    # TODO check errors and propagate (we should get {:ok, pid})
-    case DynamicSupervisor.start_child(
+    # We stay on the Dynamic Supervisor host
+    sup = get_supervisor()
+    Logger.info("Supervisor pid is #{pid_to_string(sup)}")
+    supervisor_node = node(sup)
+    Logger.info("Supervisor is running on #{supervisor_node}")
+
+    # case DynamicSupervisor.start_child(
+    #        {:global, Cocktailparty.RedisInstancesDynamicSupervisor},
+    #        spec_redix
+    #      ) do
+    case :rpc.call(supervisor_node, DynamicSupervisor, :start_child, [
            {:global, Cocktailparty.RedisInstancesDynamicSupervisor},
            spec_redix
-         ) do
+         ]) do
       {:ok, pid} ->
         Logger.info("Redix driver alive for #{rc.name} with pid #{pid_to_string(pid)}")
 
-        # case DynamicSupervisor.start_child(__MODULE__, spec_broker) do
-        case DynamicSupervisor.start_child(
+        # case DynamicSupervisor.start_child(
+        #        {:global, Cocktailparty.RedisInstancesDynamicSupervisor},
+        #        spec_broker
+        #      ) do
+        case :rpc.call(supervisor_node, DynamicSupervisor, :start_child, [
                {:global, Cocktailparty.RedisInstancesDynamicSupervisor},
                spec_broker
-             ) do
+             ]) do
           {:ok, pid_broker} ->
             Logger.info("Broker initialized for #{rc.name} with pid #{pid_to_string(pid_broker)}")
 
@@ -101,6 +113,7 @@ defmodule Cocktailparty.Input.RedisInstance do
 
   """
   def terminate(rc = %__MODULE__{}) do
+    Logger.info("Terminating processes for redis instance: " <> Integer.to_string(rc.id))
     sup = get_supervisor()
 
     case GenServer.whereis({:global, "broker_" <> Integer.to_string(rc.id)}) do
