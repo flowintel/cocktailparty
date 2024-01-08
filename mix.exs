@@ -26,7 +26,7 @@ defmodule Cocktailparty.MixProject do
   def application do
     [
       mod: {Cocktailparty.Application, []},
-      extra_applications: extra_applications(Mix.env()) ++ [:logger, :runtime_tools]
+      extra_applications: extra_applications(Mix.env()) ++ [:logger, :runtime_tools, :os_mon]
     ]
   end
 
