@@ -23,6 +23,14 @@
     <.icon :if={redis_instance.sink} name="hero-check" />
     <.icon :if={!redis_instance.sink} name="hero-x-mark" />
   </:col>
+  <:col :let={redis_instance} label="Status">
+    <div :if={redis_instance.connected} class="badge badge-success">
+      online
+    </div>
+    <div :if={!redis_instance.connected} class="badge badge-warning">
+      offline
+    </div>
+  </:col>
   <:action :let={redis_instance}>
     <div class="sr-only">
       <.link navigate={~p"/admin/redisinstances/#{redis_instance}"}>Show</.link>

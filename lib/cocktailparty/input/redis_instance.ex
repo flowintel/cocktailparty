@@ -45,14 +45,8 @@ defmodule Cocktailparty.Input.RedisInstance do
 
     # We stay on the Dynamic Supervisor host
     sup = get_supervisor()
-    Logger.info("Supervisor pid is #{pid_to_string(sup)}")
     supervisor_node = node(sup)
-    Logger.info("Supervisor is running on #{supervisor_node}")
 
-    # case DynamicSupervisor.start_child(
-    #        {:global, Cocktailparty.RedisInstancesDynamicSupervisor},
-    #        spec_redix
-    #      ) do
     case :rpc.call(supervisor_node, DynamicSupervisor, :start_child, [
            {:global, Cocktailparty.RedisInstancesDynamicSupervisor},
            spec_redix
@@ -60,10 +54,6 @@ defmodule Cocktailparty.Input.RedisInstance do
       {:ok, pid} ->
         Logger.info("Redix driver alive for #{rc.name} with pid #{pid_to_string(pid)}")
 
-        # case DynamicSupervisor.start_child(
-        #        {:global, Cocktailparty.RedisInstancesDynamicSupervisor},
-        #        spec_broker
-        #      ) do
         case :rpc.call(supervisor_node, DynamicSupervisor, :start_child, [
                {:global, Cocktailparty.RedisInstancesDynamicSupervisor},
                spec_broker

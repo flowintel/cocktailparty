@@ -20,6 +20,10 @@ defmodule Cocktailparty.Input do
   """
   def list_redisinstances do
     Repo.all(RedisInstance)
+    |> Enum.map(fn instance ->
+      instance
+      |> Map.put(:connected, connected?(instance))
+    end)
   end
 
   @doc """
@@ -75,7 +79,11 @@ defmodule Cocktailparty.Input do
       ** (Ecto.NoResultsError)
 
   """
-  def get_redis_instance!(id), do: Repo.get!(RedisInstance, id)
+  def get_redis_instance!(id) do
+    instance = Repo.get!(RedisInstance, id)
+    Map.put(instance, :connected, connected?(instance))
+  end
+
 
   @doc """
   Creates a redis_instance.
@@ -111,6 +119,7 @@ defmodule Cocktailparty.Input do
     changeset = change_redis_instance(redis_instance, attrs)
 
     # We restart related processes if needed
+    # TODO: check enabled
     if changed?(changeset, :hostname) or changed?(changeset, :port) do
       RedisInstance.terminate(redis_instance)
       {:ok, redis_instance} = Repo.update(changeset)
@@ -148,5 +157,30 @@ defmodule Cocktailparty.Input do
   """
   def change_redis_instance(%RedisInstance{} = redis_instance, attrs \\ %{}) do
     RedisInstance.changeset(redis_instance, attrs)
+  end
+
+  @doc """
+  Get the status of a redis connection
+
+  """
+  def connected?(%RedisInstance{} = redis_instance) do
+    case GenServer.whereis({:global, "redix_" <> Integer.to_string(redis_instance.id)}) do
+      nil ->
+        false
+
+      # name, node
+      {_, _} ->
+        true
+
+      # pid
+      pid ->
+        case :sys.get_state(pid) do
+          {:connected, _} ->
+            true
+
+          _ ->
+            false
+        end
+    end
   end
 end
