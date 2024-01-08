@@ -84,7 +84,6 @@ defmodule Cocktailparty.Input do
     Map.put(instance, :connected, connected?(instance))
   end
 
-
   @doc """
   Creates a redis_instance.
 

@@ -24,7 +24,7 @@ defmodule Cocktailparty.Accounts.User do
   def changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:email, :is_admin, :role_id])
-    |> validate_required([:email, :is_admin, :role])
+    |> validate_required([:email, :is_admin])
     |> validate_email(opts)
     |> unique_constraint(:email)
   end
@@ -54,7 +54,7 @@ defmodule Cocktailparty.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :role_id])
+    |> cast(attrs, [:email, :password, :role_id, :is_admin])
     |> validate_email(opts)
     |> validate_password(opts)
   end
