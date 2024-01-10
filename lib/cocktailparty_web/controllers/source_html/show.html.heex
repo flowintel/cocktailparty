@@ -200,7 +200,7 @@
     <div class="mockup-code">
       <pre><code>./websocat.x86_64-unknown-linux-musl \
     --ping-interval 5 \
-    "wss://<%= @conn.host <> ":" <>Integer.to_string(@conn.port) %>/feedsocket/websocket?token=<%= @user_token %>&vsn=2.0.0" \
+    "wss://<%= @conn.host %>:443/feedsocket/websocket?token=<%= @user_token %>&vsn=2.0.0" \
     -p '["0","0","feed:<%= @source.id %>","phx_join",{}]'
   </code></pre>
     </div>
