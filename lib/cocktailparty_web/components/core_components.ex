@@ -463,6 +463,7 @@ defmodule CocktailpartyWeb.CoreComponents do
   attr :rows, :list, required: true
   attr :row_id, :any, default: nil, doc: "the function for generating the row id"
   attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
+  attr :overflow, :string, default: "overflow-y-auto px-4 sm:overflow-visible sm:px-0", doc: "css overflow behaviour"
 
   attr :row_item, :any,
     default: &Function.identity/1,
@@ -481,7 +482,7 @@ defmodule CocktailpartyWeb.CoreComponents do
       end
 
     ~H"""
-    <div class="overflow-auto px-4 sm:px-0">
+    <div class={@overflow}>
       <table class="mt-11 w-[40rem] sm:w-full">
         <thead class="text-left text-[0.8125rem] leading-6 text-zinc-500">
           <tr>
