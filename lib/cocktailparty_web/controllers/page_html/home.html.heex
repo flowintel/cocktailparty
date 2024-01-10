@@ -3,7 +3,6 @@
 <div class="px-4 py-20 sm:px-6 lg:px-8">
   <%!-- <div class="mx-auto max-w-2xl lg:mx-1"> --%>
   <div class="mx-auto max-w-2xl">
-
     <p class="mt-4 text-[2rem] font-semibold leading-10 tracking-tighter text-zinc-900">
       Welcome on CIRCL CTI data streaming platform.
     </p>
@@ -16,17 +15,21 @@
     </p>
 
     <p class="mt-4 text-base leading-7 text-zinc-600">
-      Feel free to explore the available <.link href={~p"/sources"} class="leading-6 text-zinc-900 font-semibold hover:text-zinc-700" > sources </.link> and join us in building a more secure and informed digital space.
+      Feel free to explore the available
+      <.link href={~p"/sources"} class="leading-6 text-zinc-900 font-semibold hover:text-zinc-700">
+         sources 
+      </.link>
+      and join us in building a more secure and informed digital space.
     </p>
 
     <div class="flex">
       <div class="w-full">
-      <h1 class="mt-10 flex items-center text-sm font-semibold leading-6 text-brand">
-      Running on Cocktailparty 
-      <small class="ml-3 rounded-full bg-brand/5 px-2 text-[0.8125rem] font-medium leading-6">
-        v<%= Application.spec(:cocktailparty, :vsn) %>
-      </small>
-    </h1>
+        <h1 class="mt-10 flex items-center text-sm font-semibold leading-6 text-brand">
+          Running on Cocktailparty
+          <small class="ml-3 rounded-full bg-brand/5 px-2 text-[0.8125rem] font-medium leading-6">
+            v<%= Application.spec(:cocktailparty, :vsn) %>
+          </small>
+        </h1>
         <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
           <a
             href="https://circl.lu/services/"
@@ -99,7 +102,5 @@
         </div>
       </div>
     </div>
-
   </div>
-
 </div>
