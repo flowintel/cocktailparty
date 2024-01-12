@@ -13,7 +13,8 @@ defmodule Cocktailparty.MixProject do
       releases: [
         cocktailparty: [
           applications: [
-            fun_with_flags: :load
+            fun_with_flags: :load,
+            fun_with_flags_ui: :load
           ]
         ]
       ]
