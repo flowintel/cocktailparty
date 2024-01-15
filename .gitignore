@@ -37,3 +37,6 @@ npm-debug.log
 
 # Elixir-LS
 /.elixir_ls/
+
+# runtime config
+/config/runtime.exs

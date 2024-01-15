@@ -9,13 +9,14 @@ Key Features:
 - Stream Distribution: The project focuses on delivering real-time data streams to end-users.
 - Web Interface: The user interface allows users to easily navigate and discover the streams they are interested in.
 - Stream Subscription: Users can subscribe to their desired streams and receive realtime updates.
+- Stream Creation: Users create `sinks` in which that can upload streams of data using [realtime-py](https://github.com/flowintel/realtime-py/tree/master)
   
 # Moving parts
 
 Cocktailparty leverages the [phoenix framework](https://www.phoenixframework.org/) and the [BEAM virtual machine](https://www.erlang.org/blog/a-brief-beam-primer/) capabilities to provide:
-- A broker that take data from different sources (At the moment only topics from *one* redis instance) and publish the content into phoenix channels, that are then displayed as *sources* to the end user.
-- A pubsub system based on [pg2](https://www.erlang.org/docs/18/man/pg2.html) to route redis topics'c content to channels.
-- A web interface for managing users, and for users to create *tokens*, list sources and get access instructions.
+- A broker that take data from different sources (at the moment only topics from redis instances) and publish the content into phoenix channels, that are then displayed as *sources* to the end user.
+- A pubsub system based on [pg2](https://www.erlang.org/docs/18/man/pg2.html) to route redis topics' content to channels.
+- A web interface for managing users, and for users to list sources and sinks, and get access instructions.
 That's it.
 
 # Local installation and requirements
@@ -41,7 +42,6 @@ Parameters customization is done through environmemts variables as listing in `s
 export SECRET_KEY_BASE=
 # use whatever is your IP
 export DATABASE_URL=ecto://cocktailparty:mysuperpassword@192.168.1.1/cocktailparty
-export REDIS_URI=redis://192.168.1.1:6390/0
 # Your domain name
 export PHX_HOST=broker.d4-project.org
 # Is it standalone?
@@ -62,7 +62,7 @@ Cocktailparty is meant to be deployed behind a proxy. Nodes' duties can be separ
 ## Common deployment
 - Apache terminates https
 - Apache load balance between a set of phoenix nodes
-- One broker is keeping a connection to a redis server
+- One broker is keeping connections to redis servers
 - Clustering is done through [libcluster](https://hex.pm/packages/libcluster) (gossip protocol by default)
 
 ```mermaid
@@ -70,7 +70,9 @@ flowchart LR
     A[Apache]
     C{Round Robin}
     A --> C
-    R[Redis]
+    R1[Redis]
+    R2[Redis]
+    R3[Redis]
     
     U(Users)
     U--https-->A
@@ -81,7 +83,9 @@ flowchart LR
         B[Broker]
     end
     
-    B --subscribe to-->R
+    B --subscribes to-->R1
+    B --subscribes to-->R2
+    B --pushes into-->R2
     
     C --http--> E
     C --http--> F
@@ -129,8 +133,8 @@ Here is an example of an apache config for one broker node, and 2 nodes serving 
 # Contribution
 
 ## License
-        Copyright (C) 2023 CIRCL - Computer Incident Response Center Luxembourg
-        Copyright (C) 2023 Jean-Louis Huynen
+        Copyright (C) 2023-2024 CIRCL - Computer Incident Response Center Luxembourg
+        Copyright (C) 2023-2024 Jean-Louis Huynen
 
         This program is free software: you can redistribute it and/or modify
         it under the terms of the GNU Affero General Public License as
