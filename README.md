@@ -70,9 +70,9 @@ flowchart LR
     A[Apache]
     C{Round Robin}
     A --> C
-    R[Redis]
-    S[Redis]
-    T[Redis]
+    R[Redis 1]
+    S[Redis 2]
+    T[Redis 3]
     
     U(Users)
     U--https-->A
