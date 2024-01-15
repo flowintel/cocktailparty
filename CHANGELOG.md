@@ -1,6 +1,6 @@
-# Changelog for Cocktailparty v0.2 ( Stream distribution Beta)
+# Changelog for Cocktailparty v0.2.0 ( Stream distribution Beta)
 
-Welcome to the latest update of Cocktailparty! We're excited to bring you several new features and improvements in this release. Here's what's new in version 0.2:
+Welcome to the latest update of Cocktailparty! We're excited to bring you several new features and improvements in this release. Here's what's new in version 0.2.0:
 
 ### Enhanced Stream Distribution
 - **Multiple Redis Instances**: Cocktailparty now supports using several Redis instances, enhancing scalability and performance.
