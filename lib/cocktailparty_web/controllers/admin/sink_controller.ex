@@ -20,7 +20,7 @@ defmodule CocktailpartyWeb.Admin.SinkController do
     case instances do
       [] ->
         conn
-        |> put_flash(:error, "A redis instance is required to create a sink.")
+        |> put_flash(:error, "A receiving redis instance is required to create a sink.")
         |> redirect(to: ~p"/admin/redisinstances")
 
       _ ->
@@ -63,7 +63,7 @@ defmodule CocktailpartyWeb.Admin.SinkController do
     case instances do
       [] ->
         conn
-        |> put_flash(:error, "A redis instance is required to edit a sink.")
+        |> put_flash(:error, "A receiving redis instance is required to edit a sink.")
         |> redirect(to: ~p"/admin/redisinstances")
 
       _ ->

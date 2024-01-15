@@ -3,6 +3,7 @@ defmodule CocktailpartyWeb.SinkController do
 
   alias Cocktailparty.SinkCatalog
   alias Cocktailparty.SinkCatalog.Sink
+  alias Cocktailparty.Input
   import CocktailpartyWeb.AccessControl
 
   plug :sink_access_control when action in [:new, :create, :index, :update, :delete]
@@ -15,7 +16,18 @@ defmodule CocktailpartyWeb.SinkController do
 
   def new(conn, _params) do
     changeset = SinkCatalog.change_sink(%Sink{})
-    render(conn, :new, changeset: changeset)
+    # get a receiving redis instance
+    instance = Input.get_one_sink_redisinstance()
+    case instance do
+      nil ->
+
+        conn
+        |> put_flash(:error, "A receiving redis instance is required to create a sink.")
+        |> redirect(to: ~p"/")
+
+      _ ->
+        render(conn, :new, changeset: changeset)
+    end
   end
 
   def create(conn, %{"sink" => sink_params}) do

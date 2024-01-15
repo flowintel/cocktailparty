@@ -103,7 +103,8 @@
                     Cocktailparty.UserManagement.can?(
                       @conn.assigns.current_user.id,
                       :create_sinks
-                    )
+                    ) &&
+                    Cocktailparty.Input.get_one_sink_redisinstance() != nil
                 }
                 href={~p"/sinks"}
                 class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
