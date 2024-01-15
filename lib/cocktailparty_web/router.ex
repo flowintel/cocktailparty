@@ -66,12 +66,12 @@ defmodule CocktailpartyWeb.Router do
     forward "/", FunWithFlags.UI.Router, namespace: "feature-flags"
   end
 
-  if Application.compile_env(:cocktailparty, :dev_routes)  do
-   scope"/dev" do
-    pipe_through [:browser]
-    forward "/mailbox", Plug.Swoosh.MailboxPreview
+  if Application.compile_env(:cocktailparty, :dev_routes) do
+    scope "/dev" do
+      pipe_through [:browser]
+      forward "/mailbox", Plug.Swoosh.MailboxPreview
+    end
   end
-end
 
   # Other scopes may use custom stacks.
   # scope "/api", CocktailpartyWeb do

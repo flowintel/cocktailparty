@@ -463,7 +463,10 @@ defmodule CocktailpartyWeb.CoreComponents do
   attr :rows, :list, required: true
   attr :row_id, :any, default: nil, doc: "the function for generating the row id"
   attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
-  attr :overflow, :string, default: "overflow-y-auto px-4 sm:overflow-visible sm:px-0", doc: "css overflow behaviour"
+
+  attr :overflow, :string,
+    default: "overflow-y-auto px-4 sm:overflow-visible sm:px-0",
+    doc: "css overflow behaviour"
 
   attr :row_item, :any,
     default: &Function.identity/1,

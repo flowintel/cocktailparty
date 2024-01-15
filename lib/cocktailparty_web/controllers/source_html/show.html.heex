@@ -141,8 +141,7 @@
           </td>
           <td class="relative p-0 w-14">
             <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
-              <%!-- <%= Integer.to_string(@conn.port) %> --%>
-              443
+              <%!-- <%= Integer.to_string(@conn.port) %> --%> 443
             </div>
           </td>
         </tr>
@@ -206,10 +205,9 @@
     </div>
   </div>
 
-<.table id="sample" rows={@sample} overflow="overflow-auto"> 
-  <:col :let={event} label="Latest 5 messages"><%= event %></:col>
-</.table>
-
+  <.table id="sample" rows={@sample} overflow="overflow-auto">
+    <:col :let={event} label="Latest 5 messages"><%= event %></:col>
+  </.table>
 </div>
 
 <.back :if={!@is_admin} navigate={~p"/sources"}>Back to sources</.back>
