@@ -111,3 +111,6 @@ import_config "#{config_env()}.exs"
 
 # IP x-fwd-for rewriting config
 config :remote_ip, debug: false
+
+# TimeZone data
+config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase

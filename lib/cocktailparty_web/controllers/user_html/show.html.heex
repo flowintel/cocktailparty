@@ -11,6 +11,7 @@
   <:item title="Id"><%= @user.id %></:item>
   <:item title="Email"><%= @user.email %></:item>
   <:item title="Role"><%= @user.role.name %></:item>
+  <:item title="Confirmed_at"><%= utc_datetime = DateTime.from_naive!(@user.confirmed_at, "Etc/UTC"); datetime_in_timezone = DateTime.shift_zone!(utc_datetime, "Europe/Paris"); DateTime.to_string(datetime_in_timezone) %></:item>
 
   <:item title="Admin">
     <.icon :if={@user.is_admin} name="hero-check" />
