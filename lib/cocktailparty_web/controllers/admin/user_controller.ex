@@ -53,8 +53,21 @@ defmodule CocktailpartyWeb.Admin.UserController do
 
     connected_users_sinks = Tracker.get_all_connected_users_sinks()
 
+    confirmation =
+      case user.confirmed_at do
+        nil ->
+          "User email not confirmed."
+
+        _ ->
+          DateTime.from_naive!(user.confirmed_at, "Etc/UTC")
+          |> DateTime.shift_zone!("Europe/Paris")
+          |> DateTime.to_string()
+      end
+
     user =
-      Map.put(user, :is_present_sink, Enum.member?(connected_users_sinks, String.to_integer(id)))
+      user
+      |> Map.put(:is_present_sink, Enum.member?(connected_users_sinks, String.to_integer(id)))
+      |> Map.put(:confirmation, confirmation)
 
     render(conn, :show, user: user)
   end
