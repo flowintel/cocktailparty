@@ -59,13 +59,19 @@ defmodule CocktailpartyWeb.Router do
     resources "/redisinstances", RedisInstanceController
     resources "/roles", RoleController
     live_dashboard "/dashboard", metrics: CocktailpartyWeb.Telemetry
-    # forward "/mailbox", Plug.Swoosh.MailboxPreview
   end
 
   scope path: "/feature-flags" do
     pipe_through [:mounted_apps, :auth, :require_admin]
     forward "/", FunWithFlags.UI.Router, namespace: "feature-flags"
   end
+
+  if Application.compile_env(:cocktailparty, :dev_routes)  do
+   scope"/dev" do
+    pipe_through [:browser]
+    forward "/mailbox", Plug.Swoosh.MailboxPreview
+  end
+end
 
   # Other scopes may use custom stacks.
   # scope "/api", CocktailpartyWeb do
