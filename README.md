@@ -70,9 +70,9 @@ flowchart LR
     A[Apache]
     C{Round Robin}
     A --> C
-    R1[Redis]
-    R2[Redis]
-    R3[Redis]
+    R[Redis]
+    S[Redis]
+    T[Redis]
     
     U(Users)
     U--https-->A
@@ -83,9 +83,9 @@ flowchart LR
         B[Broker]
     end
     
-    B --subscribes to-->R1
-    B --subscribes to-->R2
-    B --pushes into-->R2
+    B --subscribes to-->R
+    B --subscribes to-->S
+    B --pushes into-->T
     
     C --http--> E
     C --http--> F
