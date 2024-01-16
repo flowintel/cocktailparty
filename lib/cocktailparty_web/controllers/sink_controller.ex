@@ -18,9 +18,9 @@ defmodule CocktailpartyWeb.SinkController do
     changeset = SinkCatalog.change_sink(%Sink{})
     # get a receiving redis instance
     instance = Input.get_one_sink_redisinstance()
+
     case instance do
       nil ->
-
         conn
         |> put_flash(:error, "A receiving redis instance is required to create a sink.")
         |> redirect(to: ~p"/")

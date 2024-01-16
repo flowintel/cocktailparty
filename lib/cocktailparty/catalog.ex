@@ -562,16 +562,6 @@ defmodule Cocktailparty.Catalog do
     Repo.one(query)
   end
 
-  # Check whether a used is authorized to :show a source
-  def authorized_show?(source_id, user_id) do
-    Logger.info("Checking authorization for UserID: #{user_id} @ FeedId: #{source_id}.")
-
-    (UserManagement.is_confirmed?(user_id) && is_subscribed?(source_id, user_id)) ||
-      (UserManagement.is_confirmed?(user_id) && UserManagement.can?(user_id, :access_all_sources) &&
-         UserManagement.can?(user_id, :list_all_sources)) ||
-      (UserManagement.is_confirmed?(user_id) && is_public?(source_id))
-  end
-
   defp notify_broker(%Source{} = source, msg) do
     GenServer.cast(get_broker(source), msg)
   end

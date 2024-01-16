@@ -5,6 +5,20 @@
     <.link :if={@is_admin} href={~p"/admin/sources/#{@source}/edit"}>
       <.button>Edit source</.button>
     </.link>
+    <.link
+      :if={!@is_admin && !@source.subscribed}
+      href={~p"/sources/subscribe/#{@source}"}
+      method="post"
+    >
+      <.button>Subscribe</.button>
+    </.link>
+    <.link
+      :if={!@is_admin && @source.subscribed}
+      href={~p"/sources/unsubscribe/#{@source}"}
+      method="delete"
+    >
+      <.button>Unsubscribe</.button>
+    </.link>
   </:actions>
 </.header>
 
