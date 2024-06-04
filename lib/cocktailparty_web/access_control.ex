@@ -29,7 +29,9 @@ defmodule CocktailpartyWeb.AccessControl do
     source_id = conn.params["id"]
 
     (UserManagement.is_confirmed?(user_id) && Catalog.is_subscribed?(source_id, user_id)) ||
-      (UserManagement.is_confirmed?(user_id) && (UserManagement.can?(user_id, :access_all_sources) || UserManagement.can?(user_id, :list_all_sources))) ||
+      (UserManagement.is_confirmed?(user_id) &&
+         (UserManagement.can?(user_id, :access_all_sources) ||
+            UserManagement.can?(user_id, :list_all_sources))) ||
       (UserManagement.is_confirmed?(user_id) && Catalog.is_public?(source_id))
   end
 

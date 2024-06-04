@@ -4,22 +4,22 @@ defmodule Cocktailparty.Input do
   """
 
   import Ecto.Query, warn: false
-  import Ecto.Changeset
+  # import Ecto.Changeset
   alias Cocktailparty.Repo
 
-  alias Cocktailparty.Input.RedisInstance
+  alias Cocktailparty.Input.Connection
 
   @doc """
-  Returns the list of redisinstances.
+  Returns the list of connections.
 
   ## Examples
 
-      iex> list_redisinstances()
-      [%RedisInstance{}, ...]
+      iex> list_connections()
+      [%Connection{}, ...]
 
   """
-  def list_redisinstances do
-    Repo.all(RedisInstance)
+  def list_connections do
+    Repo.all(Connection)
     |> Enum.map(fn instance ->
       instance
       |> Map.put(:connected, connected?(instance))
@@ -31,12 +31,12 @@ defmodule Cocktailparty.Input do
 
   ## Examples
 
-      iex> list_redisinstances()
-      [%RedisInstance{}, ...]
+      iex> list_connections()
+      [%Connection{}, ...]
 
   """
-  def list_sink_redisinstances do
-    Repo.all(from r in RedisInstance, where: r.sink == true)
+  def list_sink_connections do
+    Repo.all(from r in Connection, where: r.sink == true)
   end
 
   @doc """
@@ -44,142 +44,146 @@ defmodule Cocktailparty.Input do
 
   ## Examples
 
-      iex> list_redisinstances()
-      [%RedisInstance{}, ...]
+      iex> list_connections()
+      [%Connection{}, ...]
 
   """
-  def get_one_sink_redisinstance do
-    Repo.one(from r in RedisInstance, where: r.sink == true)
+  def get_one_sink_connection do
+    Repo.one(from r in Connection, where: r.sink == true)
   end
 
   @doc """
-  Returns the list of redisinstances for feeding a select component
+  Returns the list of connections for feeding a select component
 
   ## Examples
 
-      iex> list_redisinstances()
+      iex> list_connections()
       [{"name", 1}]
 
   """
-  def list_redisinstances_for_select do
-    Repo.all(from r in "redis_instances", select: {r.name, r.id})
+  def list_connections_for_select do
+    Repo.all(from r in "connections", select: {r.name, r.id})
   end
 
   @doc """
-  Gets a single redis_instance.
+  Gets a single connection.
 
-  Raises `Ecto.NoResultsError` if the Redis instance does not exist.
+  Raises `Ecto.NoResultsError` if the connection does not exist.
 
   ## Examples
 
-      iex> get_redis_instance!(123)
-      %RedisInstance{}
+      iex> get_connection!(123)
+      %Connection{}
 
-      iex> get_redis_instance!(456)
+      iex> get_connection!(456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_redis_instance!(id) do
-    instance = Repo.get!(RedisInstance, id)
+  def get_connection!(id) do
+    instance = Repo.get!(Connection, id)
     Map.put(instance, :connected, connected?(instance))
   end
 
   @doc """
-  Creates a redis_instance.
+  Creates a connection.
 
   ## Examples
 
-      iex> create_redis_instance(%{field: value})
-      {:ok, %RedisInstance{}}
+      iex> create_connection(%{field: value})
+      {:ok, %Connection{}}
 
-      iex> create_redis_instance(%{field: bad_value})
+      iex> create_connection(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_redis_instance(attrs \\ %{}) do
-    %RedisInstance{}
-    |> RedisInstance.changeset(attrs)
+  def create_connection(attrs \\ %{}) do
+    %Connection{}
+    |> Connection.changeset(attrs)
     |> Repo.insert()
   end
 
   @doc """
-  Updates a redis_instance.
+  Updates a connection.
 
   ## Examples
 
-      iex> update_redis_instance(redis_instance, %{field: new_value})
-      {:ok, %RedisInstance{}}
+      iex> update_connection(connection, %{field: new_value})
+      {:ok, %Connection{}}
 
-      iex> update_redis_instance(redis_instance, %{field: bad_value})
+      iex> update_connection(connection, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_redis_instance(%RedisInstance{} = redis_instance, attrs) do
-    changeset = change_redis_instance(redis_instance, attrs)
+  def update_connection(%Connection{} = connection, attrs) do
+    changeset = change_connection(connection, attrs)
 
     # We restart related processes if needed
     # TODO: check enabled
-    if changed?(changeset, :hostname) or changed?(changeset, :port) do
-      RedisInstance.terminate(redis_instance)
-      {:ok, redis_instance} = Repo.update(changeset)
-      RedisInstance.start(redis_instance)
-      {:ok, redis_instance}
-    else
-      Repo.update(changeset)
-    end
+    # TODO check within the map
+    # if changed?(changeset, :hostname) or changed?(changeset, :port) do
+    #   Connection.terminate(connection)
+    #   {:ok, connection} = Repo.update(changeset)
+    #   Connection.start(connection)
+    #   {:ok, connection}
+    # else
+    Repo.update(changeset)
+    # end
   end
 
   @doc """
-  Deletes a redis_instance.
+  Deletes a connection.
 
   ## Examples
 
-      iex> delete_redis_instance(redis_instance)
-      {:ok, %RedisInstance{}}
+      iex> delete_connection(connection)
+      {:ok, %Connection{}}
 
-      iex> delete_redis_instance(redis_instance)
+      iex> delete_connection(connection)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_redis_instance(%RedisInstance{} = redis_instance) do
-    Repo.delete(redis_instance)
+  def delete_connection(%Connection{} = connection) do
+    Repo.delete(connection)
   end
 
   @doc """
-  Returns an `%Ecto.Changeset{}` for tracking redis_instance changes.
+  Returns an `%Ecto.Changeset{}` for tracking connection changes.
 
   ## Examples
 
-      iex> change_redis_instance(redis_instance)
-      %Ecto.Changeset{data: %RedisInstance{}}
+      iex> change_connection(connection)
+      %Ecto.Changeset{data: %Connection{}}
 
   """
-  def change_redis_instance(%RedisInstance{} = redis_instance, attrs \\ %{}) do
-    RedisInstance.changeset(redis_instance, attrs)
+  def change_connection(%Connection{} = connection, attrs \\ %{}) do
+    Connection.changeset(connection, attrs)
   end
 
   @doc """
   Get the status of a redis connection
 
   """
-  def connected?(%RedisInstance{} = redis_instance) do
-    case GenServer.whereis({:global, "redix_" <> Integer.to_string(redis_instance.id)}) do
-      nil ->
-        false
+  # def connected?(%Connection{} = connection) do
+  def connected?(%Connection{} = _) do
+    # TODO refacto for connections
+    #   case GenServer.whereis({:global, "redix_" <> Integer.to_string(connection.id)}) do
+    #     nil ->
+    #       false
 
-      # name, node
-      {_, _} ->
-        true
+    #     # name, node
+    #     {_, _} ->
+    #       true
 
-      # pid
-      pid ->
-        case :sys.get_state(pid) do
-          {:connected, _} ->
-            true
+    #     # pid
+    #     pid ->
+    #       case :sys.get_state(pid) do
+    #         {:connected, _} ->
+    #           true
 
-          _ ->
-            false
-        end
-    end
+    #         _ ->
+    #           false
+    #       end
+    #   end
+    false
   end
 end

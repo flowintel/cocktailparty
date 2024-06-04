@@ -8,7 +8,7 @@ defmodule Cocktailparty.Broker do
 
   defstruct [
     :pubsub,
-    :redis_instance,
+    :connection,
     subscribed: [],
     subscribing: []
   ]
@@ -18,20 +18,20 @@ defmodule Cocktailparty.Broker do
   end
 
   def init(opts) do
-    redis_instance = opts[:redis_instance]
+    connection = opts[:connection]
 
     {:ok, pubsub} =
       PubSub.start_link(
-        host: redis_instance.hostname,
-        port: redis_instance.port,
-        name: {:global, "pubsub_" <> Integer.to_string(redis_instance.id)}
+        host: connection.hostname,
+        port: connection.port,
+        name: {:global, "pubsub_" <> Integer.to_string(connection.id)}
       )
 
-    # Logger.info("Starting pubsub for #{redis_instance.name}")
-    Logger.info("Starting pubsub for #{redis_instance.id}")
+    # Logger.info("Starting pubsub for #{connection.name}")
+    Logger.info("Starting pubsub for #{connection.id}")
 
     # Get sources from the catalog
-    sources = Catalog.list_redis_instance_sources(redis_instance.id)
+    sources = Catalog.list_connection_sources(connection.id)
 
     subscribing =
       Enum.reduce(sources, [], fn source, subscribing ->
@@ -41,8 +41,7 @@ defmodule Cocktailparty.Broker do
         [source | subscribing]
       end)
 
-    {:ok,
-     %{subscribing: subscribing, pubsub: pubsub, subscribed: [], redis_instance: redis_instance}}
+    {:ok, %{subscribing: subscribing, pubsub: pubsub, subscribed: [], connection: connection}}
   end
 
   # Receiving a connection notification from Redix about source we are subscribing to.
@@ -63,7 +62,7 @@ defmodule Cocktailparty.Broker do
       subscribing: subscribing,
       subscribed: subscribed,
       pubsub: state.pubsub,
-      redis_instance: state.redis_instance
+      connection: state.connection
     }
 
     # Log the subscription
@@ -89,7 +88,7 @@ defmodule Cocktailparty.Broker do
       subscribing: subscribing,
       subscribed: subscribed,
       pubsub: state.pubsub,
-      redis_instance: state.redis_instance
+      connection: state.connection
     }
 
     Logger.info("Disconnected from #{inspect(current_sub.name)}")
@@ -156,7 +155,7 @@ defmodule Cocktailparty.Broker do
        subscribing: subscribing,
        pubsub: state.pubsub,
        subscribed: subscribed,
-       redis_instance: state.redis_instance
+       connection: state.connection
      }}
   end
 
@@ -171,7 +170,7 @@ defmodule Cocktailparty.Broker do
        subscribing: subscribing,
        pubsub: state.pubsub,
        subscribed: state.subscribed,
-       redis_instance: state.redis_instance
+       connection: state.connection
      }}
   end
 
@@ -205,7 +204,7 @@ defmodule Cocktailparty.Broker do
        subscribing: state.subscribing,
        pubsub: state.pubsub,
        subscribed: state.subscribed,
-       redis_instance: state.redis_instance
+       connection: state.connection
      }}
   end
 end

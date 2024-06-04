@@ -3,18 +3,18 @@ defmodule Cocktailparty.Catalog.Source do
   import Ecto.Changeset
 
   schema "sources" do
-    field :channel, :string
-    field :description, :string
     field :name, :string
     field :type, :string
+    field :config, :map
     field :public, :boolean
+    field :description, :string
 
     many_to_many :users, Cocktailparty.Accounts.User,
       join_through: "sources_subscriptions",
       on_replace: :delete,
       on_delete: :delete_all
 
-    belongs_to :redis_instance, Cocktailparty.Input.RedisInstance
+    belongs_to :connection, Cocktailparty.Input.Connection
 
     timestamps()
   end
@@ -22,8 +22,8 @@ defmodule Cocktailparty.Catalog.Source do
   @doc false
   def changeset(source, attrs) do
     source
-    |> cast(attrs, [:name, :description, :type, :channel, :redis_instance_id, :public])
-    |> validate_required([:name, :description, :type, :channel])
+    |> cast(attrs, [:name, :type, :description, :config, :connection_id, :public])
+    |> validate_required([:name, :type, :config])
     |> unique_constraint(:name)
   end
 end

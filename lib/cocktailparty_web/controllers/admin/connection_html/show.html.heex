@@ -1,0 +1,33 @@
+<.header>
+  Redis instance <%= @connection.id %>
+  <:subtitle>This is a connection record from your database.</:subtitle>
+  <:actions>
+    <.link href={~p"/admin/connections/#{@connection}/edit"}>
+      <.button>Edit connection</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @connection.name %></:item>
+  <%!-- <:item title="Hostname"><%= @connection.config.hostname %></:item> --%>
+  <%!-- <:item title="Port"><%= @connection.config.port %></:item> --%>
+  <:item title="Enabled">
+    <.icon :if={@connection.enabled} name="hero-check" />
+    <.icon :if={!@connection.enabled} name="hero-x-mark" />
+  </:item>
+  <:item title="Sink">
+    <.icon :if={@connection.sink} name="hero-check" />
+    <.icon :if={!@connection.sink} name="hero-x-mark" />
+  </:item>
+  <:item title="Status">
+    <div :if={@connection.connected} class="badge badge-success">
+      online
+    </div>
+    <div :if={!@connection.connected} class="badge badge-warning">
+      offline
+    </div>
+  </:item>
+</.list>
+
+<.back navigate={~p"/admin/connections"}>Back to connections</.back>

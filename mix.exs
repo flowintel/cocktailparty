@@ -74,7 +74,9 @@ defmodule Cocktailparty.MixProject do
       {:fun_with_flags_ui, "~> 0.8.1", runtime: false},
       # Libcluster
       {:libcluster, "~> 3.3"},
-      {:tzdata, "~> 1.1.1"}
+      {:tzdata, "~> 1.1.1"},
+      # STOMP support
+      {:barytherium, "~> 0.7.0"}
     ]
   end
 

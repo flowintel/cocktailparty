@@ -5,7 +5,7 @@ defmodule Cocktailparty.Catalog do
   require Logger
 
   import Ecto.Query, warn: false
-  alias Cocktailparty.Input.RedisInstance
+  alias Cocktailparty.Input.Connection
   alias Cocktailparty.Repo
   alias Cocktailparty.Catalog.Source
   alias Cocktailparty.Accounts.User
@@ -25,7 +25,7 @@ defmodule Cocktailparty.Catalog do
   def list_sources do
     Repo.all(Source)
     |> Repo.preload(:users)
-    |> Repo.preload(:redis_instance)
+    |> Repo.preload(:connection)
   end
 
   @doc """
@@ -87,7 +87,7 @@ defmodule Cocktailparty.Catalog do
 
     Repo.all(query)
     |> Repo.preload(:users)
-    |> Repo.preload(:redis_instance)
+    |> Repo.preload(:connection)
   end
 
   @doc """
@@ -95,16 +95,16 @@ defmodule Cocktailparty.Catalog do
 
   ## Examples
 
-      iex> list_redis_instance_sources(redis_instance_id)
+      iex> list_connection_sources(connection_id)
       [%Source{}, ...]
 
   """
-  def list_redis_instance_sources(redis_instance_id) do
+  def list_connection_sources(connection_id) do
     Repo.all(
       from s in Source,
-        join: r in RedisInstance,
-        on: s.redis_instance_id == r.id,
-        where: r.id == ^redis_instance_id
+        join: r in Connection,
+        on: s.connection_id == r.id,
+        where: r.id == ^connection_id
     )
   end
 
@@ -125,7 +125,7 @@ defmodule Cocktailparty.Catalog do
   def get_source!(id) do
     Repo.get!(Source, id)
     |> Repo.preload(:users)
-    |> Repo.preload(:redis_instance)
+    |> Repo.preload(:connection)
   end
 
   @doc """
@@ -141,7 +141,7 @@ defmodule Cocktailparty.Catalog do
 
   """
   def create_source(attrs \\ %{}) do
-    Cocktailparty.Input.get_redis_instance!(attrs["redis_instance_id"])
+    Cocktailparty.Input.get_connection!(attrs["connection_id"])
     |> Ecto.build_assoc(:sources)
     |> change_source(attrs)
     |> Repo.insert()
@@ -528,7 +528,7 @@ defmodule Cocktailparty.Catalog do
 
   def get_broker(%Source{} = source) do
     # locate the reponsible broker process
-    case GenServer.whereis({:global, "broker_" <> Integer.to_string(source.redis_instance_id)}) do
+    case GenServer.whereis({:global, "broker_" <> Integer.to_string(source.connection_id)}) do
       {name, node} ->
         # TODO
         Logger.error("TODO: contacting remote broker in  the cluster: #{node}/#{name}")
@@ -538,7 +538,7 @@ defmodule Cocktailparty.Catalog do
         # TODO
         Logger.error(
           "looks like broker_" <>
-            Integer.to_string(source.redis_instance_id) <> " is dead - should not happen"
+            Integer.to_string(source.connection_id) <> " is dead - should not happen"
         )
 
         nil

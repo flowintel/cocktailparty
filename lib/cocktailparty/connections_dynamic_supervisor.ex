@@ -1,4 +1,4 @@
-defmodule Cocktailparty.RedisInstancesDynamicSupervisor do
+defmodule Cocktailparty.ConnectionsDynamicSupervisor do
   use DynamicSupervisor
 
   require Logger

@@ -3,11 +3,11 @@
     Oops, something went wrong! Please check the errors below.
   </.error>
   <.input field={f[:name]} type="text" label="Name" />
-  <.input field={f[:hostname]} type="text" label="hostname" />
   <.input field={f[:port]} type="text" label="port" />
   <.input field={f[:enabled]} type="checkbox" label="Enabled" />
   <.input field={f[:sink]} type="checkbox" label="Sink" />
+  <.input field={f[:config]} type="text" label="config" />
   <:actions>
-    <.button>Save Redis instance</.button>
+    <.button>Save connection</.button>
   </:actions>
 </.simple_form>
