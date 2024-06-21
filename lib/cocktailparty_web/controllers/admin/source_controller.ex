@@ -21,25 +21,31 @@ defmodule CocktailpartyWeb.Admin.SourceController do
     case instances do
       [] ->
         conn
-        |> put_flash(:error, "A redis instance is required to create a source.")
+        |> put_flash(:error, "A connection is required to create a source.")
         |> redirect(to: ~p"/admin/connections")
 
       _ ->
-        render(conn, :new, changeset: changeset, redis_instances: instances)
+        render(conn, :new, changeset: changeset, connections: instances)
     end
   end
 
   def create(conn, %{"source" => source_params}) do
-    case Catalog.create_source(source_params) do
+    {:ok, config_str} = Map.fetch(source_params, "config")
+    config = YamlElixir.read_from_string!(config_str)
+    case Catalog.create_source(Map.put(source_params, "config", config)) do
       {:ok, source} ->
         conn
         |> put_flash(:info, "Source created successfully.")
         |> redirect(to: ~p"/admin/sources/#{source}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
+        txt_config = Ymlr.document!(changeset.changes.config)
+        new_changes = Map.put(changeset.changes, :config, txt_config)
+        new_changeset = Map.put(changeset, :changes, new_changes)
+
         # get list of redis instances
         instances = Input.list_connections()
-        render(conn, :new, changeset: changeset, redis_instances: instances)
+        render(conn, :new, changeset: new_changeset, connections: instances)
     end
   end
 
@@ -97,7 +103,7 @@ defmodule CocktailpartyWeb.Admin.SourceController do
         |> redirect(to: ~p"/admin/connections")
 
       _ ->
-        render(conn, :edit, source: source, changeset: changeset, redis_instances: instances)
+        render(conn, :edit, source: source, changeset: changeset, connections: instances)
     end
   end
 
@@ -113,7 +119,7 @@ defmodule CocktailpartyWeb.Admin.SourceController do
         |> redirect(to: ~p"/admin/sources/#{source}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :edit, source: source, changeset: changeset, redis_instances: instances)
+        render(conn, :edit, source: source, changeset: changeset, connections: instances)
     end
   end
 

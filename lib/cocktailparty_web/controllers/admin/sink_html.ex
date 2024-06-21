@@ -8,7 +8,7 @@ defmodule CocktailpartyWeb.Admin.SinkHTML do
   """
   attr :changeset, Ecto.Changeset, required: true
   attr :action, :string, required: true
-  attr :redis_instances, :list, required: true
+  attr :connections, :list, required: true
   attr :users, :list, required: true
 
   def sink_form(assigns)

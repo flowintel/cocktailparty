@@ -9,12 +9,10 @@
 
 <.table id="sinks" rows={@sinks} row_click={&JS.navigate(~p"/admin/sinks/#{&1}")}>
   <:col :let={sink} label="Name"><%= sink.name %></:col>
-  <:col :let={sink} label="Description"><%= sink.description %></:col>
   <:col :let={sink} label="Type"><%= sink.type %></:col>
-  <:col :let={sink} label="Channel"><%= sink.channel %></:col>
   <:col :let={sink} label="User"><%= sink.user.email %></:col>
-  <:col :let={sink} label="Redis instance">
-    <%= sink.redis_instance.name %>
+  <:col :let={sink} label="Connection">
+    <%= sink.connection.name %>
   </:col>
   <:action :let={sink}>
     <div class="sr-only">

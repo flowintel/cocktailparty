@@ -39,8 +39,8 @@ defmodule Cocktailparty.Input.Connection do
 
         spec_redix =
           {Redix,
-           host: rc.config.hostname,
-           port: rc.config.port,
+           host: Map.get(rc.config, "hostname"),
+           port: Map.get(rc.config, "port"),
            name: {:global, "redix_" <> Integer.to_string(rc.id)}}
 
         # TODO remove the nested name (impacts catalog.ex)

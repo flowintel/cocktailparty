@@ -24,7 +24,7 @@ defmodule CocktailpartyWeb.Admin.SinkController do
         |> redirect(to: ~p"/admin/connections")
 
       _ ->
-        render(conn, :new, changeset: changeset, redis_instances: instances, users: users)
+        render(conn, :new, changeset: changeset, connections: instances, users: users)
     end
   end
 
@@ -41,7 +41,7 @@ defmodule CocktailpartyWeb.Admin.SinkController do
         # get list of users
         users = SinkCatalog.list_authorized_users()
 
-        render(conn, :new, changeset: changeset, redis_instances: instances, users: users)
+        render(conn, :new, changeset: changeset, connections: instances, users: users)
     end
   end
 
@@ -70,7 +70,7 @@ defmodule CocktailpartyWeb.Admin.SinkController do
         render(conn, :edit,
           sink: sink,
           changeset: changeset,
-          redis_instances: instances,
+          connections: instances,
           users: users
         )
     end
@@ -94,7 +94,7 @@ defmodule CocktailpartyWeb.Admin.SinkController do
         render(conn, :edit,
           sink: sink,
           changeset: changeset,
-          redis_instances: instances,
+          connections: instances,
           users: users
         )
     end

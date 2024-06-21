@@ -2,8 +2,6 @@ defmodule CocktailpartyWeb.ConnectionControllerTest do
   use CocktailpartyWeb.ConnCase
 
   import Cocktailparty.InputFixtures
-  import Cocktailparty.UserManagementFixtures
-  alias CocktailpartyWeb.UserAuth
 
   @create_attrs %{enabled: true, name: "some name", uri: "some uri"}
   @update_attrs %{enabled: false, name: "some updated name", uri: "some updated uri"}

@@ -56,10 +56,8 @@
 <.list>
   <:item title="Name"><%= @source.name %></:item>
   <:item title="Id"><%= @source.id %></:item>
-  <:item title="Description"><%= @source.description %></:item>
   <:item title="Type"><%= @source.type %></:item>
-  <:item title="Channel"><%= @source.channel %></:item>
-  <:item :if={@is_admin} title="Redis instance"><%= @source.redis_instance.name %></:item>
+  <:item :if={@is_admin} title="Connection"><%= @source.connection.name %></:item>
 
   <:item title="Public">
     <.icon :if={@source.public} name="hero-check" />

@@ -66,7 +66,7 @@ defmodule Cocktailparty.Input do
   end
 
   @doc """
-  Gets a single connection.
+  Gets a single connection -- with config as a text field
 
   Raises `Ecto.NoResultsError` if the connection does not exist.
 
@@ -79,9 +79,37 @@ defmodule Cocktailparty.Input do
       ** (Ecto.NoResultsError)
 
   """
-  def get_connection!(id) do
+  def get_connection_text!(id) do
     instance = Repo.get!(Connection, id)
-    Map.put(instance, :connected, connected?(instance))
+
+    instance
+    |> Map.put(:connected, connected?(instance))
+    |> Map.put(:config, config_to_yaml(instance.config))
+  end
+
+  @doc """
+  Gets a single connection -- with config as a map
+
+  Raises `Ecto.NoResultsError` if the connection does not exist.
+
+  ## Examples
+
+      iex> get_connection!(123)
+      %Connection{}
+
+      iex> get_connection!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_connection_map!(id) do
+    instance = Repo.get!(Connection, id)
+
+    instance
+    |> Map.put(:connected, connected?(instance))
+  end
+
+  def config_to_yaml(config) do
+    Ymlr.document!(config)
   end
 
   @doc """

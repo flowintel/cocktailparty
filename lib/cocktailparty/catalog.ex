@@ -141,7 +141,7 @@ defmodule Cocktailparty.Catalog do
 
   """
   def create_source(attrs \\ %{}) do
-    Cocktailparty.Input.get_connection!(attrs["connection_id"])
+    Cocktailparty.Input.get_connection_map!(attrs["connection_id"])
     |> Ecto.build_assoc(:sources)
     |> change_source(attrs)
     |> Repo.insert()

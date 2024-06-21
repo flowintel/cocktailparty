@@ -154,7 +154,7 @@ defmodule Cocktailparty.SinkCatalog do
 
   """
   def create_sink(attrs \\ %{}) do
-    Cocktailparty.Input.get_connection!(attrs["connection_id"])
+    Cocktailparty.Input.get_connection_map!(attrs["connection_id"])
     |> Ecto.build_assoc(:sinks)
     |> change_sink(attrs)
     |> Repo.insert()

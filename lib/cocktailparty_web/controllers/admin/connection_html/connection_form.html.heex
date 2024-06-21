@@ -3,10 +3,15 @@
     Oops, something went wrong! Please check the errors below.
   </.error>
   <.input field={f[:name]} type="text" label="Name" />
-  <.input field={f[:port]} type="text" label="port" />
+  <.input
+    field={f[:type]}
+    type="select"
+    label="Type"
+    options={Enum.map(@connection_types, fn {label, string} -> {label, string} end)}
+  />
   <.input field={f[:enabled]} type="checkbox" label="Enabled" />
   <.input field={f[:sink]} type="checkbox" label="Sink" />
-  <.input field={f[:config]} type="text" label="config" />
+  <.input field={f[:config]} type="textarea" label="Config" />
   <:actions>
     <.button>Save connection</.button>
   </:actions>

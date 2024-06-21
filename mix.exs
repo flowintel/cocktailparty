@@ -76,7 +76,11 @@ defmodule Cocktailparty.MixProject do
       {:libcluster, "~> 3.3"},
       {:tzdata, "~> 1.1.1"},
       # STOMP support
-      {:barytherium, "~> 0.7.0"}
+      {:barytherium, "~> 0.7.0"},
+      # YAML parsing
+      {:yaml_elixir, "~> 2.9.0"},
+      # YAML encoding
+      {:ymlr, "~> 5.0"}
     ]
   end
 
