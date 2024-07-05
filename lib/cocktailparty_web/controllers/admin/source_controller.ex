@@ -32,6 +32,7 @@ defmodule CocktailpartyWeb.Admin.SourceController do
   def create(conn, %{"source" => source_params}) do
     {:ok, config_str} = Map.fetch(source_params, "config")
     config = YamlElixir.read_from_string!(config_str)
+
     case Catalog.create_source(Map.put(source_params, "config", config)) do
       {:ok, source} ->
         conn
@@ -50,7 +51,7 @@ defmodule CocktailpartyWeb.Admin.SourceController do
   end
 
   def show(conn, %{"id" => id}) do
-    source = Catalog.get_source!(id)
+    source = Catalog.get_source_map!(id)
 
     connected_users = Tracker.get_all_connected_users_feeds()
 
@@ -91,7 +92,7 @@ defmodule CocktailpartyWeb.Admin.SourceController do
   end
 
   def edit(conn, %{"id" => id}) do
-    source = Catalog.get_source!(id)
+    source = Catalog.get_source_text!(id)
     changeset = Catalog.change_source(source)
     # get list of redis instances
     instances = Input.list_connections()
@@ -108,23 +109,39 @@ defmodule CocktailpartyWeb.Admin.SourceController do
   end
 
   def update(conn, %{"id" => id, "source" => source_params}) do
-    source = Catalog.get_source!(id)
+    source = Catalog.get_source_text!(id)
     # get list of redis instances
     instances = Input.list_connections()
 
-    case Catalog.update_source(source, source_params) do
-      {:ok, source} ->
-        conn
-        |> put_flash(:info, "Source updated successfully.")
-        |> redirect(to: ~p"/admin/sources/#{source}")
+    yaml_config = source_params["config"]
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :edit, source: source, changeset: changeset, connections: instances)
+    case YamlElixir.read_from_string(yaml_config) do
+      {:ok, config_map} ->
+        source_params = Map.put(source_params, "config", config_map)
+
+        case Catalog.update_source(source, source_params) do
+          {:ok, source} ->
+            conn
+            |> put_flash(:info, "Source updated successfully.")
+            |> redirect(to: ~p"/admin/sources/#{source}")
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            render(conn, :edit, source: source, changeset: changeset, connections: instances)
+        end
+
+      {:error, reason = %YamlElixir.ParsingError{}} ->
+        conn
+        |> put_flash(:error, "Failed to parse YAML: #{reason.message}")
+        |> render("edit.html",
+          source: source,
+          changeset: Source.changeset(source, source_params),
+          connections: instances
+        )
     end
   end
 
   def delete(conn, %{"id" => id}) do
-    source = Catalog.get_source!(id)
+    source = Catalog.get_source_text!(id)
     {:ok, _source} = Catalog.delete_source(source)
 
     conn

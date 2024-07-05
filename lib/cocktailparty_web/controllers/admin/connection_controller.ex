@@ -4,6 +4,7 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
   alias Cocktailparty.Input
   alias Cocktailparty.Input.Connection
   alias Cocktailparty.Input.ConnectionTypes
+  import Cocktailparty.Util
 
   def index(conn, _params) do
     connections = Input.list_connections()
@@ -18,7 +19,8 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
 
   def create(conn, %{"connection" => connection_params}) do
     {:ok, config_str} = Map.fetch(connection_params, "config")
-    config = YamlElixir.read_from_string!(config_str)
+    # replace with function from Util
+    config = yaml_to_map!(config_str)
 
     case Input.create_connection(Map.put(connection_params, "config", config)) do
       {:ok, connection} ->
@@ -30,7 +32,7 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
         |> redirect(to: ~p"/admin/connections/#{connection}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        txt_config = Ymlr.document!(changeset.changes.config)
+        txt_config = map_to_yaml!(changeset.changes.config)
         new_changes = Map.put(changeset.changes, :config, txt_config)
         new_changeset = Map.put(changeset, :changes, new_changes)
 
@@ -46,12 +48,16 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
   end
 
   def edit(conn, %{"id" => id}) do
-    connection = Input.get_connection_text!(id)
-    changeset = Input.change_connection(connection)
+    connection_map = Input.get_connection_map!(id)
+
+    changeset =
+      Input.change_connection(connection_map)
+      |> Map.put(:data, Input.switch_config_repr!(connection_map))
+
     connection_types = ConnectionTypes.all()
 
     render(conn, :edit,
-      connection: connection,
+      connection: connection_map,
       changeset: changeset,
       connection_types: connection_types
     )
@@ -60,28 +66,11 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
   def update(conn, %{"id" => id, "connection" => connection_params}) do
     connection = Input.get_connection_text!(id)
 
-    # TODO wip
     yaml_config = connection_params["config"]
 
     case YamlElixir.read_from_string(yaml_config) do
       {:ok, config_map} ->
         connection_params = Map.put(connection_params, "config", config_map)
-        # dbg(config_map)
-        # dbg(connection_params)
-
-        #     case Catalog.update_connection(connection, connection_params) do
-        #       {:ok, _connection} ->
-        #         conn
-        #         |> put_flash(:info, "Connection updated successfully.")
-        #         |> redirect(to: Routes.connection_path(conn, :index))
-        #       {:error, changeset} ->
-        #         render(conn, "edit.html", connection: connection, changeset: changeset)
-        #     end
-
-        #   {:error, reason} ->
-        #     conn
-        #     |> put_flash(:error, "Failed to parse YAML: #{reason}")
-        #     |> render("edit.html", connection: connection, changeset: Connection.changeset(connection, connection_params))
 
         case Input.update_connection(connection, connection_params) do
           {:ok, connection} ->
@@ -92,12 +81,27 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
           {:error, %Ecto.Changeset{} = changeset} ->
             connection_types = ConnectionTypes.all()
 
+            txt_config = map_to_yaml!(changeset.changes.config)
+            new_changes = Map.put(changeset.changes, :config, txt_config)
+            new_changeset = Map.put(changeset, :changes, new_changes)
+
             render(conn, :edit,
               connection: connection,
-              changeset: changeset,
+              changeset: new_changeset,
               connection_types: connection_types
             )
         end
+
+      {:error, reason = %YamlElixir.ParsingError{}} ->
+        connection_types = ConnectionTypes.all()
+
+        conn
+        |> put_flash(:error, "Failed to parse YAML: #{reason.message}")
+        |> render("edit.html",
+          connection: connection,
+          changeset: Connection.changeset(connection, connection_params),
+          connection_types: connection_types
+        )
     end
   end
 

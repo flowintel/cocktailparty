@@ -2,6 +2,7 @@ defmodule Cocktailparty.Input.Connection do
   use Ecto.Schema
   import Ecto.Changeset
   alias Cocktailparty.Broker
+  alias Cocktailparty.Input.ConnectionManager
 
   require Logger
 
@@ -24,6 +25,20 @@ defmodule Cocktailparty.Input.Connection do
     |> cast(attrs, [:name, :type, :config, :enabled, :sink])
     |> validate_required([:name, :type, :config, :enabled, :sink])
     |> unique_constraint(:name)
+    |> validate_config()
+  end
+
+  defp validate_config(changeset) do
+    case get_field(changeset, :type) do
+      nil ->
+        changeset
+
+      type ->
+        case ConnectionManager.validate_config(type, get_field(changeset, :config)) do
+          :ok -> changeset
+          {:error, reason} -> add_error(changeset, :config, reason)
+        end
+    end
   end
 
   @doc """

@@ -38,12 +38,12 @@ defmodule Cocktailparty.Application do
         # This guy uses Tasks to init DynamicSupervisors
         Cocktailparty.DynamicSupervisorBoot
       )
-      # |> append_if_true(
-      #   Application.get_env(:cocktailparty, :standalone) ||
-      #     Application.get_env(:cocktailparty, :broker),
-      #   # Start the PubSub monitoring
-      #   {Cocktailparty.PubSubMonitor, name: {:global, Cocktailparty.PubSubMonitor}}
-      # )
+      |> append_if_true(
+        Application.get_env(:cocktailparty, :standalone) ||
+          Application.get_env(:cocktailparty, :broker),
+        # Start the PubSub monitoring
+        {Cocktailparty.PubSubMonitor, name: {:global, Cocktailparty.PubSubMonitor}}
+      )
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

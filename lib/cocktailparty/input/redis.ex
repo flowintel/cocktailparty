@@ -2,6 +2,7 @@ defmodule Cocktailparty.Input.Redis do
   @behaviour Cocktailparty.Input.ConnectionBehavior
 
   def start_link(_config) do
+    {:error, "Not started"}
     # Implement Redis connection logic
   end
 

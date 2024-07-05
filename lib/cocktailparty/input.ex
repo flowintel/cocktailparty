@@ -4,6 +4,7 @@ defmodule Cocktailparty.Input do
   """
 
   import Ecto.Query, warn: false
+  import Cocktailparty.Util
   # import Ecto.Changeset
   alias Cocktailparty.Repo
 
@@ -84,7 +85,7 @@ defmodule Cocktailparty.Input do
 
     instance
     |> Map.put(:connected, connected?(instance))
-    |> Map.put(:config, config_to_yaml(instance.config))
+    |> Map.put(:config, map_to_yaml!(instance.config))
   end
 
   @doc """
@@ -108,10 +109,23 @@ defmodule Cocktailparty.Input do
     |> Map.put(:connected, connected?(instance))
   end
 
-  def config_to_yaml(config) do
-    Ymlr.document!(config)
+  @doc """
+  Switch Connection's config representation between YAML string and map
+  """
+  @spec switch_config_repr!(map() | String.t()) :: map() | String.t()
+  def switch_config_repr!(connection) do
+    case connection.config do
+      %{} ->
+        connection
+        |> Map.put(:config, map_to_yaml!(connection.config))
+
+      _ ->
+        connection
+        |> Map.put(:config, yaml_to_map!(connection.config))
+    end
   end
 
+  @spec create_connection() :: any()
   @doc """
   Creates a connection.
 

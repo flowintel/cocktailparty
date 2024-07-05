@@ -2,6 +2,7 @@ defmodule Cocktailparty.Input.Stomp do
   @behaviour Cocktailparty.Input.ConnectionBehavior
 
   def start_link(_config) do
+    {:error, "Not started"}
     # Implement rabbitmq stomp connection logic
   end
 

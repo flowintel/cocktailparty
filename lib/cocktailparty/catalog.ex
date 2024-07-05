@@ -3,6 +3,7 @@ defmodule Cocktailparty.Catalog do
   The Catalog context.
   """
   require Logger
+  import Cocktailparty.Util
 
   import Ecto.Query, warn: false
   alias Cocktailparty.Input.Connection
@@ -109,7 +110,7 @@ defmodule Cocktailparty.Catalog do
   end
 
   @doc """
-  Gets a single source.
+  Gets a single source, with its config as a map
 
   Raises `Ecto.NoResultsError` if the Source does not exist.
 
@@ -122,11 +123,36 @@ defmodule Cocktailparty.Catalog do
       ** (Ecto.NoResultsError)
 
   """
-  def get_source!(id) do
+  def get_source_map!(id) do
     Repo.get!(Source, id)
     |> Repo.preload(:users)
     |> Repo.preload(:connection)
   end
+
+  @doc """
+  Gets a single source, with its config as a string
+
+  Raises `Ecto.NoResultsError` if the Source does not exist.
+
+  ## Examples
+
+      iex> get_source!(123)
+      %Source{}
+
+      iex> get_source!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_source_text!(id) do
+    source = Repo.get!(Source, id)
+
+    source
+      |> Repo.preload(:users)
+      |> Repo.preload(:connection)
+      |> Map.put(:config, map_to_yaml!(source.config))
+  end
+
+
 
   @doc """
   Creates a source.
@@ -256,7 +282,7 @@ defmodule Cocktailparty.Catalog do
   end
 
   def is_subscribed?(source_id, user_id) do
-    src = get_source!(source_id)
+    src = get_source_map!(source_id)
     user = Accounts.get_user!(user_id)
 
     if Enum.member?(src.users, user) do
@@ -279,7 +305,7 @@ defmodule Cocktailparty.Catalog do
 
   """
   def subscribe(source_id, user_id) do
-    src = get_source!(source_id)
+    src = get_source_map!(source_id)
     user = Accounts.get_user!(user_id)
     user_list = src.users |> Enum.concat([user])
 
@@ -301,7 +327,7 @@ defmodule Cocktailparty.Catalog do
 
   """
   def mass_subscribe(source_id) do
-    source = get_source!(source_id)
+    source = get_source_map!(source_id)
     all_users = UserManagement.list_users_short()
 
     get_src_users =

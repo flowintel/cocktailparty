@@ -22,7 +22,7 @@ defmodule CocktailpartyWeb.SourceController do
   end
 
   def show(conn, %{"id" => id}) do
-    source = Catalog.get_source!(id)
+    source = Catalog.get_source_text!(id)
     sample = Catalog.get_sample(id)
 
     source =
