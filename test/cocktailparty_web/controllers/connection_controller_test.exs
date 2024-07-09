@@ -3,9 +3,37 @@ defmodule CocktailpartyWeb.ConnectionControllerTest do
 
   import Cocktailparty.InputFixtures
 
-  @create_attrs %{enabled: true, name: "some name", uri: "some uri"}
-  @update_attrs %{enabled: false, name: "some updated name", uri: "some updated uri"}
-  @invalid_attrs %{enabled: nil, name: nil, uri: nil}
+  @create_attrs %{
+    enabled: true,
+    sink: false,
+    name: "some name",
+    type: "redis",
+    config: "---\nhostname: redis.example.com\nport: 6380\n"
+  }
+  @update_attrs %{
+    enabled: false,
+    name: "some updated name",
+    type: "redis",
+    config: "---\nhostname: redis.example.com\nport: 6379\n"
+  }
+  @invalid_attrs_missing %{
+    enabled: nil,
+    name: nil,
+    type: "redis",
+    config: "---\nhostname: redis.example.com\nport: 6379\n"
+  }
+  @invalid_attrs_broken_yaml %{
+    enabled: nil,
+    name: nil,
+    type: "redis",
+    config: "---\nhostname: redis.example.com\nport:|\n\n\r4242\n: 6379"
+  }
+  @invalid_attrs_missing_yaml %{
+    enabled: nil,
+    name: nil,
+    type: "redis",
+    config: "---\nhostname: redis.example.com\n"
+  }
 
   describe "index" do
     setup [:register_and_log_in_admin]
@@ -20,6 +48,7 @@ defmodule CocktailpartyWeb.ConnectionControllerTest do
 
   describe "new connection" do
     setup [:register_and_log_in_admin]
+
     test "renders form", %{conn: conn} do
       conn = get(conn, ~p"/admin/connections/new")
       assert html_response(conn, 200) =~ "New connection"
@@ -28,6 +57,7 @@ defmodule CocktailpartyWeb.ConnectionControllerTest do
 
   describe "create connection" do
     setup [:register_and_log_in_admin]
+
     test "redirects to show when data is valid", %{conn: conn} do
       conn = post(conn, ~p"/admin/connections", connection: @create_attrs)
 
@@ -35,12 +65,24 @@ defmodule CocktailpartyWeb.ConnectionControllerTest do
       assert redirected_to(conn) == ~p"/admin/connections/#{id}"
 
       conn = get(conn, ~p"/admin/connections/#{id}")
-      assert html_response(conn, 200) =~ "connection #{id}"
+      assert html_response(conn, 200) =~ "Connection #{id}"
     end
 
-    test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, ~p"/admin/connections", connection: @invalid_attrs)
-      assert html_response(conn, 200) =~ "New connection"
+    test "renders errors when data is missing", %{conn: conn} do
+      conn = post(conn, ~p"/admin/connections", connection: @invalid_attrs_missing)
+
+      assert html_response(conn, 200) =~ "be blank"
+    end
+
+    test "renders errors when YAML data is missing", %{conn: conn} do
+      conn = post(conn, ~p"/admin/connections", connection: @invalid_attrs_missing_yaml)
+      assert html_response(conn, 200) =~ "Missing required keys in config"
+    end
+
+    # TODO this should not raise anynore when fixed
+    test "renders errors when YAML data is broken", %{conn: conn} do
+      conn = post(conn, ~p"/admin/connections", connection: @invalid_attrs_broken_yaml)
+      assert html_response(conn, 200) =~ "Failed to parse"
     end
   end
 
@@ -52,27 +94,28 @@ defmodule CocktailpartyWeb.ConnectionControllerTest do
       conn: conn,
       connection: connection
     } do
-      conn = get(conn, ~p"/admin/connections/#{connection}/edit")
-      assert html_response(conn, 200) =~ "Edit connection"
+      conn = get(conn, ~p"/admin/connections/#{connection.id}/edit")
+      assert html_response(conn, 200) =~ "Edit Connection #{connection.id}"
     end
   end
 
-  @tag run: true
   describe "update connection" do
     setup [:register_and_log_in_admin]
     setup [:create_connection]
 
     test "redirects when data is valid", %{conn: conn, connection: connection} do
-      conn = put(conn, ~p"/admin/connections/#{connection}", connection: @update_attrs)
-      assert redirected_to(conn) == ~p"/admin/connections/#{connection}"
+      conn = put(conn, ~p"/admin/connections/#{connection.id}", connection: @update_attrs)
+      assert redirected_to(conn) == ~p"/admin/connections/#{connection.id}"
 
-      conn = get(conn, ~p"/admin/connections/#{connection}")
+      conn = get(conn, ~p"/admin/connections/#{connection.id}")
       assert html_response(conn, 200) =~ "some updated name"
     end
 
     test "renders errors when data is invalid", %{conn: conn, connection: connection} do
-      conn = put(conn, ~p"/admin/connections/#{connection}", connection: @invalid_attrs)
-      assert html_response(conn, 200) =~ "Edit connection"
+      conn =
+        put(conn, ~p"/admin/connections/#{connection.id}", connection: @invalid_attrs_missing_yaml)
+
+      assert html_response(conn, 200) =~ "Missing required keys in config"
     end
   end
 

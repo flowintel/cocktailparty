@@ -22,9 +22,10 @@ defmodule Cocktailparty.InputFixtures do
       attrs
       |> Enum.into(%{
         enabled: true,
+        sink: false,
         name: unique_connection_name(),
         type: "redis",
-        config: %{hostname: "localhost", port: 6379}
+        config: %{"hostname" => "localhost", "port" => "6379"}
       })
       |> Cocktailparty.Input.create_connection()
 
