@@ -1,5 +1,6 @@
 defmodule CocktailpartyWeb.ConnectionControllerTest do
   use CocktailpartyWeb.ConnCase
+  # use CocktailpartyWeb.DataCase
 
   import Cocktailparty.InputFixtures
 

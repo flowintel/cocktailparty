@@ -68,14 +68,14 @@ defmodule Cocktailparty.Input.Connection do
         supervisor_node = node(sup)
 
         case :rpc.call(supervisor_node, DynamicSupervisor, :start_child, [
-               {:global, Cocktailparty.RedisInstancesDynamicSupervisor},
+               {:global, Cocktailparty.ConnectionsDynamicSupervisor},
                spec_redix
              ]) do
           {:ok, pid} ->
             Logger.info("Redix driver alive for #{rc.name} with pid #{pid_to_string(pid)}")
 
             case :rpc.call(supervisor_node, DynamicSupervisor, :start_child, [
-                   {:global, Cocktailparty.RedisInstancesDynamicSupervisor},
+                   {:global, Cocktailparty.ConnectionsDynamicSupervisor},
                    spec_broker
                  ]) do
               {:ok, pid_broker} ->
@@ -159,7 +159,7 @@ defmodule Cocktailparty.Input.Connection do
 
   defp get_supervisor() do
     # locate the reponsible broker process
-    case GenServer.whereis({:global, Cocktailparty.RedisInstancesDynamicSupervisor}) do
+    case GenServer.whereis({:global, Cocktailparty.ConnectionsDynamicSupervisor}) do
       {name, node} ->
         Logger.info("Supervisor is located at: #{node}/#{name}")
         {name, node}

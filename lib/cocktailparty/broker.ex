@@ -19,11 +19,12 @@ defmodule Cocktailparty.Broker do
 
   def init(opts) do
     connection = opts[:connection]
+    dbg(connection)
 
     {:ok, pubsub} =
       PubSub.start_link(
-        host: connection.hostname,
-        port: connection.port,
+        host: connection.config["hostname"],
+        port: connection.config["port"],
         name: {:global, "pubsub_" <> Integer.to_string(connection.id)}
       )
 

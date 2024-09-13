@@ -31,7 +31,7 @@ defmodule Cocktailparty.MixProject do
     ]
   end
 
-  defp extra_applications(:dev), do: [:observer, :wx]
+  defp extra_applications(:dev), do: [:observer, :wx, :debugger]
   defp extra_applications(_), do: []
 
   # Specifies which paths to compile per environment.
@@ -74,7 +74,7 @@ defmodule Cocktailparty.MixProject do
       {:fun_with_flags_ui, "~> 0.8.1", runtime: false},
       # Libcluster
       {:libcluster, "~> 3.3"},
-      {:tzdata, "~> 1.1.1"},
+      {:tzdata, "~> 1.1.2"},
       # STOMP support
       {:barytherium, "~> 0.7.0"},
       # YAML parsing

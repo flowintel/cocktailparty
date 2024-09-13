@@ -205,27 +205,34 @@ defmodule Cocktailparty.Input do
   Get the status of a redis connection
 
   """
-  # def connected?(%Connection{} = connection) do
-  def connected?(%Connection{} = _) do
-    # TODO refacto for connections
-    #   case GenServer.whereis({:global, "redix_" <> Integer.to_string(connection.id)}) do
-    #     nil ->
-    #       false
+  def connected?(%Connection{} = connection) do
+    case connection.type do
+      "redis" ->
+        case GenServer.whereis({:global, "redix_" <> Integer.to_string(connection.id)}) do
+          nil ->
+            false
 
-    #     # name, node
-    #     {_, _} ->
-    #       true
+          # name, node
+          {_, _} ->
+            true
 
-    #     # pid
-    #     pid ->
-    #       case :sys.get_state(pid) do
-    #         {:connected, _} ->
-    #           true
+          # pid
+          pid ->
+            case :sys.get_state(pid) do
+              {:connected, _} ->
+                true
 
-    #         _ ->
-    #           false
-    #       end
-    #   end
-    false
+              _ ->
+                false
+            end
+        end
+
+      # TODO
+      "stomp" ->
+        false
+
+      _ ->
+        false
+    end
   end
 end
