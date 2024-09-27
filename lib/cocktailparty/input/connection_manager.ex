@@ -11,11 +11,11 @@ defmodule Cocktailparty.Input.ConnectionManager do
     end
   end
 
-  def start_connection(%Cocktailparty.Input.Connection{type: type, config: config}) do
+  def start_connection(connection = %Cocktailparty.Input.Connection{type: type}) do
     module = ConnectionTypes.get_module(type)
 
     if module do
-      module.start_link(config)
+      module.start_link(connection)
     else
       {:error, "Unsupported connection type"}
     end

@@ -1,6 +1,7 @@
 defmodule Cocktailparty.Input.ConnectionTypes do
   @connection_types [
     {"Redis", "redis", Cocktailparty.Input.Redis},
+    {"Redis PubSub", "redis_pub_sub", Cocktailparty.Input.RedisPubSub},
     {"STOMP", "stomp", Cocktailparty.Input.Stomp}
     # Add other connection types here
   ]

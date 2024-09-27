@@ -1,15 +1,17 @@
-defmodule Cocktailparty.Input.Redis do
+defmodule Cocktailparty.Input.RedisPubSub do
   @behaviour Cocktailparty.Input.ConnectionBehavior
   require Logger
 
   def start_link(connection) do
-    Logger.info("Supervisor Starting #{connection.name} redix driver")
+    Logger.info("Supervisor Starting #{connection.name} redix pubsub driver")
 
-    specs =
-      {Redix,
-       host: connection.config["hostname"],
-       port: connection.config["port"],
-       name: {:global, {connection.type, connection.id}}}
+    opts = [
+      [
+        host: connection.config["hostname"],
+        port: connection.config["port"],
+        name: {:global, {connection.type, connection.id}}
+      ]
+    ]
 
     # Add to the ConnectionDynamicSupervisor children
     case :global.whereis_name(Cocktailparty.ConnectionsDynamicSupervisor) do
@@ -19,7 +21,10 @@ defmodule Cocktailparty.Input.Redis do
       pid ->
         DynamicSupervisor.start_child(
           pid,
-          specs
+          %{
+            id: Redix.PubSub,
+            start: {Redix.PubSub, :start_link, opts}
+          }
         )
     end
   end

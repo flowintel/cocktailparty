@@ -19,7 +19,6 @@ defmodule Cocktailparty.Broker do
 
   def init(opts) do
     connection = opts[:connection]
-    dbg(connection)
 
     {:ok, pubsub} =
       PubSub.start_link(

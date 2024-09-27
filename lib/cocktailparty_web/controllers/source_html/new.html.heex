@@ -7,6 +7,24 @@
   changeset={@changeset}
   action={~p"/admin/sources"}
   connections={@connections}
+  connection_source_types={@connection_source_types}
+  source_types={@source_types}
 />
 
 <.back navigate={~p"/admin/sources"}>Back to sources</.back>
+<script>
+  // Trigger on load
+    document.addEventListener("DOMContentLoaded", function() {
+    const connectionSelect = document.getElementById("source_connection_id");
+    const sourceTypeSelect = document.getElementById("source_type");
+
+    if (connectionSelect.value) {
+      const event = new Event('change');
+      connectionSelect.dispatchEvent(event);
+
+      if (sourceTypeSelect.value) {
+        sourceTypeSelect.dispatchEvent(event);
+      }
+    }
+  })
+</script>

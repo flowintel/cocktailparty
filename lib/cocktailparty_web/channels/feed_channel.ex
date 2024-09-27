@@ -20,20 +20,27 @@ defmodule CocktailpartyWeb.FeedChannel do
     end
   end
 
-  # Channels can be used in a request/response fashion
-  # by sending replies to requests from the client
   @impl true
+  def handle_in("request_ping", payload, socket) do
+    push(socket, "test_event", %{body: payload})
+    {:noreply, socket}
+  end
+
   def handle_in("ping", payload, socket) do
     {:reply, {:ok, payload}, socket}
   end
 
   # as messages are broadcasted from the broker, we intercept
-  intercept [:new_redis_message, :kick]
+  intercept [:new_redis_message, :new_stomp_message, :kick]
   @impl true
   def handle_out(msg, payload, socket) do
     case msg do
       :new_redis_message ->
         push(socket, "new_redis_message", payload)
+        {:noreply, socket}
+
+      :new_stomp_message ->
+        push(socket, "new_stomp_message", payload)
         {:noreply, socket}
 
       :kick ->

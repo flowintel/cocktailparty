@@ -4,15 +4,18 @@ defmodule Cocktailparty.Catalog do
   """
   require Logger
   import Cocktailparty.Util
+  import Ecto.Changeset
 
   import Ecto.Query, warn: false
   alias Cocktailparty.Input.Connection
+  alias Cocktailparty.Input
   alias Cocktailparty.Repo
-  alias Cocktailparty.Catalog.Source
+  alias Cocktailparty.Catalog.{Source, SourceType}
   alias Cocktailparty.Accounts.User
   alias Cocktailparty.Accounts
   alias Cocktailparty.UserManagement
   alias CocktailpartyWeb.Tracker
+  alias Cocktailparty.Catalog.SourceManager
 
   @doc """
   Returns the list of sources.
@@ -27,6 +30,14 @@ defmodule Cocktailparty.Catalog do
     Repo.all(Source)
     |> Repo.preload(:users)
     |> Repo.preload(:connection)
+  end
+
+  @doc """
+  Returns the list of available source types for a given connection.
+  """
+  def get_available_source_types(connection_id) do
+    connection = Input.get_connection!(connection_id)
+    SourceType.get_source_types_for_connection(connection.type)
   end
 
   @doc """
@@ -147,12 +158,30 @@ defmodule Cocktailparty.Catalog do
     source = Repo.get!(Source, id)
 
     source
-      |> Repo.preload(:users)
-      |> Repo.preload(:connection)
-      |> Map.put(:config, map_to_yaml!(source.config))
+    |> Repo.preload(:users)
+    |> Repo.preload(:connection)
+    |> Map.put(:config, map_to_yaml!(source.config))
   end
 
+  @doc """
+  Gets a single source.
 
+  Raises `Ecto.NoResultsError` if the Source does not exist.
+
+  ## Examples
+
+      iex> get_source!(123)
+      %Source{}
+
+      iex> get_source!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_source!(id) do
+    Repo.get!(Source, id)
+    |> Repo.preload(:users)
+    |> Repo.preload(:connection)
+  end
 
   @doc """
   Creates a source.
@@ -170,15 +199,29 @@ defmodule Cocktailparty.Catalog do
     Cocktailparty.Input.get_connection_map!(attrs["connection_id"])
     |> Ecto.build_assoc(:sources)
     |> change_source(attrs)
+    |> validate_source_type()
     |> Repo.insert()
     |> case do
       {:ok, source} ->
-        _ = notify_broker(source, {:new_source, source})
+        SourceManager.start_source(source)
         notify_monitor({:subscribe, "feed:" <> Integer.to_string(source.id)})
         {:ok, source}
 
       {:error, msg} ->
         {:error, msg}
+    end
+  end
+
+  defp validate_source_type(changeset) do
+    connection_id = get_field(changeset, :connection_id)
+    source_type = get_field(changeset, :type)
+
+    with %Connection{type: connection_type} <- Input.get_connection!(connection_id),
+         source_types <- SourceType.get_source_types_for_connection(connection_type),
+         true <- Enum.any?(source_types, fn %{type: type} -> type == source_type end) do
+      changeset
+    else
+      _ -> add_error(changeset, :type, "is not valid for the selected connection type")
     end
   end
 
@@ -199,6 +242,8 @@ defmodule Cocktailparty.Catalog do
 
     # Preserve the existing users association
     changeset = Ecto.Changeset.put_assoc(changeset, :users, source.users)
+    # TODO
+    # remove broker logic -- call the source itself
 
     case changeset do
       %Ecto.Changeset{
@@ -207,21 +252,28 @@ defmodule Cocktailparty.Catalog do
       }
       when source.channel != new_channel ->
         # We ask the broker to delete the source with the old channel
-        notify_broker(source, {:delete_source, source})
+        # TODO Terminate the source gen_server
+        # notify_broker(source, {:delete_source, source})
         # We notify the monitor
         notify_monitor({:unsubscribe, "feed:" <> Integer.to_string(source.id)})
 
         # We update the source
-        {:ok, source} = Repo.update(changeset)
+        {:ok, source} =
+          changeset
+          |> validate_source_type()
+          |> Repo.update()
 
         # And we ask the broker and the pubsubmonitor to subscribe to the updated source
-        notify_broker(source, {:new_source, source})
+        # TODO Create a new source gen_server
+        # notify_broker(source, {:new_source, source})
         notify_monitor({:subscribe, "feed:" <> Integer.to_string(source.id)})
 
         {:ok, source}
 
       _ ->
-        Repo.update(changeset)
+        changeset
+        |> validate_source_type()
+        |> Repo.update()
     end
   end
 
@@ -241,7 +293,7 @@ defmodule Cocktailparty.Catalog do
     Repo.delete(source)
     |> case do
       {:ok, source} ->
-        _ = notify_broker(source, {:delete_source, source})
+        :ok = SourceManager.stop_source(source.id)
         notify_monitor({:unsubscribe, "feed:" <> Integer.to_string(source.id)})
 
         # kick users who subscribed to the source
@@ -251,8 +303,8 @@ defmodule Cocktailparty.Catalog do
         kick_all_users_from_source(source.id)
         {:ok, source}
 
-      {:error, msg} ->
-        {:error, msg}
+      {:error, changeset} ->
+        {:error, changeset}
     end
   end
 
@@ -588,9 +640,9 @@ defmodule Cocktailparty.Catalog do
     Repo.one(query)
   end
 
-  defp notify_broker(%Source{} = source, msg) do
-    GenServer.cast(get_broker(source), msg)
-  end
+  # defp notify_broker(%Source{} = source, msg) do
+  #   GenServer.cast(get_broker(source), msg)
+  # end
 
   defp notify_monitor(msg) do
     GenServer.cast({:global, Cocktailparty.PubSubMonitor}, msg)

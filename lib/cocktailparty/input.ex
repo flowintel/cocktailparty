@@ -9,6 +9,7 @@ defmodule Cocktailparty.Input do
   alias Cocktailparty.Repo
 
   alias Cocktailparty.Input.Connection
+  alias Cocktailparty.Input.ConnectionManager
 
   @doc """
   Returns the list of connections.
@@ -109,6 +110,11 @@ defmodule Cocktailparty.Input do
     |> Map.put(:connected, connected?(instance))
   end
 
+  def get_connection!(id) do
+    Repo.get!(Connection, id)
+    |> Repo.preload(:sources)
+  end
+
   @doc """
   Switch Connection's config representation between YAML string and map
   """
@@ -139,9 +145,19 @@ defmodule Cocktailparty.Input do
 
   """
   def create_connection(attrs \\ %{}) do
-    %Connection{}
-    |> Connection.changeset(attrs)
-    |> Repo.insert()
+    conn =
+      %Connection{}
+      |> Connection.changeset(attrs)
+      |> Repo.insert()
+
+    case conn do
+      {:ok, struct} ->
+        ConnectionManager.start_connection(struct)
+        {:ok, struct}
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
   end
 
   @doc """
@@ -206,33 +222,23 @@ defmodule Cocktailparty.Input do
 
   """
   def connected?(%Connection{} = connection) do
-    case connection.type do
-      "redis" ->
-        case GenServer.whereis({:global, "redix_" <> Integer.to_string(connection.id)}) do
-          nil ->
-            false
+    case GenServer.whereis({:global, {connection.type, connection.id}}) do
+      nil ->
+        false
 
-          # name, node
-          {_, _} ->
+      # name, node
+      {_, _} ->
+        true
+
+      # pid
+      pid ->
+        case :sys.get_state(pid) do
+          {:connected, _} ->
             true
 
-          # pid
-          pid ->
-            case :sys.get_state(pid) do
-              {:connected, _} ->
-                true
-
-              _ ->
-                false
-            end
+          _ ->
+            false
         end
-
-      # TODO
-      "stomp" ->
-        false
-
-      _ ->
-        false
     end
   end
 end
