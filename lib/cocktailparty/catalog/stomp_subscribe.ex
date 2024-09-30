@@ -62,7 +62,7 @@ defmodule Cocktailparty.Catalog.StompSubscribe do
     broadcast = %Broadcast{
       topic: "feed:" <> Integer.to_string(state.source_id),
       event: :new_stomp_message,
-      payload: %{destination: headers["destination"], body: frame.body |> Base.encode64()}
+      payload: %{destination: headers["destination"], body: frame.body |> decompress_body()  }
     }
 
     # brokers are listening only to one redis.pubsub
@@ -93,4 +93,6 @@ defmodule Cocktailparty.Catalog.StompSubscribe do
 
   #   Redix.PubSub.unsubscribe(state.conn_pid, state.source_id, self())
   # end
+  defp decompress_body(<<31, 139, 8, _::binary>> = body), do: :zlib.gunzip(body)
+  defp decompress_body(<<_::binary>> = body), do: body
 end
