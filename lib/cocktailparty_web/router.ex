@@ -58,7 +58,7 @@ defmodule CocktailpartyWeb.Router do
     delete "/sources/unsubscribe/:source_id/:user_id", SourceController, :unsubscribe
     delete "/sources/mass_unsubscribe/:source_id", SourceController, :mass_unsubscribe
     resources "/sinks", SinkController
-    resources "/redisinstances", RedisInstanceController
+    resources "/connections", ConnectionController
     resources "/roles", RoleController
     live_dashboard "/dashboard", metrics: CocktailpartyWeb.Telemetry
   end

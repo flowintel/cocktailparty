@@ -5,28 +5,30 @@ defmodule Cocktailparty.InputFixtures do
   """
 
   @doc """
-  Generate a unique redis_instance name.
+  Generate a unique connection name.
   """
-  def unique_redis_instance_name, do: "some name#{System.unique_integer([:positive])}"
+  def unique_connection_name, do: "some name#{System.unique_integer([:positive])}"
 
   @doc """
-  Generate a unique redis_instance uri.
+  Generate a unique connection uri.
   """
-  def unique_redis_instance_uri, do: "some uri#{System.unique_integer([:positive])}"
+  def unique_connection_uri, do: "some uri#{System.unique_integer([:positive])}"
 
   @doc """
-  Generate a redis_instance.
+  Generate a connection.
   """
-  def redis_instance_fixture(attrs \\ %{}) do
-    {:ok, redis_instance} =
+  def connection_fixture(attrs \\ %{}) do
+    {:ok, connection} =
       attrs
       |> Enum.into(%{
         enabled: true,
-        name: unique_redis_instance_name(),
-        uri: unique_redis_instance_uri()
+        sink: false,
+        name: unique_connection_name(),
+        type: "redis",
+        config: %{"hostname" => "localhost", "port" => "6379"}
       })
-      |> Cocktailparty.Input.create_redis_instance()
+      |> Cocktailparty.Input.create_connection()
 
-    redis_instance
+    connection
   end
 end

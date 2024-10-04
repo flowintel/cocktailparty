@@ -1,0 +1,50 @@
+<.header>
+  Listing connections
+  <:actions>
+    <.link href={~p"/admin/connections/new"}>
+      <.button>New connection</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="connections"
+  rows={@connections}
+  row_click={&JS.navigate(~p"/admin/connections/#{&1}")}
+>
+  <:col :let={connection} label="Name"><%= connection.name %></:col>
+  <:col :let={connection} label="Type"><%= connection.type %></:col>
+  <%!-- <:col :let={connection} label="Hostname"><%= connection.config.hostname %></:col> --%>
+  <%!-- <:col :let={connection} label="Port"><%= connection.config.port %></:col> --%>
+  <:col :let={connection} label="Enabled">
+    <.icon :if={connection.enabled} name="hero-check" />
+    <.icon :if={!connection.enabled} name="hero-x-mark" />
+  </:col>
+  <:col :let={connection} label="Sink">
+    <.icon :if={connection.sink} name="hero-check" />
+    <.icon :if={!connection.sink} name="hero-x-mark" />
+  </:col>
+  <:col :let={connection} label="Status">
+    <div :if={connection.connected} class="badge badge-success">
+      online
+    </div>
+    <div :if={!connection.connected} class="badge badge-warning">
+      offline
+    </div>
+  </:col>
+  <:action :let={connection}>
+    <div class="sr-only">
+      <.link navigate={~p"/admin/connections/#{connection}"}>Show</.link>
+    </div>
+    <.link navigate={~p"/admin/connections/#{connection}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={connection}>
+    <.link
+      href={~p"/admin/connections/#{connection}"}
+      method="delete"
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>

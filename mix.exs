@@ -31,7 +31,7 @@ defmodule Cocktailparty.MixProject do
     ]
   end
 
-  defp extra_applications(:dev), do: [:observer, :wx]
+  defp extra_applications(:dev), do: [:observer, :wx, :debugger]
   defp extra_applications(_), do: []
 
   # Specifies which paths to compile per environment.
@@ -67,14 +67,20 @@ defmodule Cocktailparty.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:redix, "~>1.2.4"},
+      {:redix, "~>1.5.2"},
       {:remote_ip, "~>1.1.0"},
       # runtime: false because we don't want to start the FunWithFlags.Supervisor automatically
       {:fun_with_flags, "~> 1.10.1", runtime: false},
       {:fun_with_flags_ui, "~> 0.8.1", runtime: false},
       # Libcluster
       {:libcluster, "~> 3.3"},
-      {:tzdata, "~> 1.1.1"}
+      {:tzdata, "~> 1.1.2"},
+      # STOMP support
+      {:barytherium, "~> 0.7.0"},
+      # YAML parsing
+      {:yaml_elixir, "~> 2.9.0"},
+      # YAML encoding
+      {:ymlr, "~> 5.0"}
     ]
   end
 

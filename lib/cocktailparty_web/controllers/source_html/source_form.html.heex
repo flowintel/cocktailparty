@@ -4,18 +4,84 @@
   </.error>
   <.input field={f[:name]} type="text" label="Name" />
   <.input field={f[:description]} type="text" label="Description" />
-  <.input field={f[:type]} type="text" label="Type" />
-  <.input field={f[:channel]} type="text" label="Channel" />
   <.input
-    field={f[:redis_instance_id]}
+    field={f[:connection_id]}
     type="select"
-    label="Redis instance"
-    options={
-      Enum.map(@redis_instances, fn redis_instance -> {redis_instance.name, redis_instance.id} end)
-    }
+    label="Connection"
+    options={Enum.map(@connections, fn connection -> {connection.name, connection.id} end)}
   />
+  <.input field={f[:type]} type="select" label="Source type" options={@source_types} />
+  <!-- Display Required Fields -->
+  <div class="mt-14">
+    <!-- Required fields will be displayed here -->
+    <dl class="-my-4 divide-y divide-zinc-100">
+      <div class="flex gap-4 py-4 sm:gap-8" id="required-fields"></div>
+    </dl>
+  </div>
+  <.input field={f[:config_yaml]} type="textarea" label="Config" />
   <.input type="checkbox" field={f[:public]} label="Public" />
   <:actions>
     <.button>Save Source</.button>
   </:actions>
 </.simple_form>
+
+<script>
+  // Include the connection_source_types map as a JavaScript variable
+  var connectionSourceTypes = <%= raw(Jason.encode!(@connection_source_types)) %>;
+
+  document.getElementById("source_connection_id").addEventListener("change", function() {
+    const connectionId = this.value;
+    const sourceTypeSelect = document.getElementById("source_type");
+    sourceTypeSelect.innerHTML = '';
+
+    if (connectionSourceTypes[connectionId]) {
+      connectionSourceTypes[connectionId].forEach(function(sourceTypeInfo) {
+        const option = document.createElement("option");
+        option.value = sourceTypeInfo.type;
+        option.text = sourceTypeInfo.type;
+        sourceTypeSelect.add(option);
+      });
+    } else {
+      // If no source types are available, show a message or disable the select
+      const option = document.createElement("option");
+      option.text = "No source types available";
+      option.disabled = true;
+      sourceTypeSelect.add(option);
+    }
+
+    // Clear the required fields display
+    document.getElementById("required-fields").innerHTML = '';
+
+  });
+
+    document.getElementById("source_type").addEventListener("change", function() {
+    const connectionId = document.getElementById("source_connection_id").value;
+    const sourceType = this.value;
+
+    const requiredFieldsDiv = document.getElementById("required-fields");
+    requiredFieldsDiv.innerHTML = '';
+
+    if (connectionSourceTypes[connectionId]) {
+      const sourceTypeInfo = connectionSourceTypes[connectionId].find(function(item) {
+        return item.type === sourceType;
+      });
+
+      if (sourceTypeInfo && sourceTypeInfo.required_fields) {
+        var heading = document.createElement("dt");
+        heading.setAttribute("class", "w-1/4 flex-none text-[0.8125rem] leading-6 text-zinc-500")
+        var content = document.createTextNode("Required fields:");
+        heading.appendChild(content);
+        requiredFieldsDiv.appendChild(heading);
+
+        sourceTypeInfo.required_fields.forEach(function(field) {
+          var listItem = document.createElement("dd");
+          listItem.setAttribute("class", "text-sm leading-6 text-zinc-700")
+          listItem.innerText = field;
+          requiredFieldsDiv.appendChild(listItem);
+        });
+      }
+    }
+  });
+
+
+</script>

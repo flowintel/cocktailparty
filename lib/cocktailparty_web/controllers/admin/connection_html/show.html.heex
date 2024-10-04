@@ -1,0 +1,61 @@
+<.header>
+  Connection <%= @connection.id %>
+  <:subtitle>This is a connection record from your database.</:subtitle>
+  <:actions>
+    <.link href={~p"/admin/connections/#{@connection}/edit"}>
+      <.button>Edit connection</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @connection.name %></:item>
+  <:item title="Type"><%= @connection.type %></:item>
+  <%!-- <:item title="Hostname"><%= @connection.config.hostname %></:item> --%>
+  <%!-- <:item title="Port"><%= @connection.config.port %></:item> --%>
+  <:item title="Enabled">
+    <.icon :if={@connection.enabled} name="hero-check" />
+    <.icon :if={!@connection.enabled} name="hero-x-mark" />
+  </:item>
+  <:item title="Sink">
+    <.icon :if={@connection.sink} name="hero-check" />
+    <.icon :if={!@connection.sink} name="hero-x-mark" />
+  </:item>
+  <:item title="Status">
+    <div :if={@connection.connected} class="badge badge-success">
+      online
+    </div>
+    <div :if={!@connection.connected} class="badge badge-warning">
+      offline
+    </div>
+  </:item>
+  <%!-- <:item title="Config"><%= @connection.config %></:item> --%>
+
+  <:item title="Config">
+    <table class="sm:w-full">
+      <thead class="text-left text-[0.8125rem] leading-6 text-zinc-500">
+        <tr>
+          <th class="p-0 pr-6 font-normal text-center">key</th>
+          <th class="p-0 pr-6 font-normal text-center">value</th>
+        </tr>
+      </thead>
+
+      <%= for {key, value} <- @connection.config do %>
+        <tr>
+          <td>
+            <div class="block pr-6 text-center">
+              <%= key %>
+            </div>
+          </td>
+          <td>
+            <div class="block pr-6 text-center">
+              <%= value %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  </:item>
+</.list>
+
+<.back navigate={~p"/admin/connections"}>Back to connections</.back>

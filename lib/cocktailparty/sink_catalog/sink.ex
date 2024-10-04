@@ -3,13 +3,13 @@ defmodule Cocktailparty.SinkCatalog.Sink do
   import Ecto.Changeset
 
   schema "sinks" do
-    field :channel, :string
-    field :description, :string
     field :name, :string
     field :type, :string
+    field :config, :map
+    field :description, :string
 
     belongs_to :user, Cocktailparty.Accounts.User
-    belongs_to :redis_instance, Cocktailparty.Input.RedisInstance
+    belongs_to :connection, Cocktailparty.Input.Connection
 
     timestamps()
   end
@@ -17,8 +17,8 @@ defmodule Cocktailparty.SinkCatalog.Sink do
   @doc false
   def changeset(sink, attrs) do
     sink
-    |> cast(attrs, [:name, :description, :type, :channel, :redis_instance_id, :user_id])
-    |> validate_required([:name, :description, :type, :channel])
+    |> cast(attrs, [:name, :type, :description, :config, :connection_id, :user_id])
+    |> validate_required([:name, :type, :config])
     |> unique_constraint(:name)
   end
 end

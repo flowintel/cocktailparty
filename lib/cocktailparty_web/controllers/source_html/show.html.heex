@@ -56,14 +56,37 @@
 <.list>
   <:item title="Name"><%= @source.name %></:item>
   <:item title="Id"><%= @source.id %></:item>
-  <:item title="Description"><%= @source.description %></:item>
   <:item title="Type"><%= @source.type %></:item>
-  <:item title="Channel"><%= @source.channel %></:item>
-  <:item :if={@is_admin} title="Redis instance"><%= @source.redis_instance.name %></:item>
+  <:item :if={@is_admin} title="Connection"><%= @source.connection.name %></:item>
 
   <:item title="Public">
     <.icon :if={@source.public} name="hero-check" />
     <.icon :if={!@source.public} name="hero-x-mark" />
+  </:item>
+    <:item title="Config">
+    <table class="sm:w-full">
+      <thead class="text-left text-[0.8125rem] leading-6 text-zinc-500">
+        <tr>
+          <th class="p-0 pr-6 font-normal text-center">key</th>
+          <th class="p-0 pr-6 font-normal text-center">value</th>
+        </tr>
+      </thead>
+
+      <%= for {key, value} <- @source.config do %>
+        <tr>
+          <td>
+            <div class="block pr-6 text-center">
+              <%= key %>
+            </div>
+          </td>
+          <td>
+            <div class="block pr-6 text-center">
+              <%= value %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </table>
   </:item>
 </.list>
 

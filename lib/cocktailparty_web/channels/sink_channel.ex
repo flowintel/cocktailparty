@@ -74,6 +74,14 @@ defmodule CocktailpartyWeb.SinkChannel do
     {:reply, {:ok, payload}, socket}
   end
 
+  def handle_in("ping", payload, socket) do
+    Logger.info(
+      "handling ping message from #{socket.assigns.current_user} on #{socket.assigns.sink.id}"
+    )
+
+    {:reply, {:ok, payload}, socket}
+  end
+
   def handle_in(_, _, socket) do
     {:reply, {:error, "Unknown command", socket}}
   end

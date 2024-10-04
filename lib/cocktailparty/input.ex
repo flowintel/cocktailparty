@@ -4,22 +4,24 @@ defmodule Cocktailparty.Input do
   """
 
   import Ecto.Query, warn: false
-  import Ecto.Changeset
+  import Cocktailparty.Util
+  # import Ecto.Changeset
   alias Cocktailparty.Repo
 
-  alias Cocktailparty.Input.RedisInstance
+  alias Cocktailparty.Input.Connection
+  alias Cocktailparty.Input.ConnectionManager
 
   @doc """
-  Returns the list of redisinstances.
+  Returns the list of connections.
 
   ## Examples
 
-      iex> list_redisinstances()
-      [%RedisInstance{}, ...]
+      iex> list_connections()
+      [%Connection{}, ...]
 
   """
-  def list_redisinstances do
-    Repo.all(RedisInstance)
+  def list_connections do
+    Repo.all(Connection)
     |> Enum.map(fn instance ->
       instance
       |> Map.put(:connected, connected?(instance))
@@ -31,12 +33,12 @@ defmodule Cocktailparty.Input do
 
   ## Examples
 
-      iex> list_redisinstances()
-      [%RedisInstance{}, ...]
+      iex> list_connections()
+      [%Connection{}, ...]
 
   """
-  def list_sink_redisinstances do
-    Repo.all(from r in RedisInstance, where: r.sink == true)
+  def list_sink_connections do
+    Repo.all(from r in Connection, where: r.sink == true)
   end
 
   @doc """
@@ -44,126 +46,183 @@ defmodule Cocktailparty.Input do
 
   ## Examples
 
-      iex> list_redisinstances()
-      [%RedisInstance{}, ...]
+      iex> list_connections()
+      [%Connection{}, ...]
 
   """
-  def get_one_sink_redisinstance do
-    Repo.one(from r in RedisInstance, where: r.sink == true)
+  def get_one_sink_connection do
+    Repo.one(from r in Connection, where: r.sink == true)
   end
 
   @doc """
-  Returns the list of redisinstances for feeding a select component
+  Returns the list of connections for feeding a select component
 
   ## Examples
 
-      iex> list_redisinstances()
+      iex> list_connections()
       [{"name", 1}]
 
   """
-  def list_redisinstances_for_select do
-    Repo.all(from r in "redis_instances", select: {r.name, r.id})
+  def list_connections_for_select do
+    Repo.all(from r in "connections", select: {r.name, r.id})
   end
 
   @doc """
-  Gets a single redis_instance.
+  Gets a single connection -- with config as a text field
 
-  Raises `Ecto.NoResultsError` if the Redis instance does not exist.
+  Raises `Ecto.NoResultsError` if the connection does not exist.
 
   ## Examples
 
-      iex> get_redis_instance!(123)
-      %RedisInstance{}
+      iex> get_connection!(123)
+      %Connection{}
 
-      iex> get_redis_instance!(456)
+      iex> get_connection!(456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_redis_instance!(id) do
-    instance = Repo.get!(RedisInstance, id)
-    Map.put(instance, :connected, connected?(instance))
+  def get_connection_text!(id) do
+    instance = Repo.get!(Connection, id)
+
+    instance
+    |> Map.put(:connected, connected?(instance))
+    |> Map.put(:config, map_to_yaml!(instance.config))
   end
 
   @doc """
-  Creates a redis_instance.
+  Gets a single connection -- with config as a map
+
+  Raises `Ecto.NoResultsError` if the connection does not exist.
 
   ## Examples
 
-      iex> create_redis_instance(%{field: value})
-      {:ok, %RedisInstance{}}
+      iex> get_connection!(123)
+      %Connection{}
 
-      iex> create_redis_instance(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+      iex> get_connection!(456)
+      ** (Ecto.NoResultsError)
 
   """
-  def create_redis_instance(attrs \\ %{}) do
-    %RedisInstance{}
-    |> RedisInstance.changeset(attrs)
-    |> Repo.insert()
+  def get_connection_map!(id) do
+    instance = Repo.get!(Connection, id)
+
+    instance
+    |> Map.put(:connected, connected?(instance))
+  end
+
+  def get_connection!(id) do
+    Repo.get!(Connection, id)
+    |> Repo.preload(:sources)
   end
 
   @doc """
-  Updates a redis_instance.
+  Switch Connection's config representation between YAML string and map
+  """
+  @spec switch_config_repr!(map() | String.t()) :: map() | String.t()
+  def switch_config_repr!(connection) do
+    case connection.config do
+      %{} ->
+        connection
+        |> Map.put(:config, map_to_yaml!(connection.config))
+
+      _ ->
+        connection
+        |> Map.put(:config, yaml_to_map!(connection.config))
+    end
+  end
+
+  @spec create_connection() :: any()
+  @doc """
+  Creates a connection.
 
   ## Examples
 
-      iex> update_redis_instance(redis_instance, %{field: new_value})
-      {:ok, %RedisInstance{}}
+      iex> create_connection(%{field: value})
+      {:ok, %Connection{}}
 
-      iex> update_redis_instance(redis_instance, %{field: bad_value})
+      iex> create_connection(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_redis_instance(%RedisInstance{} = redis_instance, attrs) do
-    changeset = change_redis_instance(redis_instance, attrs)
+  def create_connection(attrs \\ %{}) do
+    conn =
+      %Connection{}
+      |> Connection.changeset(attrs)
+      |> Repo.insert()
 
-    # We restart related processes if needed
-    # TODO: check enabled
-    if changed?(changeset, :hostname) or changed?(changeset, :port) do
-      RedisInstance.terminate(redis_instance)
-      {:ok, redis_instance} = Repo.update(changeset)
-      RedisInstance.start(redis_instance)
-      {:ok, redis_instance}
-    else
-      Repo.update(changeset)
+    case conn do
+      {:ok, struct} ->
+        ConnectionManager.start_connection(struct)
+        {:ok, struct}
+
+      {:error, changeset} ->
+        {:error, changeset}
     end
   end
 
   @doc """
-  Deletes a redis_instance.
+  Updates a connection.
 
   ## Examples
 
-      iex> delete_redis_instance(redis_instance)
-      {:ok, %RedisInstance{}}
+      iex> update_connection(connection, %{field: new_value})
+      {:ok, %Connection{}}
 
-      iex> delete_redis_instance(redis_instance)
+      iex> update_connection(connection, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_redis_instance(%RedisInstance{} = redis_instance) do
-    Repo.delete(redis_instance)
+  def update_connection(%Connection{} = connection, attrs) do
+    changeset = change_connection(connection, attrs)
+
+    # We restart related processes if needed
+    # TODO: check enabled
+    # TODO check within the map
+    # if changed?(changeset, :hostname) or changed?(changeset, :port) do
+    #   Connection.terminate(connection)
+    #   {:ok, connection} = Repo.update(changeset)
+    #   Connection.start(connection)
+    #   {:ok, connection}
+    # else
+    Repo.update(changeset)
+    # end
   end
 
   @doc """
-  Returns an `%Ecto.Changeset{}` for tracking redis_instance changes.
+  Deletes a connection.
 
   ## Examples
 
-      iex> change_redis_instance(redis_instance)
-      %Ecto.Changeset{data: %RedisInstance{}}
+      iex> delete_connection(connection)
+      {:ok, %Connection{}}
+
+      iex> delete_connection(connection)
+      {:error, %Ecto.Changeset{}}
 
   """
-  def change_redis_instance(%RedisInstance{} = redis_instance, attrs \\ %{}) do
-    RedisInstance.changeset(redis_instance, attrs)
+  def delete_connection(%Connection{} = connection) do
+    Repo.delete(connection)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking connection changes.
+
+  ## Examples
+
+      iex> change_connection(connection)
+      %Ecto.Changeset{data: %Connection{}}
+
+  """
+  def change_connection(%Connection{} = connection, attrs \\ %{}) do
+    Connection.changeset(connection, attrs)
   end
 
   @doc """
   Get the status of a redis connection
 
   """
-  def connected?(%RedisInstance{} = redis_instance) do
-    case GenServer.whereis({:global, "redix_" <> Integer.to_string(redis_instance.id)}) do
+  def connected?(%Connection{} = connection) do
+    case GenServer.whereis({:global, {connection.type, connection.id}}) do
       nil ->
         false
 

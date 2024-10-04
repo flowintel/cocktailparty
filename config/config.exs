@@ -114,3 +114,5 @@ config :remote_ip, debug: false
 
 # TimeZone data
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
+
+config :tzdata, :autoupdate, :disabled

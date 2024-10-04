@@ -5,14 +5,11 @@
   <.input field={f[:name]} type="text" label="Name" />
   <.input field={f[:description]} type="text" label="Description" />
   <.input field={f[:type]} type="text" label="Type" />
-  <.input field={f[:channel]} type="text" label="Channel" />
   <.input
-    field={f[:redis_instance_id]}
+    field={f[:connection_id]}
     type="select"
-    label="Redis instance"
-    options={
-      Enum.map(@redis_instances, fn redis_instance -> {redis_instance.name, redis_instance.id} end)
-    }
+    label="Connection"
+    options={Enum.map(@connections, fn connection -> {connection.name, connection.id} end)}
   />
   <.input
     field={f[:user_id]}

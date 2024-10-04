@@ -1,9 +1,9 @@
 defmodule Cocktailparty.DynamicSupervisorBoot do
-  alias Cocktailparty.Input.RedisInstance
+  alias Cocktailparty.Input.ConnectionManager
+  alias Cocktailparty.Catalog.SourceManager
   use Supervisor
 
   require Logger
-  import Cocktailparty.Input
 
   def start_link(init_arg) do
     Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
@@ -13,15 +13,19 @@ defmodule Cocktailparty.DynamicSupervisorBoot do
     children = [
       # We start the dynamic supervisor, then we use a Task
       # to start its children
-      {Cocktailparty.RedisInstancesDynamicSupervisor,
-       name: {:global, Cocktailparty.RedisInstancesDynamicSupervisor}},
+      {Cocktailparty.ConnectionsDynamicSupervisor,
+       name: {:global, Cocktailparty.ConnectionsDynamicSupervisor}},
+      {Cocktailparty.SourcesDynamicSupervisor,
+       name: {:global, Cocktailparty.SourcesDynamicSupervisor}},
       {Task,
        fn ->
-         Logger.info("Redis Instances Dynamic Supervisor Task started")
-         # When starting we check what inputs are available
-         # for each instance, we start a redix connection along with a broker gen_server
-         list_redisinstances()
-         |> Enum.each(fn x -> RedisInstance.start(x) end)
+         Logger.info("Starting Connections")
+         Cocktailparty.Input.list_connections()
+         |> Enum.each(fn x -> ConnectionManager.start_connection(x) end)
+
+         Logger.info("Starting Sources")
+         Cocktailparty.Catalog.list_sources()
+         |> Enum.each(fn x -> SourceManager.start_source(x) end)
        end}
     ]
 

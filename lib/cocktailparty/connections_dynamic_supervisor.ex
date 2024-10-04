@@ -1,5 +1,6 @@
-defmodule Cocktailparty.RedisInstancesDynamicSupervisor do
+defmodule Cocktailparty.ConnectionsDynamicSupervisor do
   use DynamicSupervisor
+  import Cocktailparty.Util
 
   require Logger
 
@@ -10,12 +11,7 @@ defmodule Cocktailparty.RedisInstancesDynamicSupervisor do
   @impl true
   def init(_init_arg) do
     {:ok, sup} = DynamicSupervisor.init(strategy: :one_for_one)
-    Logger.info("Dynamic sup alive  with pid #{pid_to_string(self())}")
+    Logger.info("Connection Dynamic Supervisor alive  with pid #{pid_to_string(self())}")
     {:ok, sup}
-  end
-
-  defp pid_to_string(pid) do
-    :erlang.pid_to_list(pid)
-    |> to_string
   end
 end

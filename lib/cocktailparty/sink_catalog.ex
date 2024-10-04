@@ -8,7 +8,7 @@ defmodule Cocktailparty.SinkCatalog do
   import Ecto.Query, warn: false
   import Ecto.Changeset
   alias Cocktailparty.UserManagement
-  alias Cocktailparty.Input.RedisInstance
+  alias Cocktailparty.Input.Connection
   alias Cocktailparty.Repo
   alias Cocktailparty.SinkCatalog.Sink
   alias Cocktailparty.Accounts.User
@@ -27,7 +27,7 @@ defmodule Cocktailparty.SinkCatalog do
   """
   def list_sinks do
     Repo.all(Sink)
-    |> Repo.preload(:redis_instance)
+    |> Repo.preload(:connection)
   end
 
   @doc """
@@ -41,7 +41,7 @@ defmodule Cocktailparty.SinkCatalog do
   """
   def list_sinks_with_user do
     Repo.all(Sink)
-    |> Repo.preload(:redis_instance)
+    |> Repo.preload(:connection)
     |> Repo.preload(:user)
   end
 
@@ -50,16 +50,16 @@ defmodule Cocktailparty.SinkCatalog do
 
   ## Examples
 
-      iex> list_redis_instance_sinks(redis_instance_id)
+      iex> list_connection_sinks(connection_id)
       [%Sink{}, ...]
 
   """
-  def list_redis_instance_sinks(redis_instance_id) do
+  def list_connection_sinks(connection_id) do
     Repo.all(
       from s in Sink,
-        join: r in RedisInstance,
-        on: s.redis_instance_id == r.id,
-        where: r.id == ^redis_instance_id,
+        join: r in Connection,
+        on: s.connection_id == r.id,
+        where: r.id == ^connection_id,
         preload: [:user]
     )
   end
@@ -120,7 +120,7 @@ defmodule Cocktailparty.SinkCatalog do
   def get_sink!(id) do
     Repo.get!(Sink, id)
     |> Repo.preload(:user)
-    |> Repo.preload(:redis_instance)
+    |> Repo.preload(:connection)
   end
 
   @doc """
@@ -138,7 +138,7 @@ defmodule Cocktailparty.SinkCatalog do
   def get_sink(id) do
     Repo.get(Sink, id)
     |> Repo.preload(:user)
-    |> Repo.preload(:redis_instance)
+    |> Repo.preload(:connection)
   end
 
   @doc """
@@ -154,7 +154,7 @@ defmodule Cocktailparty.SinkCatalog do
 
   """
   def create_sink(attrs \\ %{}) do
-    Cocktailparty.Input.get_redis_instance!(attrs["redis_instance_id"])
+    Cocktailparty.Input.get_connection_map!(attrs["connection_id"])
     |> Ecto.build_assoc(:sinks)
     |> change_sink(attrs)
     |> Repo.insert()
@@ -181,7 +181,7 @@ defmodule Cocktailparty.SinkCatalog do
 
   """
   def create_sink(attrs, user_id) do
-    Cocktailparty.Input.get_one_sink_redisinstance()
+    Cocktailparty.Input.get_one_sink_connection()
     |> Ecto.build_assoc(:sinks)
     |> change_sink(attrs)
     |> put_change(:user_id, user_id)
