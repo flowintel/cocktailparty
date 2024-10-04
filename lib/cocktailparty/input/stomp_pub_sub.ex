@@ -10,6 +10,8 @@ defmodule Cocktailparty.Input.StompPubSub do
   alias Cocktailparty.Input
   import Cocktailparty.Util
 
+  @run_interval 10_000
+
   defstruct host: "localhost",
             port: 61613,
             login: nil,
@@ -17,12 +19,10 @@ defmodule Cocktailparty.Input.StompPubSub do
             virtual_host: "/",
             ssl: false,
             subscriptions: %{},
-            stomp_conn: nil,
-            sender_pid: nil,
+            network_pid: nil,
             connection_id: nil
 
   ## Public API
-
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: Keyword.get(opts, :name, __MODULE__))
   end
@@ -38,7 +38,6 @@ defmodule Cocktailparty.Input.StompPubSub do
   end
 
   ## GenServer Callbacks
-
   @impl true
   def init(opts) do
     state = %{
@@ -49,8 +48,7 @@ defmodule Cocktailparty.Input.StompPubSub do
       passcode: Keyword.get(opts, :passcode),
       opts: [secure: Keyword.get(opts, :ssl, false)],
       subscriptions: %{},
-      stomp_conn: self(),
-      sender_pid: nil,
+      network_pid: nil,
       connection_id: Keyword.get(opts, :connection_id)
     }
 
@@ -59,16 +57,15 @@ defmodule Cocktailparty.Input.StompPubSub do
 
   @impl true
   def handle_continue(:connect, state) do
-    {:ok, sender_pid} =
-      Network.start_link(self(), state.host, state.port, state.opts)
+    {:ok, network_pid} = connect(state)
 
-    {:noreply, Map.put(state, :sender_pid, sender_pid)}
+    {:noreply, Map.put(state, :network_pid, network_pid)}
   end
 
   @impl true
   def handle_call({:subscribe, destination, name}, _from, state) do
     with pid <- :global.whereis_name(name) do
-      # We monitor the process
+      # We monitor the source process
       Process.monitor(pid)
 
       subscribers = Map.get(state.subscriptions, destination, MapSet.new())
@@ -105,11 +102,25 @@ defmodule Cocktailparty.Input.StompPubSub do
     {:reply, :ok, Map.put(state, :subscriptions, new_subscriptions)}
   end
 
+  # @impl true
+  # TODO when a source process sends DOWN, we unsubscribe from the STOMP Network ?
+  # Or do we manage this externally?
+  # def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
+  #   # Remove the dead pid from all subscriptions
+  #   new_subscriptions = remove_pid_from_subscriptions(state.subscriptions, pid)
+  #   {:noreply, %{state | subscriptions: new_subscriptions}}
+  # end
+
   @impl true
-  def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
-    # Remove the dead pid from all subscriptions
-    new_subscriptions = remove_pid_from_subscriptions(state.subscriptions, pid)
-    {:noreply, %{state | subscriptions: new_subscriptions}}
+  def handle_info(:reconnect, state) do
+    Logger.info("Reconnecting to #{state.host}:#{state.port}")
+    # Kill the disconnected process
+    if state.network_pid do
+      Process.exit(state.network_pid, :kill)
+    end
+
+    {:ok, network_pid} = connect(state)
+    {:noreply, Map.put(state, :network_pid, network_pid)}
   end
 
   # Handle messages from Barytherium
@@ -143,6 +154,17 @@ defmodule Cocktailparty.Input.StompPubSub do
     {:noreply, state}
   end
 
+  # ERROR on CONNECT
+  def handle_cast(
+        {:barytherium, :connect, {:error, error}},
+        state = %{host: host, port: port}
+      ) do
+    Logger.error("Stomp Connection to #{host}:#{port} failed, error: #{error}")
+    Process.send_after(self(), :reconnect, @run_interval)
+    {:noreply, state}
+    # {:stop, :connect_disconnected, state}
+  end
+
   # CONNECTED SET DESTINATIONS
   def handle_cast(
         {:barytherium, :frames, {[frame = %Frame{command: :connected}], sender_pid}},
@@ -166,6 +188,7 @@ defmodule Cocktailparty.Input.StompPubSub do
               Logger.info("Cannot find process #{{:source, source.id}}")
               acc
 
+            # TODO do we monitor sources, or handle this case from the source_dynamic_supervisor?
             pid ->
               # We monitor the process
               Process.monitor(pid)
@@ -222,18 +245,13 @@ defmodule Cocktailparty.Input.StompPubSub do
     {:noreply, state}
   end
 
-  def handle_cast(
-        {:barytherium, :connect, {:error, error}},
-        state = %{host: host, port: port}
-      ) do
-    Logger.error("Stomp Connection to #{host}:#{port} failed, error: #{error}")
-    {:stop, :connect_disconnected, state}
-  end
-
   @impl true
-  def handle_cast({:barytherium, :disconnect, _sender_pid}, state) do
-    Logger.info("STOMP disconnected")
-    {:noreply, state}
+  def handle_cast({:barytherium, :disconnect, reason}, state) do
+    Logger.info("STOMP disconnected because #{reason}")
+    # Remove the dead pid from all subscriptions
+    new_subscriptions = remove_pid_from_subscriptions(state.subscriptions, state.network_pid)
+    Process.send_after(self(), :reconnect, @run_interval)
+    {:noreply, %{state | subscriptions: new_subscriptions}}
   end
 
   @impl true
@@ -244,16 +262,18 @@ defmodule Cocktailparty.Input.StompPubSub do
 
   @impl true
   def terminate(_reason, state) do
-    if state.stomp_conn do
-      :ok
-      # TODO
-      # Barytherium.Network.disconnect(state.stomp_conn)
+    if state.network_pid do
+      Process.exit(state.network_pid, :kill)
     end
 
     :ok
   end
 
   ## Helper Functions
+  defp connect(state) do
+    Network.start_link(self(), state.host, state.port, state.opts)
+  end
+
   defp send_subscribe_frame(state, destination) do
     frame = %Frame{
       command: "SUBSCRIBE",
