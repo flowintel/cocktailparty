@@ -5,7 +5,7 @@ defmodule Cocktailparty.Input do
 
   import Ecto.Query, warn: false
   import Cocktailparty.Util
-  # import Ecto.Changeset
+  import Ecto.Changeset
   alias Cocktailparty.Repo
 
   alias Cocktailparty.Input.Connection
@@ -22,6 +22,23 @@ defmodule Cocktailparty.Input do
   """
   def list_connections do
     Repo.all(Connection)
+    |> Enum.map(fn instance ->
+      instance
+      |> Map.put(:connected, connected?(instance))
+    end)
+  end
+
+  @doc """
+  Returns the list of enabled connections
+
+  ## Examples
+
+      iex> list_enabled_connections()
+      [%Connection{}, ...]
+
+  """
+  def list_enabled_connections do
+    Repo.all(from c in Connection, where: c.enabled == true)
     |> Enum.map(fn instance ->
       instance
       |> Map.put(:connected, connected?(instance))
@@ -176,16 +193,16 @@ defmodule Cocktailparty.Input do
     changeset = change_connection(connection, attrs)
 
     # We restart related processes if needed
-    # TODO: check enabled
-    # TODO check within the map
-    # if changed?(changeset, :hostname) or changed?(changeset, :port) do
-    #   Connection.terminate(connection)
-    #   {:ok, connection} = Repo.update(changeset)
-    #   Connection.start(connection)
-    #   {:ok, connection}
-    # else
+    if changed?(changeset, :config) do
+      Connection.terminate(connection)
+      {:ok, connection} = Repo.update(changeset)
+      ConnectionManager.start_connection(connection)
+      {:ok, connection}
+      # same for its sources
+
+    else
     Repo.update(changeset)
-    # end
+    end
   end
 
   @doc """

@@ -20,7 +20,7 @@ defmodule Cocktailparty.DynamicSupervisorBoot do
       {Task,
        fn ->
          Logger.info("Starting Connections")
-         Cocktailparty.Input.list_connections()
+         Cocktailparty.Input.list_enabled_connections()
          |> Enum.each(fn x -> ConnectionManager.start_connection(x) end)
 
          Logger.info("Starting Sources")

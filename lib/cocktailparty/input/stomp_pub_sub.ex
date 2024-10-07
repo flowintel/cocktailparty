@@ -226,9 +226,12 @@ defmodule Cocktailparty.Input.StompPubSub do
     Enum.map(frames, fn frame ->
       # Logger.info("Unpacked frame: " <> inspect(frame, binaries: :as_strings))
 
-      destination = Frame.headers_to_map(frame.headers)["destination"]
+      # destination = Frame.headers_to_map(frame.headers)["destination"]
+      # looking into subscription to simplify the filtering and
+      # accomodate weird server behaviours when setting destinations...
+      subscription = Frame.headers_to_map(frame.headers)["subscription"]
 
-      subscribers = Map.get(state.subscriptions, destination, MapSet.new())
+      subscribers = Map.get(state.subscriptions, subscription, MapSet.new())
 
       Enum.each(subscribers, fn name ->
         case :global.whereis_name(name) do
