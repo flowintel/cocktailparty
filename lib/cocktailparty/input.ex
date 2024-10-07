@@ -232,12 +232,30 @@ defmodule Cocktailparty.Input do
 
       # pid
       pid ->
-        case :sys.get_state(pid) do
-          {:connected, _} ->
-            true
+        case connection.type do
+          # Redix process exposes a :connected field
+          type when type in ["redis_pub_sub", "redis"] ->
+            case :sys.get_state(pid) do
+              {:connected, _} ->
+                true
 
-          _ ->
-            false
+              _ ->
+                false
+            end
+
+          # For STOMP, we get the status from the network process
+          "stomp" ->
+            state =
+              :sys.get_state(pid).network_pid
+              |> :sys.get_state()
+
+            case state do
+              %{is_connected: true} ->
+                true
+
+              _ ->
+                false
+            end
         end
     end
   end
