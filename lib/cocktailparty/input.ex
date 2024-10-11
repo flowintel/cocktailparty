@@ -6,6 +6,7 @@ defmodule Cocktailparty.Input do
   import Ecto.Query, warn: false
   import Cocktailparty.Util
   import Ecto.Changeset
+  alias Cocktailparty.Catalog.SourceManager
   alias Cocktailparty.Repo
 
   alias Cocktailparty.Input.Connection
@@ -197,6 +198,12 @@ defmodule Cocktailparty.Input do
       Connection.terminate(connection)
       {:ok, connection} = Repo.update(changeset)
       ConnectionManager.start_connection(connection)
+      # TODO restart corresponding sources
+      # get the full object
+      conn = get_connection!(connection.id)
+      Enum.map(conn.sources, fn x ->
+        SourceManager.restart_source(x.id)
+      end)
       {:ok, connection}
     else
     Repo.update(changeset)

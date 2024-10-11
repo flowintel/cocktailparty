@@ -8,7 +8,7 @@ defmodule CocktailpartyWeb.Admin.ConnectionHTML do
   """
   attr :changeset, Ecto.Changeset, required: true
   attr :connection_types, :list, required: false
-  attr :show_connection_types, :boolean, required: true
+  attr :show_connection_types, :boolean, default: true
   attr :action, :string, required: true
 
   def connection_form(assigns)

@@ -53,6 +53,19 @@ defmodule Cocktailparty.Catalog.SourceManager do
     end
   end
 
+  @doc """
+  Restart a source process given a source id
+  """
+  def restart_source(id) do
+    with src <- Cocktailparty.Catalog.get_source!(id),
+     :ok <- stop_source(src.id) do
+      start_source(src)
+    else
+      :undefined ->
+        Logger.error("Cannot restart process for source #{id} -- not running")
+    end
+  end
+
   defp validate_required_fields(module, source_schema) do
     required_fields = module.required_fields()
     config = source_schema.config || %{}
