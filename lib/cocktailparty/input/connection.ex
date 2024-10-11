@@ -27,6 +27,15 @@ defmodule Cocktailparty.Input.Connection do
     |> validate_config()
   end
 
+  @doc false
+  # we don't allow for changing a connection type once created
+  def edit_changeset(connection, attrs) do
+    connection
+    |> cast(attrs, [:name, :config, :enabled, :sink])
+    |> validate_required([:name, :config, :enabled, :sink])
+    |> unique_constraint(:name)
+  end
+
   defp validate_config(changeset) do
     case get_field(changeset, :type) do
       nil ->
@@ -41,7 +50,7 @@ defmodule Cocktailparty.Input.Connection do
   end
 
   @doc """
-  Kill processes related to a redis instance
+  Kill processes related to a connection
   TODO
 
   """
@@ -71,7 +80,7 @@ defmodule Cocktailparty.Input.Connection do
       nil ->
         # TODO
         Logger.error(
-          "It looks like the redis instances dynamic supervisor is dead, it's not looking good."
+          "It looks like the connection dynamic supervisor is dead, it's not looking good."
         )
 
         nil

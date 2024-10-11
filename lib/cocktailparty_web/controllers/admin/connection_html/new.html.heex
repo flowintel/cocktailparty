@@ -3,6 +3,6 @@
   <:subtitle>Use this form to manage connection records in your database.</:subtitle>
 </.header>
 
-<.connection_form changeset={@changeset} action={~p"/admin/connections"} connection_types={@connection_types} />
+<.connection_form changeset={@changeset} action={~p"/admin/connections"} connection_types={@connection_types} show_connection_types={@show_connection_types}/>
 
 <.back navigate={~p"/admin/connections"}>Back to connections</.back>

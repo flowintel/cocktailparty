@@ -38,7 +38,7 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
 
         connection_types = ConnectionTypes.all()
 
-        render(conn, :new, changeset: new_changeset, connection_types: connection_types)
+        render(conn, :new, changeset: new_changeset, connection_types: connection_types, show_connection_types: true)
     end
   end
 
@@ -51,7 +51,7 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
     connection_map = Input.get_connection_map!(id)
 
     changeset =
-      Input.change_connection(connection_map)
+      Input.change_edit_connection(connection_map)
       |> Map.put(:data, Input.switch_config_repr!(connection_map))
 
     connection_types = ConnectionTypes.all()
@@ -59,6 +59,7 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
     render(conn, :edit,
       connection: connection_map,
       changeset: changeset,
+      show_connection_types: false,
       connection_types: connection_types
     )
   end

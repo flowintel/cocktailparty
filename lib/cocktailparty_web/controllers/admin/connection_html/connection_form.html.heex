@@ -3,7 +3,7 @@
     Oops, something went wrong! Please check the errors below.
   </.error>
   <.input field={f[:name]} type="text" label="Name" />
-  <.input
+  <.input :if={@show_connection_types}
     field={f[:type]}
     type="select"
     label="Type"

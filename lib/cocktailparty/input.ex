@@ -198,8 +198,6 @@ defmodule Cocktailparty.Input do
       {:ok, connection} = Repo.update(changeset)
       ConnectionManager.start_connection(connection)
       {:ok, connection}
-      # same for its sources
-
     else
     Repo.update(changeset)
     end
@@ -232,6 +230,19 @@ defmodule Cocktailparty.Input do
   """
   def change_connection(%Connection{} = connection, attrs \\ %{}) do
     Connection.changeset(connection, attrs)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking connection changes -- without the type
+
+  ## Examples
+
+      iex> change_edit_connection(connection)
+      %Ecto.Changeset{data: %Connection{}}
+
+  """
+  def change_edit_connection(%Connection{} = connection, attrs \\ %{}) do
+    Connection.edit_changeset(connection, attrs)
   end
 
   @doc """
