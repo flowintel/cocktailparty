@@ -198,7 +198,6 @@ defmodule Cocktailparty.Input do
       Connection.terminate(connection)
       {:ok, connection} = Repo.update(changeset)
       ConnectionManager.start_connection(connection)
-      # TODO restart corresponding sources
       # get the full object
       conn = get_connection!(connection.id)
       Enum.map(conn.sources, fn x ->

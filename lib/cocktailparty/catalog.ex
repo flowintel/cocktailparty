@@ -240,40 +240,25 @@ defmodule Cocktailparty.Catalog do
   def update_source(%Source{} = source, attrs) do
     changeset = change_source(source, attrs)
 
-    # Preserve the existing users association
-    changeset = Ecto.Changeset.put_assoc(changeset, :users, source.users)
-    # TODO
-    # remove broker logic -- call the source itself
-
-    case changeset do
-      %Ecto.Changeset{
-        changes: %{channel: new_channel},
-        data: %Source{} = source
-      }
-      when source.channel != new_channel ->
-        # We ask the broker to delete the source with the old channel
-        # TODO Terminate the source gen_server
-        # notify_broker(source, {:delete_source, source})
-        # We notify the monitor
-        notify_monitor({:unsubscribe, "feed:" <> Integer.to_string(source.id)})
-
-        # We update the source
-        {:ok, source} =
-          changeset
-          |> validate_source_type()
-          |> Repo.update()
-
-        # And we ask the broker and the pubsubmonitor to subscribe to the updated source
-        # TODO Create a new source gen_server
-        # notify_broker(source, {:new_source, source})
-        notify_monitor({:subscribe, "feed:" <> Integer.to_string(source.id)})
-
-        {:ok, source}
-
-      _ ->
+    if changed?(changeset, :config) do
+      source =
         changeset
         |> validate_source_type()
-        |> Repo.update()
+
+      case Repo.update(source) do
+        {:ok, source} ->
+          notify_monitor({:unsubscribe, "feed:" <> Integer.to_string(source.id)})
+          SourceManager.restart_source(source.id)
+          notify_monitor({:subscribe, "feed:" <> Integer.to_string(source.id)})
+          {:ok, source}
+
+        {:error, changeset} ->
+          {:error, changeset}
+      end
+    else
+      changeset
+      |> validate_source_type()
+      |> Repo.update()
     end
   end
 
