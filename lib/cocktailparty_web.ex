@@ -43,7 +43,7 @@ defmodule CocktailpartyWeb do
         layouts: [html: CocktailpartyWeb.Layouts]
 
       import Plug.Conn
-      import CocktailpartyWeb.Gettext
+      use Gettext, backend: Cocktailparty.Gettext
 
       unquote(verified_routes())
     end
