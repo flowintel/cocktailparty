@@ -22,4 +22,10 @@ defmodule Cocktailparty.Util do
     :erlang.pid_to_list(pid)
     |> to_string
   end
+
+  # Function to find the global name from the PID
+  def get_global_name(pid) do
+    :global.registered_names()
+    |> Enum.find(fn name -> :global.whereis_name(name) == pid end)
+  end
 end

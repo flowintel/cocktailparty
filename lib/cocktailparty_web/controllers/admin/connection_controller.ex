@@ -19,13 +19,11 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
 
   def create(conn, %{"connection" => connection_params}) do
     {:ok, config_str} = Map.fetch(connection_params, "config")
-    # replace with function from Util
+    # TODO handle exception
     config = yaml_to_map!(config_str)
 
     case Input.create_connection(Map.put(connection_params, "config", config)) do
       {:ok, connection} ->
-        # TODO: handle errors
-        # Cocktailparty.Input.Connection.start(connection)
 
         conn
         |> put_flash(:info, "Connection created successfully.")

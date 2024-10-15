@@ -43,13 +43,18 @@ defmodule Cocktailparty.Catalog.SourceManager do
   Stops a source process given its ID.
   """
   def stop_source(source_id) do
-    with pid_sds <- :global.whereis_name(Cocktailparty.SourcesDynamicSupervisor),
-         pid <- :global.whereis_name({:source, source_id}) do
-      DynamicSupervisor.terminate_child(pid_sds, pid)
-      :ok
-    else
-      :undefined ->
-        {:error, :source_not_running}
+    pid_sds = :global.whereis_name(Cocktailparty.SourcesDynamicSupervisor)
+    pid = :global.whereis_name({:source, source_id})
+
+    cond do
+      pid_sds == :undefined ->
+        :ok
+
+      pid == :undefined ->
+        :ok
+
+      true ->
+        DynamicSupervisor.terminate_child(pid_sds, pid)
     end
   end
 
@@ -58,10 +63,10 @@ defmodule Cocktailparty.Catalog.SourceManager do
   """
   def restart_source(id) do
     with src <- Cocktailparty.Catalog.get_source!(id),
-     :ok <- stop_source(src.id) do
+         :ok <- stop_source(src.id) do
       start_source(src)
     else
-      :undefined ->
+        _ ->
         Logger.error("Cannot restart process for source #{id} -- not running")
     end
   end

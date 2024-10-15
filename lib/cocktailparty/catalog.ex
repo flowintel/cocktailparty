@@ -589,6 +589,7 @@ defmodule Cocktailparty.Catalog do
     end
   end
 
+  # TODO remove
   def get_broker(%Source{} = source) do
     # locate the reponsible broker process
     case GenServer.whereis({:global, "broker_" <> Integer.to_string(source.connection_id)}) do
@@ -629,6 +630,7 @@ defmodule Cocktailparty.Catalog do
   #   GenServer.cast(get_broker(source), msg)
   # end
 
+  # TODO remove
   defp notify_monitor(msg) do
     GenServer.cast({:global, Cocktailparty.PubSubMonitor}, msg)
   end

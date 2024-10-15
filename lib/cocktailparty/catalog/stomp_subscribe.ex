@@ -4,7 +4,7 @@ defmodule Cocktailparty.Catalog.StompSubscribe do
 
   alias Phoenix.Socket.Broadcast
   alias Cocktailparty.Catalog.SourceType
-  # alias Cocktailparty.Input.StompPubSub
+  alias Cocktailparty.Input.StompPubSub
   alias Barytherium.Frame
   require Logger
 
@@ -26,7 +26,7 @@ defmodule Cocktailparty.Catalog.StompSubscribe do
   def init(source) do
     with conn_pid <- :global.whereis_name({"stomp", source.connection_id}) do
       # Subscribe to the STOMP channel
-      # StompPubSub.subscribe(conn_pid, source.config["destination"], self())
+      StompPubSub.subscribe(conn_pid, source.config["destination"], {:source, source.id})
 
       {:ok,
        %{
@@ -83,16 +83,6 @@ defmodule Cocktailparty.Catalog.StompSubscribe do
     {:noreply, state}
   end
 
-  # @impl GenServer
-  # TODO when terminating we notify the STOMP pubsub driver so it unsubscribes
-  # from the server if there is no other consumer
-  # def terminate(reason, state) do
-  #   Logger.info(
-  #     "Redis PubSub source #{state.source_id} unsubscribing from #{state.channel} because #{reason}"
-  #   )
-
-  #   Redix.PubSub.unsubscribe(state.conn_pid, state.source_id, self())
-  # end
   defp decompress_body(<<31, 139, 8, _::binary>> = body), do: :zlib.gunzip(body)
   defp decompress_body(<<_::binary>> = body), do: body
 end
