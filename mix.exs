@@ -80,7 +80,9 @@ defmodule Cocktailparty.MixProject do
       # YAML parsing
       {:yaml_elixir, "~> 2.9.0"},
       # YAML encoding
-      {:ymlr, "~> 5.0"}
+      {:ymlr, "~> 5.0"},
+      # Encryption at rest
+      {:cloak_ecto, "~> 1.3.0"}
     ]
   end
 

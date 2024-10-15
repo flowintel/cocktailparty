@@ -9,7 +9,7 @@ defmodule Cocktailparty.Input.Connection do
     field :enabled, :boolean, default: false
     field :name, :string
     field :type, :string
-    field :config, :map
+    field :config, Cocktailparty.Encrypted.Map
     field :sink, :boolean, default: false
 
     has_many :sources, Cocktailparty.Catalog.Source

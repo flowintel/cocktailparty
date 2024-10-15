@@ -10,6 +10,8 @@ defmodule Cocktailparty.Application do
     # Common children
     children =
       [
+        # Start the Vault
+        Cocktailparty.Vault,
         # Start the Telemetry supervisor
         CocktailpartyWeb.Telemetry,
         # Start the Ecto repository
