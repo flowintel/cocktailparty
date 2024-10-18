@@ -21,6 +21,8 @@ defmodule Cocktailparty.Input.StompPubSub do
             subscriptions: %{},
             subscribing: %{},
             network_pid: nil,
+            sender_pid: nil,
+            network_ref: nil,
             connection_id: nil
 
   ## Public API
@@ -29,11 +31,11 @@ defmodule Cocktailparty.Input.StompPubSub do
   end
 
   def subscribe(pubsub, destination, name) do
-    GenServer.cast(pubsub, {:subscribe, destination, name})
+    :ok = GenServer.cast(pubsub, {:subscribe, destination, name})
   end
 
   def unsubscribe(pubsub, destination, name) do
-    GenServer.cast(pubsub, {:unsubscribe, destination, name})
+    :ok = GenServer.cast(pubsub, {:unsubscribe, destination, name})
   end
 
   ## GenServer Callbacks
@@ -49,6 +51,8 @@ defmodule Cocktailparty.Input.StompPubSub do
       subscriptions: %{},
       ready: false,
       network_pid: nil,
+      sender_pid: nil,
+      network_ref: nil,
       connection_id: Keyword.get(opts, :connection_id)
     }
 
@@ -66,6 +70,7 @@ defmodule Cocktailparty.Input.StompPubSub do
   def handle_info(:reconnect, state) do
     Logger.info("Reconnecting to #{state.host}:#{state.port}")
     # Kill the disconnected process
+    # Are we are monitoring and not linking, the present process does not exit
     if state.network_pid do
       Process.exit(state.network_pid, :kill)
     end
@@ -74,24 +79,13 @@ defmodule Cocktailparty.Input.StompPubSub do
     {:noreply, Map.put(state, :network_pid, network_pid)}
   end
 
-  @impl true
-  def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
-    # do the translation between pid and source name
-    name = Util.get_global_name(pid)
-    # TODO haha cannot get it's name it is already dead.
-    Logger.info("Process #{name} has been terminated")
-    # Remove the dead pid from all subscriptions
-    new_subscriptions = remove_process_from_subscriptions(state.subscriptions, name)
-    {:noreply, %{state | subscriptions: new_subscriptions}}
-  end
-
-  def handle_cast({:subscribe, destination, name}, state) do
+  def handle_cast({:subscribe, destination, name = {:source, srcid}}, state) do
     with pid <- :global.whereis_name(name) do
       Logger.info("Received SUB from #{:erlang.pid_to_list(pid) |> to_string}")
 
       # If the connection is ready we can start subscribing right away
       if state.ready do
-        Logger.info("Connection is ready, SUBSCRIBING")
+        Logger.info("Connection is ready, SUBSCRIBING to #{destination}")
         subscribers = Map.get(state.subscriptions, destination, MapSet.new())
         new_subscribers = MapSet.put(subscribers, name)
         new_subscriptions = Map.put(state.subscriptions, destination, new_subscribers)
@@ -101,38 +95,44 @@ defmodule Cocktailparty.Input.StompPubSub do
           send_subscribe_frame(state.sender_pid, destination)
         end
 
-        # We monitor the process to handle subscriptions
-        Process.monitor(pid)
-
         {:noreply, Map.put(state, :subscriptions, new_subscriptions)}
       else
-        Logger.info("Connection is not ready, keeping for later")
         # Otherwise we don't do anything, the driver will reconnect all the source anyway
+        Logger.info("Connection is not ready -- Subscription for #{srcid} will occur once ready")
       end
     else
       :undefined ->
         Logger.info("Cannot find process #{name}")
+        {:noreply, state}
     end
   end
 
-  def handle_cast({:unsubscribe, destination, name}, state) do
+  def handle_cast({:unsubscribe, destination, name = {:source, src}}, state) do
+    # Logger.info("Received UNSUB from #{:erlang.pid_to_list(pid) |> to_string}")
+    Logger.info("Received UNSUB from #{destination} from #{src}")
     # We remove the process from the list of processes that receive the frame to this destination
     # if this is the last one, we send an unsubscribe frame
     # if the network is not ready there is nothing to do
-    subscribers = Map.get(state.subscriptions, destination, MapSet.new())
-    new_subscribers = MapSet.delete(subscribers, name)
+    if state.ready do
+      subscribers = Map.get(state.subscriptions, destination, MapSet.new())
+      new_subscribers = MapSet.delete(subscribers, name)
 
-    # TODO this is broken ATM
-    new_subscriptions =
-      if MapSet.size(new_subscribers) == 0 do
-        # Send UNSUBSCRIBE frame if no subscribers left
-        send_unsubscribe_frame(state, destination)
-        Map.delete(state.subscriptions, destination)
-      else
-        Map.put(state.subscriptions, destination, new_subscribers)
-      end
+      new_subscriptions =
+        if MapSet.size(new_subscribers) == 0 do
+          # Send UNSUBSCRIBE frame if no subscribers left
+          Logger.info("Connection is ready, UNSUBSCRIBING")
+          send_unsubscribe_frame(state.sender_pid, destination)
+          Map.delete(state.subscriptions, destination)
+        else
+          Map.put(state.subscriptions, destination, new_subscribers)
+        end
 
-    {:reply, :ok, Map.put(state, :subscriptions, new_subscriptions)}
+      # new_subscriptions = remove_process_from_subscriptions(state.subscriptions, name)
+      # {:noreply, %{state | subscriptions: new_subscriptions}}
+      {:noreply, Map.put(state, :subscriptions, new_subscriptions)}
+    else
+      {:noreply, state}
+    end
   end
 
   # Handle messages from Barytherium
@@ -163,7 +163,7 @@ defmodule Cocktailparty.Input.StompPubSub do
       }
     ])
 
-    {:noreply, state}
+    {:noreply, %{state | sender_pid: sender_pid}}
   end
 
   # ERROR on CONNECT
@@ -173,7 +173,7 @@ defmodule Cocktailparty.Input.StompPubSub do
       ) do
     Logger.error("Stomp Connection to #{host}:#{port} failed, error: #{error}")
     Process.send_after(self(), :reconnect, @run_interval)
-    {:noreply, state}
+    {:noreply, state |> Map.put(:ready, false)}
   end
 
   # CONNECTED SET DESTINATIONS
@@ -199,25 +199,13 @@ defmodule Cocktailparty.Input.StompPubSub do
               Logger.info("Cannot find process #{{:source, source.id}}")
               acc
 
-            pid ->
-              # we monitor the process to handle subscriptions
-              Process.monitor(pid)
+            _ ->
               subscribers = Map.get(acc, source.config["destination"], MapSet.new())
               new_subscribers = MapSet.put(subscribers, {:source, source.id})
 
               # Send SUBSCRIBE frame if this is the first subscriber to the destination
               if MapSet.size(subscribers) == 0 do
-                # send_subscribe_frame(state, source.config["destination"])
-                Sender.write(sender_pid, [
-                  %Barytherium.Frame{
-                    command: :subscribe,
-                    headers: [
-                      {"id", source.config["destination"]},
-                      {"destination", source.config["destination"]},
-                      {"ack", "client"}
-                    ]
-                  }
-                ])
+                send_subscribe_frame(state.sender_pid, source.config["destination"])
               end
 
               Map.put(acc, source.config["destination"], new_subscribers)
@@ -225,17 +213,19 @@ defmodule Cocktailparty.Input.StompPubSub do
         end
       )
 
-    {:noreply, Map.put(state, :subscriptions, new_subscriptions) |> Map.put(:ready, true)}
+    {:noreply,
+     Map.put(state, :subscriptions, new_subscriptions)
+     |> Map.put(:sender_pid, sender_pid)
+     |> Map.put(:ready, true)}
   end
 
-  # # RECEIVING DATA
+  # RECEIVING DATA
   def handle_cast({:barytherium, :frames, {frames, sender_pid}}, state) do
     # Logger.info("Received frames: " <> inspect(frames, binaries: :as_strings))
 
     Enum.map(frames, fn frame ->
       # Logger.info("Unpacked frame: " <> inspect(frame, binaries: :as_strings))
 
-      # destination = Frame.headers_to_map(frame.headers)["destination"]
       # looking into subscription to simplify the filtering and
       # accomodate weird server behaviours when setting destinations...
       subscription = Frame.headers_to_map(frame.headers)["subscription"]
@@ -245,7 +235,8 @@ defmodule Cocktailparty.Input.StompPubSub do
       Enum.each(subscribers, fn name ->
         case :global.whereis_name(name) do
           :undefined ->
-            Logger.info("Cannot find process #{name}")
+            {:source, n} = name
+            Logger.info("Cannot find process #{n}")
 
           pid ->
             send(pid, {:new_stomp_message, frame})
@@ -254,7 +245,8 @@ defmodule Cocktailparty.Input.StompPubSub do
     end)
 
     List.last(frames) |> acknowledge_frame(sender_pid)
-    {:noreply, state}
+
+    {:noreply, Map.put(state, :sender_pid, sender_pid) |> Map.put(:ready, true)}
   end
 
   @impl true
@@ -262,28 +254,34 @@ defmodule Cocktailparty.Input.StompPubSub do
     Logger.info("STOMP disconnected because #{reason}")
     # We destroy the subscription map, we have to reconnect anyway
     Process.send_after(self(), :reconnect, @run_interval)
-    # {:noreply, %{state | subscriptions: new_subscriptions}}
     {:noreply, Map.put(state, :subscriptions, %{}) |> Map.put(:ready, false)}
   end
 
   @impl true
   def handle_cast({:barytherium, :error, {error, _sender_pid}}, state) do
+    # STOMP error can occur when subscribing to a destination fails
+    # We just bail
     Logger.error("STOMP error: #{inspect(error)}")
-    {:noreply, state}
+    Process.send_after(self(), :reconnect, @run_interval)
+    {:noreply, Map.put(state, :subscriptions, %{}) |> Map.put(:ready, false)}
   end
 
-  @impl true
-  def terminate(_reason, state) do
-    if state.network_pid do
-      Process.exit(state.network_pid, :kill)
-    end
-
-    :ok
-  end
-
-  ## Helper Functions
   defp connect(state) do
-    Network.start_link(self(), state.host, state.port, state.opts)
+    init_state = %{
+      opts: state.opts,
+      host: state.host,
+      port: state.port,
+      callback_handler: self()
+    }
+
+    case GenServer.start(Network, init_state, []) do
+      {:ok, pid} ->
+        Logger.info("network pid: #{Util.pid_to_string(pid)}")
+        {:ok, pid}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
   end
 
   defp send_subscribe_frame(sender_pid, destination) do
@@ -291,8 +289,13 @@ defmodule Cocktailparty.Input.StompPubSub do
       %Barytherium.Frame{
         command: :subscribe,
         headers: [
+          # We share the STOMP id as we multiplex subscriptions:
+          # There is only on STOMP subscription for potentially
+          # several cocktailparty sources
           {"id", destination},
           {"destination", destination},
+          # We use client mode so the sender will send again messages
+          # that we did not (cumulatively) acknowledged
           {"ack", "client"}
         ]
       }
@@ -304,27 +307,10 @@ defmodule Cocktailparty.Input.StompPubSub do
       %Barytherium.Frame{
         command: :unsubscribe,
         headers: [
-          {"id", destination},
-          {"destination", destination},
-          {"ack", "client"}
+          {"id", destination}
         ]
       }
     ])
-  end
-
-  defp remove_process_from_subscriptions(subscriptions, name) do
-    subscriptions
-    |> Enum.reduce(%{}, fn {destination, subscribers}, acc ->
-      new_subscribers = MapSet.delete(subscribers, name)
-
-      if MapSet.size(new_subscribers) == 0 do
-        # Send UNSUBSCRIBE frame if no subscribers left
-        send_unsubscribe_frame(acc, destination)
-        acc
-      else
-        Map.put(acc, destination, new_subscribers)
-      end
-    end)
   end
 
   defp acknowledge_frame(%Frame{headers: headers}, sender_pid) do

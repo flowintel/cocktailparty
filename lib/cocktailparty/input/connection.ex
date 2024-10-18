@@ -89,9 +89,4 @@ defmodule Cocktailparty.Input.Connection do
         pid
     end
   end
-
-  # defp pid_to_string(pid) do
-  #   :erlang.pid_to_list(pid)
-  #   |> to_string
-  # end
 end

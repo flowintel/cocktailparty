@@ -200,12 +200,14 @@ defmodule Cocktailparty.Input do
       ConnectionManager.start_connection(connection)
       # get the full object
       conn = get_connection!(connection.id)
+
       Enum.map(conn.sources, fn x ->
         SourceManager.restart_source(x.id)
       end)
+
       {:ok, connection}
     else
-    Repo.update(changeset)
+      Repo.update(changeset)
     end
   end
 
@@ -279,9 +281,13 @@ defmodule Cocktailparty.Input do
 
           # For STOMP, we get the status from the network process
           "stomp" ->
+            # TODO the process is not linked anymore
             state =
-              :sys.get_state(pid).network_pid
-              |> :sys.get_state()
+              false
+
+            # state =
+            #   :sys.get_state(pid).network_pid
+            #   |> :sys.get_state()
 
             case state do
               %{is_connected: true} ->

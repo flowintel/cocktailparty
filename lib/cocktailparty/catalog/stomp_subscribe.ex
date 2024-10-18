@@ -25,12 +25,16 @@ defmodule Cocktailparty.Catalog.StompSubscribe do
   @impl GenServer
   def init(source) do
     with conn_pid <- :global.whereis_name({"stomp", source.connection_id}) do
+      # The stomp_pub_sub driver is not monitoring this process
+      # we trap the exit and send :unsubscribe request on termination
+      Process.flag(:trap_exit, true)
+
       # Subscribe to the STOMP channel
       StompPubSub.subscribe(conn_pid, source.config["destination"], {:source, source.id})
 
       {:ok,
        %{
-         conn_pid: conn_pid,
+         conn_id: source.connection_id,
          channel: source.config["destination"],
          source_id: source.id
        }}
@@ -39,36 +43,18 @@ defmodule Cocktailparty.Catalog.StompSubscribe do
     end
   end
 
-  # def handle_info({:redix_pubsub, _, _, :subscribed, %{channel: channel}}, state) do
-  #   Logger.info("Subscribed to #{channel}")
-  #   {:noreply, state}
-  # end
 
-  # Coming from redix pubsub, messages contain %{channel: channel, payload: payload}
-  # https://hexdocs.pm/redix/Redix.PubSub.html#module-messages
   # Receiving a message from a source we are subscribed to.
   @impl GenServer
   def handle_info({:new_stomp_message, frame = %Frame{}}, state) do
-    # Logger.info("source  #{state.source_id} receiving events")
-    # wrap messages into %Broadcast{} to keep metadata about the payload
-    # broadcast = %Broadcast{
-    #   topic: "feed:" <> Integer.to_string(state.source_id),
-    #   event: :new_stomp_message,
-    #   payload:  inspect(frame, binaries: :as_strings)
-    # }
-
     headers = Frame.headers_to_map(frame.headers)
 
     broadcast = %Broadcast{
       topic: "feed:" <> Integer.to_string(state.source_id),
       event: :new_stomp_message,
-      payload: %{destination: headers["destination"], body: frame.body |> decompress_body()  }
+      payload: %{destination: headers["destination"], body: frame.body |> decompress_body()}
     }
 
-    # brokers are listening only to one redis.pubsub
-    # so there is no channel name collisions
-    # feed:channel_id
-    # TODO don't raise, log and add metric of failures
     :ok =
       Phoenix.PubSub.broadcast(
         Cocktailparty.PubSub,
@@ -81,6 +67,14 @@ defmodule Cocktailparty.Catalog.StompSubscribe do
     })
 
     {:noreply, state}
+  end
+
+  @impl true
+  def terminate(reason, state) do
+    Logger.info("Terminating stomp subscribe source process #{state.source_id} because: #{reason}")
+    conn_pid = :global.whereis_name({"stomp", state.conn_id})
+    # we unsubscribe here so the drive should not get irrelevant message from the server
+    StompPubSub.unsubscribe(conn_pid, state.channel, {:source, state.source_id})
   end
 
   defp decompress_body(<<31, 139, 8, _::binary>> = body), do: :zlib.gunzip(body)

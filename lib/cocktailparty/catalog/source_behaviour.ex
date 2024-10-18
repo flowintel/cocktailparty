@@ -3,11 +3,6 @@ defmodule Cocktailparty.Catalog.SourceBase do
   Defines the behavior for sources.
   """
 
-  # @callback start_link(Ecto.Schema.t()) :: GenServer.on_start()
-  # @callback init(Ecto.Schema.t()) :: {:ok, any()}
-  # @callback required_fields() :: [atom()]
-
-
   @callback required_fields() :: [atom()]
 
   defmacro __using__(_) do
