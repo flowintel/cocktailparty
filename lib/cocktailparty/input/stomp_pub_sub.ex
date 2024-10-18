@@ -56,6 +56,9 @@ defmodule Cocktailparty.Input.StompPubSub do
       connection_id: Keyword.get(opts, :connection_id)
     }
 
+      # We monitor the network process, so we have to kill ourself on termination
+      Process.flag(:trap_exit, true)
+
     {:ok, state, {:continue, :connect}}
   end
 
@@ -264,6 +267,14 @@ defmodule Cocktailparty.Input.StompPubSub do
     Logger.error("STOMP error: #{inspect(error)}")
     Process.send_after(self(), :reconnect, @run_interval)
     {:noreply, Map.put(state, :subscriptions, %{}) |> Map.put(:ready, false)}
+  end
+
+  @impl true
+  def terminate(_reason, state) do
+    Logger.info("Cleaning after Stomp connection #{state.connection_id}")
+    if state.network_pid do
+      Process.exit(state.network_pid, :kill)
+    end
   end
 
   defp connect(state) do
