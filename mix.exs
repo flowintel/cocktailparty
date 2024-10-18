@@ -44,7 +44,7 @@ defmodule Cocktailparty.MixProject do
   defp deps do
     [
       {:argon2_elixir, "~> 3.0"},
-      {:phoenix, "~> 1.7.10"},
+      {:phoenix, "~> 1.7.14"},
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},
       {:postgrex, ">= 0.0.0"},
@@ -70,8 +70,8 @@ defmodule Cocktailparty.MixProject do
       {:redix, "~>1.5.2"},
       {:remote_ip, "~>1.1.0"},
       # runtime: false because we don't want to start the FunWithFlags.Supervisor automatically
-      {:fun_with_flags, "~> 1.10.1", runtime: false},
-      {:fun_with_flags_ui, "~> 0.8.1", runtime: false},
+      {:fun_with_flags, "~> 1.12.0", runtime: false},
+      {:fun_with_flags_ui, "~> 1.0.0", runtime: false},
       # Libcluster
       {:libcluster, "~> 3.3"},
       {:tzdata, "~> 1.1.2"},
