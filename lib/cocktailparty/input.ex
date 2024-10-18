@@ -281,13 +281,9 @@ defmodule Cocktailparty.Input do
 
           # For STOMP, we get the status from the network process
           "stomp" ->
-            # TODO the process is not linked anymore
             state =
-              false
-
-            # state =
-            #   :sys.get_state(pid).network_pid
-            #   |> :sys.get_state()
+              :sys.get_state(pid).network_pid
+              |> :sys.get_state()
 
             case state do
               %{is_connected: true} ->
