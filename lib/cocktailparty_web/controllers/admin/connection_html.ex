@@ -7,7 +7,7 @@ defmodule CocktailpartyWeb.Admin.ConnectionHTML do
   Renders a connection form.
   """
   attr :changeset, Ecto.Changeset, required: true
-  attr :connection_types, :list, required: false
+  attr :connection_types, :list, required: true
   attr :show_connection_types, :boolean, default: true
   attr :action, :string, required: true
 

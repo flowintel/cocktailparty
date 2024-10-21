@@ -1,7 +1,7 @@
 defmodule Cocktailparty.Input.Connection do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Cocktailparty.Input.ConnectionManager
+  alias Cocktailparty.Input.ConnectionTypes
 
   require Logger
 
@@ -42,9 +42,12 @@ defmodule Cocktailparty.Input.Connection do
         changeset
 
       type ->
-        case ConnectionManager.validate_config(type, get_field(changeset, :config)) do
-          :ok -> changeset
-          {:error, reason} -> add_error(changeset, :config, reason)
+        case ConnectionTypes.validate_config(type, get_field(changeset, :config)) do
+          :ok ->
+            changeset
+
+          {:error, reason} ->
+            add_error(changeset, :config, reason)
         end
     end
   end

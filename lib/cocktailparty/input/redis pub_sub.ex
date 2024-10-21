@@ -28,14 +28,4 @@ defmodule Cocktailparty.Input.RedisPubSub do
         )
     end
   end
-
-  def validate_config(config) do
-    # TODO implement uri
-    required_keys = ["hostname", "port"]
-
-    case Enum.all?(required_keys, &Map.has_key?(config, &1)) do
-      true -> :ok
-      false -> {:error, "Missing required keys in config"}
-    end
-  end
 end

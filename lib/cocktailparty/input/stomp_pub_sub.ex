@@ -130,8 +130,6 @@ defmodule Cocktailparty.Input.StompPubSub do
           Map.put(state.subscriptions, destination, new_subscribers)
         end
 
-      # new_subscriptions = remove_process_from_subscriptions(state.subscriptions, name)
-      # {:noreply, %{state | subscriptions: new_subscriptions}}
       {:noreply, Map.put(state, :subscriptions, new_subscriptions)}
     else
       {:noreply, state}

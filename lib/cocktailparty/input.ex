@@ -195,17 +195,22 @@ defmodule Cocktailparty.Input do
 
     # We restart related processes if needed
     if changed?(changeset, :config) do
-      Connection.terminate(connection)
-      {:ok, connection} = Repo.update(changeset)
-      ConnectionManager.start_connection(connection)
-      # get the full object
-      conn = get_connection!(connection.id)
+      case Repo.update(changeset) do
+        {:ok, connection} ->
+          Connection.terminate(connection)
+          ConnectionManager.start_connection(connection)
+          # get the full object
+          conn = get_connection!(connection.id)
 
-      Enum.map(conn.sources, fn x ->
-        SourceManager.restart_source(x.id)
-      end)
+          Enum.map(conn.sources, fn x ->
+            SourceManager.restart_source(x.id)
+          end)
 
-      {:ok, connection}
+          {:ok, connection}
+
+        {:error, changeset} ->
+          {:error, changeset}
+      end
     else
       Repo.update(changeset)
     end

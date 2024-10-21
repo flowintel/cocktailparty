@@ -18,25 +18,45 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
   end
 
   def create(conn, %{"connection" => connection_params}) do
-    {:ok, config_str} = Map.fetch(connection_params, "config")
-    # TODO handle exception
-    config = yaml_to_map!(config_str)
+    {:ok, yaml_config} = Map.fetch(connection_params, "config")
 
-    case Input.create_connection(Map.put(connection_params, "config", config)) do
-      {:ok, connection} ->
+    case yaml_to_map(yaml_config) do
+      {:ok, config} ->
+        case Input.create_connection(Map.put(connection_params, "config", config)) do
+          {:ok, connection} ->
+            conn
+            |> put_flash(:info, "Connection created successfully.")
+            |> redirect(to: ~p"/admin/connections/#{connection}")
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            new_changes = Map.put(changeset.changes, :config, yaml_config)
+            new_changeset = Map.put(changeset, :changes, new_changes)
+
+            connection_types = ConnectionTypes.all()
+
+            render(conn, :new,
+              changeset: new_changeset,
+              connection_types: connection_types,
+              show_connection_types: true
+            )
+        end
+
+      {:error, reason = %YamlElixir.ParsingError{}} ->
+        connection_types = ConnectionTypes.all()
+        changeset = Input.change_connection(%Connection{}, connection_params)
+
+        new_changeset =
+          changeset
+          |> Map.put(:action, :insert)
+          |> Ecto.Changeset.add_error(:config, "YAML configuration is invalid", [])
 
         conn
-        |> put_flash(:info, "Connection created successfully.")
-        |> redirect(to: ~p"/admin/connections/#{connection}")
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        txt_config = map_to_yaml!(changeset.changes.config)
-        new_changes = Map.put(changeset.changes, :config, txt_config)
-        new_changeset = Map.put(changeset, :changes, new_changes)
-
-        connection_types = ConnectionTypes.all()
-
-        render(conn, :new, changeset: new_changeset, connection_types: connection_types, show_connection_types: true)
+        |> put_flash(:error, "Failed to parse YAML: #{reason.message}")
+        |> render(:new,
+          changeset: new_changeset,
+          connection_types: connection_types,
+          show_connection_types: true
+        )
     end
   end
 
@@ -64,10 +84,11 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
 
   def update(conn, %{"id" => id, "connection" => connection_params}) do
     connection = Input.get_connection_text!(id)
+    connection_map = Input.get_connection_map!(id)
 
     yaml_config = connection_params["config"]
 
-    case YamlElixir.read_from_string(yaml_config) do
+    case yaml_to_map(yaml_config) do
       {:ok, config_map} ->
         connection_params = Map.put(connection_params, "config", config_map)
 
@@ -78,28 +99,36 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
             |> redirect(to: ~p"/admin/connections/#{connection}")
 
           {:error, %Ecto.Changeset{} = changeset} ->
-            connection_types = ConnectionTypes.all()
-
-            txt_config = map_to_yaml!(changeset.changes.config)
-            new_changes = Map.put(changeset.changes, :config, txt_config)
+            new_changes = Map.put(changeset.changes, :config, yaml_config)
             new_changeset = Map.put(changeset, :changes, new_changes)
+
+            connection_types = ConnectionTypes.all()
+            dbg(new_changeset)
 
             render(conn, :edit,
               connection: connection,
               changeset: new_changeset,
-              connection_types: connection_types
+              connection_types: connection_types,
+              show_connection_types: false
             )
         end
 
       {:error, reason = %YamlElixir.ParsingError{}} ->
         connection_types = ConnectionTypes.all()
 
+        changeset = Input.change_connection(connection_map, connection_params)
+
+        new_changeset =
+          changeset
+          |> Ecto.Changeset.add_error(:config, "YAML configuration is invalid", [])
+
         conn
         |> put_flash(:error, "Failed to parse YAML: #{reason.message}")
-        |> render("edit.html",
+        |> render(:edit,
           connection: connection,
-          changeset: Connection.changeset(connection, connection_params),
-          connection_types: connection_types
+          changeset: new_changeset,
+          connection_types: connection_types,
+          show_connection_types: false
         )
     end
   end

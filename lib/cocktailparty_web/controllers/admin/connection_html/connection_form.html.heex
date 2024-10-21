@@ -3,16 +3,57 @@
     Oops, something went wrong! Please check the errors below.
   </.error>
   <.input field={f[:name]} type="text" label="Name" />
-  <.input :if={@show_connection_types}
+  <.input
+    :if={@show_connection_types}
     field={f[:type]}
     type="select"
     label="Type"
-    options={Enum.map(@connection_types, fn {label, string} -> {label, string} end)}
+    options={
+      Enum.map(@connection_types, fn {type, %{name: name, required_fields: _req_fields}} ->
+        {name, type}
+      end)
+    }
   />
   <.input field={f[:enabled]} type="checkbox" label="Enabled" />
   <.input field={f[:sink]} type="checkbox" label="Sink" />
+  <!-- Display Required Fields -->
+  <div class="mt-14">
+    <!-- Required fields will be displayed here -->
+    <dl class="-my-4 divide-y divide-zinc-100">
+      <div class="flex gap-4 py-4 sm:gap-8" id="required-fields"></div>
+    </dl>
+  </div>
   <.input field={f[:config]} type="textarea" label="Config" />
   <:actions>
     <.button>Save connection</.button>
   </:actions>
 </.simple_form>
+
+<script>
+  // Include the connection_types map as a JavaScript variable
+  var connectionTypes = <%= raw(Jason.encode!(@connection_types)) %>;
+
+  // Function to update the required fields display based on the selected connection type
+  function updateRequiredFields() {
+    const ConnectionTypeId = document.getElementById("connection_type").value;
+    const requiredFieldsDiv = document.getElementById("required-fields");
+    requiredFieldsDiv.innerHTML = '';
+
+    var heading = document.createElement("dt");
+    heading.setAttribute("class", "w-1/4 flex-none text-[0.8125rem] leading-6 text-zinc-500");
+    var content = document.createTextNode("Required fields:");
+    heading.appendChild(content);
+    requiredFieldsDiv.appendChild(heading);
+
+    connectionTypes[ConnectionTypeId].required_fields.forEach(function(field) {
+      var listItem = document.createElement("dd");
+      listItem.setAttribute("class", "text-sm leading-6 text-zinc-700");
+      listItem.innerText = field;
+      requiredFieldsDiv.appendChild(listItem);
+    });
+  }
+
+  // Event listener for when the connection type selection changes
+  document.getElementById("connection_type").addEventListener("change", updateRequiredFields);
+  updateRequiredFields();
+</script>

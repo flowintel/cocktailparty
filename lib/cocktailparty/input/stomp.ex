@@ -29,12 +29,4 @@ defmodule Cocktailparty.Input.Stomp do
     end
   end
 
-  def validate_config(config) do
-    required_keys = ["host", "port", "virtual_host", "login", "passcode", "ssl"]
-
-    case Enum.all?(required_keys, &Map.has_key?(config, &1)) do
-      true -> :ok
-      false -> {:error, "Missing required keys in config"}
-    end
-  end
 end
