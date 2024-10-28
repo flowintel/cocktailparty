@@ -1,4 +1,4 @@
-defmodule Cocktailparty.Catalog.SourceBase do
+defmodule Cocktailparty.Catalog.SourceBehaviour do
   @moduledoc """
   Defines the behavior for sources.
   """
@@ -7,7 +7,7 @@ defmodule Cocktailparty.Catalog.SourceBase do
 
   defmacro __using__(_) do
     quote do
-      @behaviour Cocktailparty.Catalog.SourceBase
+      @behaviour Cocktailparty.Catalog.SourceBehaviour
 
       def required_fields, do: []
 

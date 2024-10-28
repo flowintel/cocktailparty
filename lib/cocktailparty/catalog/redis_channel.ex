@@ -1,18 +1,18 @@
 defmodule Cocktailparty.Catalog.RedisChannel do
-  use Cocktailparty.Catalog.SourceBase
+  use Cocktailparty.Catalog.SourceBehaviour
   use GenServer
 
   alias Phoenix.Socket.Broadcast
   require Logger
 
-  @impl Cocktailparty.Catalog.SourceBase
+  @impl Cocktailparty.Catalog.SourceBehaviour
   def required_fields do
     SourceType
     {:ok, required_fields} = Cocktailparty.Catalog.SourceType.get_required_fields("redis_pub_sub", "pubsub")
     required_fields
   end
 
-  def start_link(source) do
+  def start_link(%Cocktailparty.Catalog.Source{} = source) do
     GenServer.start_link(__MODULE__, source, name: {:global, {:source, source.id}})
   end
 

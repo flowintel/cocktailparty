@@ -1,5 +1,5 @@
 defmodule Cocktailparty.Catalog.StompSubscribe do
-  use Cocktailparty.Catalog.SourceBase
+  use Cocktailparty.Catalog.SourceBehaviour
   use GenServer
 
   alias Phoenix.Socket.Broadcast
@@ -8,7 +8,7 @@ defmodule Cocktailparty.Catalog.StompSubscribe do
   alias Barytherium.Frame
   require Logger
 
-  @impl Cocktailparty.Catalog.SourceBase
+  @impl Cocktailparty.Catalog.SourceBehaviour
   def required_fields do
     SourceType
 
