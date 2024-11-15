@@ -6,6 +6,7 @@ defmodule Cocktailparty.SinkCatalog.Sink do
     field :name, :string
     field :type, :string
     field :config, :map
+    field :config_yaml, :string, virtual: true
     field :description, :string
 
     belongs_to :user, Cocktailparty.Accounts.User

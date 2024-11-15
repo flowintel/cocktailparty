@@ -9,6 +9,8 @@ defmodule CocktailpartyWeb.SinkHTML do
   attr :changeset, Ecto.Changeset, required: true
   attr :action, :string, required: true
   attr :connections, :list, required: true
+  attr :connection_sink_types, :map, required: true
+  attr :sink_types, :list, required: true
 
   def sink_form(assigns)
 end

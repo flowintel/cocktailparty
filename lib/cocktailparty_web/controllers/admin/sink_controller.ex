@@ -12,19 +12,28 @@ defmodule CocktailpartyWeb.Admin.SinkController do
 
   def new(conn, _params) do
     changeset = SinkCatalog.change_sink(%Sink{})
-    # get list of redis instances
-    instances = Input.list_sink_connections()
-    # get list of users
+    # get list of available sink connections
+    connections = Input.list_sink_connections()
+    # get list of users authorized to create sinks
     users = SinkCatalog.list_authorized_users()
 
-    case instances do
+    # Build the map of connection IDs to sink types with required fields
+    connection_sink_types = build_connection_sink_types(connections)
+
+    case connections do
       [] ->
         conn
-        |> put_flash(:error, "A receiving redis instance is required to create a sink.")
+        |> put_flash(:error, "A receiving connection is required to create a sink.")
         |> redirect(to: ~p"/admin/connections")
 
       _ ->
-        render(conn, :new, changeset: changeset, connections: instances, users: users)
+        render(conn, :new,
+          changeset: changeset,
+          connections: connections,
+          connection_sink_types: connection_sink_types,
+          sink_types: [],
+          users: users
+        )
     end
   end
 
@@ -108,5 +117,24 @@ defmodule CocktailpartyWeb.Admin.SinkController do
     conn
     |> put_flash(:info, "Sink deleted successfully.")
     |> redirect(to: ~p"/admin/sinks")
+  end
+
+  defp build_connection_sink_types(connections) do
+    Enum.reduce(connections, %{}, fn connection, acc ->
+      sink_types = SinkCatalog.get_available_sink_types(connection.id)
+
+      sink_type_info =
+        Enum.map(sink_types, fn sink_type ->
+          {:ok, required_fields} =
+            SinkCatalog.SinkType.get_required_fields(connection.type, sink_type.type)
+
+          %{
+            type: sink_type.type,
+            required_fields: Enum.map(required_fields, &Atom.to_string/1)
+          }
+        end)
+
+      Map.put(acc, Integer.to_string(connection.id), sink_type_info)
+    end)
   end
 end

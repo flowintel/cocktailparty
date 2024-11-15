@@ -8,9 +8,10 @@ defmodule Cocktailparty.SinkCatalog do
   import Ecto.Query, warn: false
   import Ecto.Changeset
   alias Cocktailparty.UserManagement
-  alias Cocktailparty.Input.Connection
+  alias Cocktailparty.Input
   alias Cocktailparty.Repo
   alias Cocktailparty.SinkCatalog.Sink
+  alias Cocktailparty.SinkCatalog.SinkType
   alias Cocktailparty.Accounts.User
   alias CocktailpartyWeb.Endpoint
 
@@ -29,6 +30,16 @@ defmodule Cocktailparty.SinkCatalog do
     Repo.all(Sink)
     |> Repo.preload(:connection)
   end
+
+  @doc """
+  Returns the list of available sink types for a given connection.
+  """
+  def get_available_sink_types(connection_id) do
+    connection = Input.get_connection!(connection_id)
+    SinkType.get_sink_types_for_connection(connection.type)
+  end
+
+
 
   @doc """
   Returns the list of sinks / joined with its use
