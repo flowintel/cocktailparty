@@ -1,8 +1,0 @@
-<.header>
-  Edit Sink <%= @sink.id %>
-  <:subtitle>Use this form to manage sink records in your database.</:subtitle>
-</.header>
-
-<.sink_form changeset={@changeset} action={~p"/sinks/#{@sink}"} connections={@connections} />
-
-<.back navigate={~p"/sinks"}>Back to sinks</.back>

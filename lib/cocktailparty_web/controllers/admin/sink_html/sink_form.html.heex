@@ -10,7 +10,13 @@
     label="Connection"
     options={Enum.map(@connections, fn connection -> {connection.name, connection.id} end)}
   />
-  <.input field={f[:type]} type="select" label="Source type" options={@source_types} />
+  <.input field={f[:type]} type="select" label="Sink type" options={@sink_types} />
+  <.input
+    field={f[:user_id]}
+    type="select"
+    label="User"
+    options={Enum.map(@users, fn user -> {user.email, user.id} end)}
+  />
   <!-- Display Required Fields -->
   <div class="mt-14">
     <!-- Required fields will be displayed here -->
@@ -19,36 +25,35 @@
     </dl>
   </div>
   <.input field={f[:config_yaml]} type="textarea" label="Config" />
-  <.input type="checkbox" field={f[:public]} label="Public" />
   <:actions>
-    <.button>Save Source</.button>
+    <.button>Save Sink</.button>
   </:actions>
 </.simple_form>
 <script>
-  // Include the connection_source_types map as a JavaScript variable
-  var connectionSourceTypes = <%= raw(Jason.encode!(@connection_source_types)) %>;
+  // Include the connection_sink_types map as a JavaScript variable
+  var connectionSinkTypes = <%= raw(Jason.encode!(@connection_sink_types)) %>;
 
-  // Function to update the required fields display based on the selected source type
+  // Function to update the required fields display based on the selected sink type
   function updateRequiredFields() {
-    const connectionId = document.getElementById("source_connection_id").value;
-    const sourceType = document.getElementById("source_type").value;
+    const connectionId = document.getElementById("sink_connection_id").value;
+    const sinkType = document.getElementById("sink_type").value;
 
     const requiredFieldsDiv = document.getElementById("required-fields");
     requiredFieldsDiv.innerHTML = '';
 
-    if (connectionSourceTypes[connectionId]) {
-      const sourceTypeInfo = connectionSourceTypes[connectionId].find(function(item) {
-        return item.type === sourceType;
+    if (connectionSinkTypes[connectionId]) {
+      const sinkTypeInfo = connectionSinkTypes[connectionId].find(function(item) {
+        return item.type === sinkType;
       });
 
-      if (sourceTypeInfo && sourceTypeInfo.required_fields) {
+      if (sinkTypeInfo && sinkTypeInfo.required_fields) {
         var heading = document.createElement("dt");
         heading.setAttribute("class", "w-1/4 flex-none text-[0.8125rem] leading-6 text-zinc-500");
         var content = document.createTextNode("Required fields:");
         heading.appendChild(content);
         requiredFieldsDiv.appendChild(heading);
 
-        sourceTypeInfo.required_fields.forEach(function(field) {
+        sinkTypeInfo.required_fields.forEach(function(field) {
           var listItem = document.createElement("dd");
           listItem.setAttribute("class", "text-sm leading-6 text-zinc-700");
           listItem.innerText = field;
@@ -59,40 +64,40 @@
   }
 
   // Event listener for when the connection selection changes
-  document.getElementById("source_connection_id").addEventListener("change", function() {
+  document.getElementById("sink_connection_id").addEventListener("change", function() {
     const connectionId = this.value;
-    const sourceTypeSelect = document.getElementById("source_type");
+    const sinkTypeSelect = document.getElementById("sink_type");
     const requiredFieldsDiv = document.getElementById("required-fields");
 
     // Clear existing options and required fields
-    sourceTypeSelect.innerHTML = '';
+    sinkTypeSelect.innerHTML = '';
     requiredFieldsDiv.innerHTML = '';
 
-    if (connectionSourceTypes[connectionId]) {
-      // Populate the source type select with options
-      connectionSourceTypes[connectionId].forEach(function(sourceTypeInfo) {
+    if (connectionSinkTypes[connectionId]) {
+      // Populate the sink type select with options
+      connectionSinkTypes[connectionId].forEach(function(sinkTypeInfo) {
         const option = document.createElement("option");
-        option.value = sourceTypeInfo.type;
-        option.text = sourceTypeInfo.type;
-        sourceTypeSelect.add(option);
+        option.value = sinkTypeInfo.type;
+        option.text = sinkTypeInfo.type;
+        sinkTypeSelect.add(option);
       });
 
-      // Select the first source type and update required fields
-      if (sourceTypeSelect.options.length > 0) {
-        sourceTypeSelect.selectedIndex = 0;
+      // Select the first sink type and update required fields
+      if (sinkTypeSelect.options.length > 0) {
+        sinkTypeSelect.selectedIndex = 0;
         updateRequiredFields();
       }
     } else {
-      // If no source types are available, show a message or disable the select
+      // If no sink types are available, show a message or disable the select
       const option = document.createElement("option");
-      option.text = "No source types available";
+      option.text = "No sink types available";
       option.disabled = true;
-      sourceTypeSelect.add(option);
+      sinkTypeSelect.add(option);
     }
   });
 
-  // Event listener for when the source type selection changes
-  document.getElementById("source_type").addEventListener("change", updateRequiredFields);
+  // Event listener for when the sink type selection changes
+  document.getElementById("sink_type").addEventListener("change", updateRequiredFields);
   updateRequiredFields();
 </script>
 

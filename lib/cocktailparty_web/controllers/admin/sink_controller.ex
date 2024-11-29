@@ -1,6 +1,8 @@
 defmodule CocktailpartyWeb.Admin.SinkController do
   use CocktailpartyWeb, :controller
 
+  import Cocktailparty.Util
+
   alias Cocktailparty.SinkCatalog
   alias Cocktailparty.SinkCatalog.Sink
   alias Cocktailparty.Input
@@ -45,12 +47,22 @@ defmodule CocktailpartyWeb.Admin.SinkController do
         |> redirect(to: ~p"/admin/sinks/#{sink}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        # get list of redis instances
-        instances = Input.list_connections()
+        sink_types = get_sink_types_from_params(sink_params)
+
+        # get list of connections
+        connections = Input.list_connections()
+        connection_sink_types = build_connection_sink_types(connections)
+
         # get list of users
         users = SinkCatalog.list_authorized_users()
 
-        render(conn, :new, changeset: changeset, connections: instances, users: users)
+        render(conn, :new,
+          changeset: changeset,
+          connections: connections,
+          connection_sink_types: connection_sink_types,
+          sink_types: sink_types,
+          users: users
+        )
     end
   end
 
@@ -64,22 +76,39 @@ defmodule CocktailpartyWeb.Admin.SinkController do
   def edit(conn, %{"id" => id}) do
     sink = SinkCatalog.get_sink!(id)
     changeset = SinkCatalog.change_sink(sink)
-    # get list of redis instances
-    instances = Input.list_sink_connections()
+    # get list of connections
+    connections = Input.list_sink_connections()
+
+    # Convert the config map to a YAML string and set it in the changeset
+    config_yaml = map_to_yaml!(sink.config)
+    changeset = Ecto.Changeset.put_change(changeset, :config_yaml, config_yaml)
+
+    # Build the map of connection IDs to sink types with required fields
+    connection_sink_types = build_connection_sink_types(connections)
+
+    # Get source types for the current connection
+    connection = Input.get_connection!(sink.connection_id)
+
+    sink_types =
+      SinkCatalog.get_available_sink_types(connection.id) |> Enum.map(&{&1.type, &1.type})
+
     # get list of users
     users = SinkCatalog.list_authorized_users()
 
-    case instances do
+
+    case connections do
       [] ->
         conn
-        |> put_flash(:error, "A receiving redis instance is required to edit a sink.")
+        |> put_flash(:error, "A receiving connection is required to edit a sink.")
         |> redirect(to: ~p"/admin/connections")
 
       _ ->
         render(conn, :edit,
           sink: sink,
           changeset: changeset,
-          connections: instances,
+          connections: connections,
+          connection_sink_types: connection_sink_types,
+          source_types: sink_types,
           users: users
         )
     end
@@ -87,6 +116,9 @@ defmodule CocktailpartyWeb.Admin.SinkController do
 
   def update(conn, %{"id" => id, "sink" => sink_params}) do
     sink = SinkCatalog.get_sink!(id)
+    # get list of redis instances
+    connections = Input.list_sink_connections()
+    connection_sink_types = build_connection_sink_types(connections)
 
     case SinkCatalog.update_sink(sink, sink_params) do
       {:ok, sink} ->
@@ -95,19 +127,30 @@ defmodule CocktailpartyWeb.Admin.SinkController do
         |> redirect(to: ~p"/admin/sinks/#{sink}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        # get list of redis instances
-        instances = Input.list_sink_connections()
         # get list of users
         users = SinkCatalog.list_authorized_users()
 
         render(conn, :edit,
           sink: sink,
           changeset: changeset,
-          connections: instances,
+          connections: connections,
+          connection_sink_types: connection_sink_types,
           users: users
         )
     end
+
+    # {:error, reason = %YamlElixir.ParsingError{}} ->
+    #   conn
+    #   |> put_flash(:error, "Failed to parse YAML: #{reason.message}")
+    #   |> render("edit.html",
+    #     source: source,
+    #     changeset: Source.changeset(source, source_params),
+    #     connections: connections
+    #   )
+    # end
   end
+
+
 
   def delete(conn, %{"id" => id}) do
     sink = SinkCatalog.get_sink!(id)
@@ -137,4 +180,12 @@ defmodule CocktailpartyWeb.Admin.SinkController do
       Map.put(acc, Integer.to_string(connection.id), sink_type_info)
     end)
   end
+
+  defp get_sink_types_from_params(%{"connection_id" => connection_id})
+       when connection_id != "" do
+    connection = Input.get_connection!(connection_id)
+    SinkCatalog.get_available_sink_types(connection.id) |> Enum.map(&{&1.type, &1.type})
+  end
+
+  defp get_sink_types_from_params(_), do: []
 end

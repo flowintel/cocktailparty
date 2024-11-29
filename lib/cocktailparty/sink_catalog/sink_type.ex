@@ -4,7 +4,7 @@ defmodule Cocktailparty.SinkCatalog.SinkType do
   """
 
   @sink_types %{
-    "redis_pub" => [
+    "redis_pub_sub" => [
       %{type: "pub", module: Cocktailparty.SinkCatalog.RedisChannel, required_fields: [:channel]}
     ]
   }

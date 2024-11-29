@@ -5,6 +5,7 @@ defmodule Cocktailparty.Catalog.SourceType do
 
   @source_types %{
     "redis_pub_sub" => [
+      # TODO change to sub
       %{type: "pubsub", module: Cocktailparty.Catalog.RedisChannel, required_fields: [:channel]}
     ],
     "redis" => [
