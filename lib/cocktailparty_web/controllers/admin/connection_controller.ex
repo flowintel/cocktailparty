@@ -72,13 +72,13 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
       Input.change_edit_connection(connection_map)
       |> Map.put(:data, Input.switch_config_repr!(connection_map))
 
-    connection_types = ConnectionTypes.all()
+    fullduplex = Input.get_fullduplex!(id)
+    dbg(fullduplex)
 
     render(conn, :edit,
       connection: connection_map,
       changeset: changeset,
-      show_connection_types: false,
-      connection_types: connection_types
+      fullduplex: fullduplex
     )
   end
 
@@ -103,7 +103,6 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
             new_changeset = Map.put(changeset, :changes, new_changes)
 
             connection_types = ConnectionTypes.all()
-            dbg(new_changeset)
 
             render(conn, :edit,
               connection: connection,

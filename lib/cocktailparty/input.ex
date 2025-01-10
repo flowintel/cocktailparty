@@ -134,6 +134,11 @@ defmodule Cocktailparty.Input do
     |> Repo.preload(:sources)
   end
 
+  def get_fullduplex!(id) do
+    Repo.one(from c in Connection, where: c.id == ^id, select: c.type)
+    |> ConnectionTypes.get_full_duplex()
+  end
+
   @doc """
   Switch Connection's config representation between YAML string and map
   """
@@ -180,8 +185,8 @@ defmodule Cocktailparty.Input do
     end
   end
 
-  defp validate_full_duplex(changeset) do
-    if ConnectionTypes.get_full_duplex (get_field(changeset, :type)) == true do
+  def validate_full_duplex(changeset) do
+    if ConnectionTypes.get_full_duplex(get_field(changeset, :type)) == true do
       changeset
     else
       add_error(changeset, :sink, "This connection type does not support fullduplex connections")
@@ -205,7 +210,15 @@ defmodule Cocktailparty.Input do
 
     # We restart related processes if needed
     if changed?(changeset, :config) do
-      case Repo.update(changeset) do
+      connection =
+        if get_change(changeset, :sink) do
+          changeset
+          |> validate_full_duplex()
+        else
+          changeset
+        end
+
+      case Repo.update(connection) do
         {:ok, connection} ->
           Connection.terminate(connection)
           ConnectionManager.start_connection(connection)

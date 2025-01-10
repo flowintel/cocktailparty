@@ -81,7 +81,7 @@ defmodule Cocktailparty.Input.ConnectionTypes do
   return whether the connection type support fullduplex connections
   """
   def get_full_duplex(type) do
-    Map.get(@connection_types, type)
+    Map.get(@connection_types, type).fullduplex
   end
 
   def validate_config(type, config) do

@@ -4,7 +4,6 @@
   </.error>
   <.input field={f[:name]} type="text" label="Name" />
   <.input
-    :if={@show_connection_types}
     field={f[:type]}
     type="select"
     label="Type"
@@ -30,35 +29,35 @@
 </.simple_form>
 
 <script>
-  // Include the connection_types map as a JavaScript variable
-  var connectionTypes = <%= raw(Jason.encode!(@connection_types)) %>;
+   // Include the connection_types map as a JavaScript variable
+   var connectionTypes = <%= raw(Jason.encode!(@connection_types)) %>;
 
-  // Function to update the required fields display based on the selected connection type
-  function updateRequiredFields() {
-    const ConnectionTypeId = document.getElementById("connection_type").value;
-    const requiredFieldsDiv = document.getElementById("required-fields");
-    requiredFieldsDiv.innerHTML = '';
+   // Function to update the required fields display based on the selected connection type
+   function updateRequiredFields() {
+     const ConnectionTypeId = document.getElementById("connection_type").value;
+     const requiredFieldsDiv = document.getElementById("required-fields");
+     requiredFieldsDiv.innerHTML = '';
 
-    var heading = document.createElement("dt");
-    heading.setAttribute("class", "w-1/4 flex-none text-[0.8125rem] leading-6 text-zinc-500");
-    var content = document.createTextNode("Required fields:");
-    heading.appendChild(content);
-    requiredFieldsDiv.appendChild(heading);
+     var heading = document.createElement("dt");
+     heading.setAttribute("class", "w-1/4 flex-none text-[0.8125rem] leading-6 text-zinc-500");
+     var content = document.createTextNode("Required fields:");
+     heading.appendChild(content);
+     requiredFieldsDiv.appendChild(heading);
 
-    connectionTypes[ConnectionTypeId].required_fields.forEach(function(field) {
-      var listItem = document.createElement("dd");
-      listItem.setAttribute("class", "text-sm leading-6 text-zinc-700");
-      listItem.innerText = field;
-      requiredFieldsDiv.appendChild(listItem);
-    });
+     connectionTypes[ConnectionTypeId].required_fields.forEach(function(field) {
+       var listItem = document.createElement("dd");
+       listItem.setAttribute("class", "text-sm leading-6 text-zinc-700");
+       listItem.innerText = field;
+       requiredFieldsDiv.appendChild(listItem);
+     });
 
-  // Disable and uncheck the sink checkbox if the type of connection does not support fullduplex
+   // Disable and uncheck the sink checkbox if the type of connection does not support fullduplex
   document.getElementById("connection_sink").disabled = !connectionTypes[ConnectionTypeId].fullduplex;
   document.getElementById("connection_sink").checked = connectionTypes[ConnectionTypeId].fullduplex ? document.getElementById("connection_sink").checked : false;
 
-  }
+   }
 
-  // Event listener for when the connection type selection changes
-  document.getElementById("connection_type").addEventListener("change", updateRequiredFields);
-  updateRequiredFields();
+   // Event listener for when the connection type selection changes
+   document.getElementById("connection_type").addEventListener("change", updateRequiredFields);
+   updateRequiredFields();
 </script>
