@@ -7,17 +7,26 @@ defmodule Cocktailparty.Input.ConnectionTypes do
     "redis" => %{
       name: "Redis",
       module: Cocktailparty.Input.Redis,
-      required_fields: [:hostname, :port]
+      required_fields: [:hostname, :port],
+      fullduplex: false
     },
     "redis_pub_sub" => %{
       name: "Redis PubSub",
       module: Cocktailparty.Input.RedisPubSub,
-      required_fields: [:hostname, :port]
+      required_fields: [:hostname, :port],
+      fullduplex: true
     },
     "stomp" => %{
       name: "STOMP",
       module: Cocktailparty.Input.Stomp,
-      required_fields: [:host, :port, :virtual_host, :login, :passcode, :ssl]
+      required_fields: [:host, :port, :virtual_host, :login, :passcode, :ssl],
+      fullduplex: false
+    },
+    "websocket" => %{
+      name: "WebSocket",
+      module: Cocktailparty.Input.WebSocket,
+      required_fields: [:url, :port, :ssl],
+      fullduplex: false
     }
     # Add other connection types here
   }
@@ -66,6 +75,13 @@ defmodule Cocktailparty.Input.ConnectionTypes do
       %{required_fields: req_fields} -> req_fields
       nil -> []
     end
+  end
+
+  @doc """
+  return whether the connection type support fullduplex connections
+  """
+  def get_full_duplex(type) do
+    Map.get(@connection_types, type)
   end
 
   def validate_config(type, config) do

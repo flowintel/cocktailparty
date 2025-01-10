@@ -10,6 +10,7 @@ defmodule Cocktailparty.Input do
   alias Cocktailparty.Repo
 
   alias Cocktailparty.Input.Connection
+  alias Cocktailparty.Input.ConnectionTypes
   alias Cocktailparty.Input.ConnectionManager
 
   @doc """
@@ -166,6 +167,7 @@ defmodule Cocktailparty.Input do
     conn =
       %Connection{}
       |> Connection.changeset(attrs)
+      |> validate_full_duplex()
       |> Repo.insert()
 
     case conn do
@@ -175,6 +177,14 @@ defmodule Cocktailparty.Input do
 
       {:error, changeset} ->
         {:error, changeset}
+    end
+  end
+
+  defp validate_full_duplex(changeset) do
+    if ConnectionTypes.get_full_duplex (get_field(changeset, :type)) == true do
+      changeset
+    else
+      add_error(changeset, :sink, "This connection type does not support fullduplex connections")
     end
   end
 
