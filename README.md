@@ -30,6 +30,8 @@ git clone https://github.com/flowintel/cocktailparty.git
 cd cocktailparty
 mix deps.get
 mix compile
+cd assets
+npm install 
 mix phx.server
 ```
 
