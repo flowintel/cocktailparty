@@ -36,8 +36,7 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
 
             render(conn, :new,
               changeset: new_changeset,
-              connection_types: connection_types,
-              show_connection_types: true
+              connection_types: connection_types
             )
         end
 
@@ -54,8 +53,7 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
         |> put_flash(:error, "Failed to parse YAML: #{reason.message}")
         |> render(:new,
           changeset: new_changeset,
-          connection_types: connection_types,
-          show_connection_types: true
+          connection_types: connection_types
         )
     end
   end
@@ -73,7 +71,6 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
       |> Map.put(:data, Input.switch_config_repr!(connection_map))
 
     fullduplex = Input.get_fullduplex!(id)
-    dbg(fullduplex)
 
     render(conn, :edit,
       connection: connection_map,
@@ -102,18 +99,17 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
             new_changes = Map.put(changeset.changes, :config, yaml_config)
             new_changeset = Map.put(changeset, :changes, new_changes)
 
-            connection_types = ConnectionTypes.all()
+            fullduplex = Input.get_fullduplex!(id)
 
             render(conn, :edit,
               connection: connection,
               changeset: new_changeset,
-              connection_types: connection_types,
-              show_connection_types: false
+              fullduplex: fullduplex
             )
         end
 
       {:error, reason = %YamlElixir.ParsingError{}} ->
-        connection_types = ConnectionTypes.all()
+        fullduplex = Input.get_fullduplex!(id)
 
         changeset = Input.change_connection(connection_map, connection_params)
 
@@ -126,8 +122,7 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
         |> render(:edit,
           connection: connection,
           changeset: new_changeset,
-          connection_types: connection_types,
-          show_connection_types: false
+          fullduplex: fullduplex
         )
     end
   end
