@@ -1,0 +1,29 @@
+<.simple_form :let={f} for={@changeset} action={@action}>
+  <.error :if={@changeset.action}>
+    Oops, something went wrong! Please check the errors below.
+  </.error>
+  <.input field={f[:name]} type="text" label="Name" />
+  <.input field={f[:enabled]} type="checkbox" label="Enabled" />
+  <.input field={f[:sink]} type="checkbox" label="Sink" />
+  <!-- Display Required Fields -->
+  <div class="mt-14">
+    <!-- Required fields will be displayed here -->
+    <dl class="-my-4 divide-y divide-zinc-100">
+      <div class="flex gap-4 py-4 sm:gap-8" id="required-fields"></div>
+    </dl>
+  </div>
+  <.input field={f[:config]} type="textarea" label="Config" />
+  <:actions>
+    <.button>Save connection</.button>
+  </:actions>
+</.simple_form>
+
+<script>
+   // Include the connection_types map as a JavaScript variable
+   var fullduplex = <%= @fullduplex %>;
+   // Disable and uncheck the sink checkbox if the type of connection does not support fullduplex
+  if (fullduplex === false) {
+    document.getElementById("connection_sink").disabled = true;
+    document.getElementById("connection_sink").checked = false;
+   }
+</script>
