@@ -7,6 +7,7 @@ defmodule Cocktailparty.SinkCatalog do
 
   import Ecto.Query, warn: false
   import Ecto.Changeset
+  alias Cocktailparty.Input.Connection
   alias Cocktailparty.UserManagement
   alias Cocktailparty.Input
   alias Cocktailparty.Repo
@@ -168,6 +169,7 @@ defmodule Cocktailparty.SinkCatalog do
     Cocktailparty.Input.get_connection_map!(attrs["connection_id"])
     |> Ecto.build_assoc(:sinks)
     |> change_sink(attrs)
+    |> validate_sink_type()
     |> Repo.insert()
     |> case do
       {:ok, sink} ->
@@ -179,6 +181,20 @@ defmodule Cocktailparty.SinkCatalog do
     end
   end
 
+  defp validate_sink_type(changeset) do
+    connection_id = get_field(changeset, :connection_id)
+    sink_type = get_field(changeset, :type)
+
+    with %Connection{type: connection_type} <- Input.get_connection!(connection_id),
+         sink_types <- SinkType.get_sink_types_for_connection(connection_type),
+         true <- Enum.any?(sink_types, fn %{type: type} -> type == sink_type end) do
+      changeset
+    else
+      _ -> add_error(changeset, :type, "is not valid for the selected connection type")
+    end
+  end
+
+  # TODO: check whether it needs to validate_sink_types again
   @doc """
   Creates a sink by users, no clues about available sinks
 
@@ -222,25 +238,25 @@ defmodule Cocktailparty.SinkCatalog do
   def update_sink(%Sink{} = sink, attrs) do
     changeset = change_sink(sink, attrs)
 
-    case changeset do
-      %Ecto.Changeset{
-        changes: %{channel: new_channel},
-        data: %Sink{} = sink
-      }
-      when sink.channel != new_channel ->
-        # We notify the monitor
-        notify_monitor({:unsubscribe, "sink:" <> Integer.to_string(sink.id)})
+    if changed?(changeset, :config) do
+      sink =
+        changeset
+        |> validate_sink_type()
 
-        # We update the sink
-        {:ok, sink} = Repo.update(changeset)
+      case Repo.update(sink) do
+        {:ok, sink} ->
+          notify_monitor({:unsubscribe, "sink:" <> Integer.to_string(sink.id)})
+          # SourceManager.restart_source(source.id)
+          notify_monitor({:subscribe, "sink:" <> Integer.to_string(sink.id)})
+          {:ok, sink}
 
-        # And we ask the pubsubmonitor to subscribe to the updated sink
-        notify_monitor({:subscribe, "sink:" <> Integer.to_string(sink.id)})
-
-        {:ok, sink}
-
-      _ ->
-        Repo.update(changeset)
+        {:error, changeset} ->
+          {:error, changeset}
+      end
+    else
+      changeset
+      |> validate_sink_type()
+      |> Repo.update()
     end
   end
 

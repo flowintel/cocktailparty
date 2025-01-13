@@ -3,9 +3,10 @@ defmodule Cocktailparty.SinkCatalog.SinkType do
   Defines the available sink types for each connection type.
   """
 
+  # The connection type MUST be fullduplex otherwise it will introduce non controlled bugs.
   @sink_types %{
-    "redis_pub_sub" => [
-      %{type: "pub", module: Cocktailparty.SinkCatalog.RedisChannel, required_fields: [:channel]}
+    "redis" => [
+      %{type: "pub", module: Cocktailparty.SinkCatalog.RedisChannelSink, required_fields: [:channel]}
     ]
   }
 

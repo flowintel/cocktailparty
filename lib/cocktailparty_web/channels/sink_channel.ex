@@ -44,20 +44,7 @@ defmodule CocktailpartyWeb.SinkChannel do
       "handling message from #{socket.assigns.current_user} on #{socket.assigns.sink.id}"
     )
 
-    # we fastlane message into redix
-    # push into redis instance corresponding to the sink channel
-    # TODO: we could push in phoenix.pubsub to create chatroom
-    # get the corresponding redix instance client
-    client =
-      GenServer.whereis(
-        {:global, "redix_" <> Integer.to_string(socket.assigns.sink.redis_instance_id)}
-      )
-
-    Redix.command!(client, ["PUBLISH", socket.assigns.sink.channel, payload])
-
-    # still, we also push on the pubsub so pubsubmonitor
-    # can keep a sample of what is coming from the client
-    # wrap messages into %Broadcast{} to keep metadata about the payload
+    # we push on the pubsub
     broadcast = %Broadcast{
       topic: "sink:" <> Integer.to_string(socket.assigns.sink.id),
       event: :new_client_message,

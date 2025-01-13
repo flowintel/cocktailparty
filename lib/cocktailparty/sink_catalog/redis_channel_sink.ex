@@ -2,6 +2,8 @@ defmodule Cocktailparty.SinkCatalog.RedisChannelSink do
   use Cocktailparty.SinkCatalog.SinkBehaviour
   use GenServer
 
+  alias Phoenix.PubSub
+
   require Logger
 
   alias Redix
@@ -13,12 +15,6 @@ defmodule Cocktailparty.SinkCatalog.RedisChannelSink do
     [:channel]
   end
 
-  ## Public API
-  @impl Cocktailparty.SinkCatalog.SinkBehaviour
-  def publish(pid, message) do
-    GenServer.call(pid, {:publish, message})
-  end
-
   ## GenServer Callbacks
   def start_link(%Cocktailparty.SinkCatalog.Sink{} = sink) do
     GenServer.start_link(__MODULE__, sink, name: {:global, {:sink, sink.id}})
@@ -26,30 +22,44 @@ defmodule Cocktailparty.SinkCatalog.RedisChannelSink do
 
   @impl GenServer
   def init(sink) do
-    # We just check whether the connection process exists
-    with conn_pid <- :global.whereis_name({"redis_pub", sink.connection_id}) do
-      # Subscribe to the Redis channel
-      {:ok,
-       %{
-         conn_pid: conn_pid,
-         channel: sink.config["channel"],
-         source_id: sink.id
-       }}
-    else
-      :undefined -> {:stop, {:connection_not_found, sink.connection_id}}
-    end
+    # we subscribe to the sink topic
+
+    :ok =
+      PubSub.subscribe(
+        Cocktailparty.PubSub,
+        "sink:" <> Integer.to_string(sink.id)
+      )
+
+    # we keep the redis client's pid in the state
+    conn_pid = :global.whereis_name({"redis", sink.connection_id})
+    {:ok, %{sink: sink, conn: conn_pid}}
+
+    {:ok,
+     %{
+       conn_pid: conn_pid,
+       channel: sink.config["channel"],
+       sink_id: Integer.to_string(sink.id)
+     }}
   end
 
- #TODO
+  @impl true
+  def handle_info(
+        %Phoenix.Socket.Broadcast{topic: "sink:" <> sink_id, event: :new_client_message, payload: message},
+        state)
+      when sink_id == state.sink_id do
+    case Redix.command(state.conn_pid, ["PUBLISH", state.channel, message]) do
+      {:ok, _} ->
+        {:noreply, state}
 
-  @impl GenServer
-  def handle_call({:publish, message}, _from, %{redix_conn: redix_conn, channel: channel} = state) do
-    case Redix.command(redix_conn, ["PUBLISH", channel, message]) do
-      {:ok, _count} ->
-        {:reply, :ok, state}
       {:error, reason} ->
-        {:reply, {:error, reason}, state}
+        Logger.error(
+          "error #{reason} when publishing into redis #{state.conn_pid}:#{state.channel}"
+        )
+
+        {:noreply, state}
     end
+
+    {:noreply, state}
   end
 
   @impl GenServer
@@ -57,6 +67,7 @@ defmodule Cocktailparty.SinkCatalog.RedisChannelSink do
     if Process.alive?(redix_conn) do
       Redix.stop(redix_conn)
     end
+
     :ok
   end
 end

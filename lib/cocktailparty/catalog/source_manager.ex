@@ -26,16 +26,16 @@ defmodule Cocktailparty.Catalog.SourceManager do
         Logger.error("Failed to start source #{source_schema.id}: #{inspect(reason)}")
         {:error, reason}
 
-      error ->
-        Logger.error("Failed to start source #{source_schema.id}: #{inspect(error)}")
-        {:error, error}
-
       :undefined ->
         msg =
           "Failed to start source #{source_schema.id}: Cocktailparty.SourcesDynamicSupervisor not found"
 
         Logger.error(msg)
         {:error, msg}
+
+      error ->
+        Logger.error("Failed to start source #{source_schema.id}: #{inspect(error)}")
+        {:error, error}
     end
   end
 
@@ -66,7 +66,7 @@ defmodule Cocktailparty.Catalog.SourceManager do
          :ok <- stop_source(src.id) do
       start_source(src)
     else
-        _ ->
+      _ ->
         Logger.error("Cannot restart process for source #{id} -- not running")
     end
   end

@@ -8,13 +8,13 @@ defmodule Cocktailparty.Input.ConnectionTypes do
       name: "Redis",
       module: Cocktailparty.Input.Redis,
       required_fields: [:hostname, :port],
-      fullduplex: false
+      fullduplex: true
     },
     "redis_pub_sub" => %{
       name: "Redis PubSub",
       module: Cocktailparty.Input.RedisPubSub,
       required_fields: [:hostname, :port],
-      fullduplex: true
+      fullduplex: false
     },
     "stomp" => %{
       name: "STOMP",

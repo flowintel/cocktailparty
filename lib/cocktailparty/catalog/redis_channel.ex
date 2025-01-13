@@ -29,8 +29,9 @@ defmodule Cocktailparty.Catalog.RedisChannel do
          source_id: source.id,
          reference: ref
        }}
-    else
-      :undefined -> {:stop, {:connection_not_found, source.connection_id}}
+    # TODO handle with with
+    # else
+    #   :undefined -> {:stop, {:connection_not_found, source.connection_id}}
     end
   end
 

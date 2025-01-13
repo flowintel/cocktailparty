@@ -38,8 +38,9 @@ defmodule Cocktailparty.Catalog.StompSubscribe do
          channel: source.config["destination"],
          source_id: source.id
        }}
-    else
-      :undefined -> {:stop, {:connection_not_found, source.connection_id}}
+    # TODO handle with with
+    #  else
+    #    :undefined -> {:stop, {:connection_not_found, source.connection_id}}
     end
   end
 

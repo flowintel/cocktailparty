@@ -103,10 +103,11 @@ defmodule Cocktailparty.Input.StompPubSub do
         # Otherwise we don't do anything, the driver will reconnect all the source anyway
         Logger.info("Connection is not ready -- Subscription for #{srcid} will occur once ready")
       end
-    else
-      :undefined ->
-        Logger.info("Cannot find process #{name}")
-        {:noreply, state}
+    # TODO handle error with with
+    # else
+    #   :undefined ->
+    #     Logger.info("Cannot find process #{name}")
+    #     {:noreply, state}
     end
   end
 

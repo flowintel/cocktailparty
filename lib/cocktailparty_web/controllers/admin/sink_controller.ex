@@ -86,7 +86,7 @@ defmodule CocktailpartyWeb.Admin.SinkController do
     # Build the map of connection IDs to sink types with required fields
     connection_sink_types = build_connection_sink_types(connections)
 
-    # Get source types for the current connection
+    # Get sink types for the current connection
     connection = Input.get_connection!(sink.connection_id)
 
     sink_types =
@@ -94,7 +94,6 @@ defmodule CocktailpartyWeb.Admin.SinkController do
 
     # get list of users
     users = SinkCatalog.list_authorized_users()
-
 
     case connections do
       [] ->
@@ -108,7 +107,7 @@ defmodule CocktailpartyWeb.Admin.SinkController do
           changeset: changeset,
           connections: connections,
           connection_sink_types: connection_sink_types,
-          source_types: sink_types,
+          sink_types: sink_types,
           users: users
         )
     end
@@ -149,8 +148,6 @@ defmodule CocktailpartyWeb.Admin.SinkController do
     #   )
     # end
   end
-
-
 
   def delete(conn, %{"id" => id}) do
     sink = SinkCatalog.get_sink!(id)

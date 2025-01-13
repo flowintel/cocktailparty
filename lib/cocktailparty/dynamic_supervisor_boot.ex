@@ -1,6 +1,7 @@
 defmodule Cocktailparty.DynamicSupervisorBoot do
   alias Cocktailparty.Input.ConnectionManager
   alias Cocktailparty.Catalog.SourceManager
+  alias Cocktailparty.SinkCatalog.SinkManager
   use Supervisor
 
   require Logger
@@ -17,6 +18,8 @@ defmodule Cocktailparty.DynamicSupervisorBoot do
        name: {:global, Cocktailparty.ConnectionsDynamicSupervisor}},
       {Cocktailparty.SourcesDynamicSupervisor,
        name: {:global, Cocktailparty.SourcesDynamicSupervisor}},
+      {Cocktailparty.SinksDynamicSupervisor,
+       name: {:global, Cocktailparty.SinksDynamicSupervisor}},
       {Task,
        fn ->
          Logger.info("Starting Connections")
@@ -26,6 +29,10 @@ defmodule Cocktailparty.DynamicSupervisorBoot do
          Logger.info("Starting Sources")
          Cocktailparty.Catalog.list_sources()
          |> Enum.each(fn x -> SourceManager.start_source(x) end)
+
+         Logger.info("Starting Sinks")
+         Cocktailparty.SinkCatalog.list_sinks()
+         |> Enum.each(fn x -> SinkManager.start_sink(x) end)
        end}
     ]
 
