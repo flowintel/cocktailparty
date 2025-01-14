@@ -302,7 +302,7 @@ defmodule Cocktailparty.Input do
       pid ->
         case connection.type do
           # Redix process exposes a :connected field
-          type when type in ["redis_pub_sub", "redis"] ->
+          type when type in ["redis_pub_sub", "redis", "websocket"] ->
             case :sys.get_state(pid) do
               {:connected, _} ->
                 true

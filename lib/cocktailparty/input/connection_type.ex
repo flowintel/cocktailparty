@@ -25,7 +25,7 @@ defmodule Cocktailparty.Input.ConnectionTypes do
     "websocket" => %{
       name: "WebSocket",
       module: Cocktailparty.Input.WebSocket,
-      required_fields: [:url, :port, :ssl],
+      required_fields: [:uri],
       fullduplex: false
     }
     # Add other connection types here
