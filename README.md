@@ -1,4 +1,5 @@
-# CocktailParty
+
+![logo-cocktail-party-horizontal-coul](https://github.com/user-attachments/assets/bc59b4be-d3f0-4fda-bb73-fe9a7487f9d2)
 
 This project is a work in progress and not feature complete, therefore this readme may not align with reality.
 
