@@ -186,10 +186,18 @@ defmodule Cocktailparty.Input do
   end
 
   def validate_full_duplex(changeset) do
-    if ConnectionTypes.get_full_duplex(get_field(changeset, :type)) == true do
-      changeset
+    if get_change(changeset, :sink) do
+      if ConnectionTypes.get_full_duplex(get_field(changeset, :type)) == true do
+        changeset
+      else
+        add_error(
+          changeset,
+          :sink,
+          "This connection type does not support fullduplex connections"
+        )
+      end
     else
-      add_error(changeset, :sink, "This connection type does not support fullduplex connections")
+      changeset
     end
   end
 
@@ -211,12 +219,8 @@ defmodule Cocktailparty.Input do
     # We restart related processes if needed
     if changed?(changeset, :config) do
       connection =
-        if get_change(changeset, :sink) do
           changeset
           |> validate_full_duplex()
-        else
-          changeset
-        end
 
       case Repo.update(connection) do
         {:ok, connection} ->
