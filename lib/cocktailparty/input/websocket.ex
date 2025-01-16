@@ -7,7 +7,7 @@ defmodule Cocktailparty.Input.WebSocket do
 
     specs =
       {Cocktailparty.Input.WebsocketClient,
-       uri: connection.config["uri"], state: %{}, opts: [name: {:global, {connection.type, connection.id}}]}
+       uri: connection.config["uri"], state: %{subscribed: MapSet.new()}, opts: [name: {:global, {connection.type, connection.id}}]}
 
     # Add to the ConnectionDynamicSupervisor children
     case :global.whereis_name(Cocktailparty.ConnectionsDynamicSupervisor) do

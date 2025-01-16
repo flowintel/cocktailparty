@@ -13,8 +13,18 @@ defmodule Cocktailparty.Catalog.SourceType do
       # %{type: "rpop", module: Cocktailparty.Catalog.Sources.Redis.RPOP}
     ],
     "stomp" => [
-      %{type: "subscribe", module: Cocktailparty.Catalog.StompSubscribe, required_fields: [:destination]}
-      # %{type: "send", module: Cocktailparty.Catalolg.Sources.Stomp.Send}
+      %{
+        type: "subscribe",
+        module: Cocktailparty.Catalog.StompSubscribe,
+        required_fields: [:destination]
+      }
+    ],
+    "websocket" => [
+      %{
+        type: "dummy",
+        module: Cocktailparty.Catalog.DummyWebsocket,
+        required_fields: []
+      }
     ]
   }
 

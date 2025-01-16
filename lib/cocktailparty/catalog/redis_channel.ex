@@ -48,7 +48,7 @@ defmodule Cocktailparty.Catalog.RedisChannel do
     # wrap messages into %Broadcast{} to keep metadata about the payload
     broadcast = %Broadcast{
       topic: "feed:" <> Integer.to_string(state.source_id),
-      event: :new_redis_message,
+      event: :new_message,
       payload: message
     }
 

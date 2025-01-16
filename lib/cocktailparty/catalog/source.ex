@@ -25,7 +25,7 @@ defmodule Cocktailparty.Catalog.Source do
     source
     |> cast(attrs, [:name, :type, :description, :config_yaml, :connection_id, :public])
     |> validate_required([:name, :type])
-    |> validate_required_config_yaml(attrs)
+    # |> validate_required_config_yaml(attrs)
     |> unique_constraint(:name)
     |> parse_yaml()
     |> validate_config_fields()

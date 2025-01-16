@@ -52,7 +52,7 @@ defmodule Cocktailparty.Catalog.StompSubscribe do
 
     broadcast = %Broadcast{
       topic: "feed:" <> Integer.to_string(state.source_id),
-      event: :new_stomp_message,
+      event: :new_message,
       payload: %{destination: headers["destination"], body: frame.body |> decompress_body()}
     }
 
