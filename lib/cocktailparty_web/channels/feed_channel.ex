@@ -31,12 +31,16 @@ defmodule CocktailpartyWeb.FeedChannel do
   end
 
   # as messages are broadcasted from the broker, we intercept
-  intercept [:new_message, :kick]
+  intercept [:new_text_message, :new_binary_message, :kick]
   @impl true
   def handle_out(msg, payload, socket) do
     case msg do
-      :new_message ->
-        push(socket, "new_message", {:binary, payload})
+      :new_binary_message ->
+        push(socket, "new_binary_message", {:binary, payload})
+        {:noreply, socket}
+
+      :new_text_message ->
+        push(socket, "new_text_message", %{payload: payload})
         {:noreply, socket}
 
       :kick ->

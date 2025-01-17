@@ -6,18 +6,18 @@ defmodule Cocktailparty.Input.WebsocketClient do
   defstruct [:subscribed]
 
   # def handle_cast({:subscribe, name = {:source, _}}, state) do
-  def handle_info({:subscribe, name = {:source, _}}, state) do
+  def handle_info({:subscribe, source = %{name: {:source, _}, datatype: _}}, state) do
     Logger.error("Received SUB")
-    # with pid <- :global.whereis_name(name) do
+    # with pid <- :global.whereis_name(source.name) do
     # Logger.info("Received SUB from #{:erlang.pid_to_list(pid) |> to_string}")
-    {:ok, Map.put(state, :subscribed, MapSet.put(state.subscribed, name))}
+    {:ok, Map.put(state, :subscribed, MapSet.put(state.subscribed, source))}
     # end
   end
 
-  def handle_info({:unsubscribe, name = {:source, _}}, state) do
-    with pid <- :global.whereis_name(name) do
+  def handle_info({:unsubscribe, source = %{name: {:source, _}, datatype: _}}, state) do
+    with pid <- :global.whereis_name(source.name) do
       Logger.info("Received UNSUB from #{:erlang.pid_to_list(pid) |> to_string}")
-      {:ok, Map.put(state, :subscribed, MapSet.delete(state.subscribed, name))}
+      {:ok, Map.put(state, :subscribed, MapSet.delete(state.subscribed, source))}
     end
   end
 
@@ -27,17 +27,26 @@ defmodule Cocktailparty.Input.WebsocketClient do
   end
 
   def handle_in({:text, content}, state) do
-    IO.puts("Received state: #{inspect(state.subscribed)}")
+    # IO.puts("Received state: #{inspect(content)}")
 
     if state.subscribed != MapSet.new() do
-      Enum.each(state.subscribed, fn name ->
-        case :global.whereis_name(name) do
+      Enum.each(state.subscribed, fn source ->
+        case :global.whereis_name(source.name) do
           :undefined ->
-            {:source, n} = name
+            {:source, n} = source.name
             Logger.info("Cannot find process #{n}")
 
           pid ->
-            send(pid, {:new_websocket_message, content})
+            case source.datatype do
+              "text" ->
+                send(pid, {:new_text_message, content})
+
+              "both" ->
+                send(pid, {:new_text_message, content})
+
+              _ ->
+                {:ok, state}
+            end
         end
       end)
     end
@@ -46,7 +55,30 @@ defmodule Cocktailparty.Input.WebsocketClient do
   end
 
   def handle_in({:binary, content}, state) do
-    IO.puts("Received binary: #{inspect(content)}")
+    # IO.puts("Received state: #{inspect(content)}")
+
+    if state.subscribed != MapSet.new() do
+      Enum.each(state.subscribed, fn source ->
+        case :global.whereis_name(source.name) do
+          :undefined ->
+            {:source, n} = source.name
+            Logger.info("Cannot find process #{n}")
+
+          pid ->
+            case source.datatype do
+              "binary" ->
+                send(pid, {:new_binary_message, content})
+
+              "both" ->
+                send(pid, {:new_binary_message, content})
+
+              _ ->
+                {:ok, state}
+            end
+        end
+      end)
+    end
+
     {:ok, state}
   end
 
