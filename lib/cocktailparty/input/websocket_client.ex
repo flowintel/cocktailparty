@@ -6,7 +6,7 @@ defmodule Cocktailparty.Input.WebsocketClient do
   defstruct [:subscribed]
 
   # def handle_cast({:subscribe, name = {:source, _}}, state) do
-  def handle_info({:subscribe, source = %{name: {:source, _}, datatype: _}}, state) do
+  def handle_info({:subscribe, source = %{name: {:source, _}, input_datatype: _}}, state) do
     Logger.error("Received SUB")
     # with pid <- :global.whereis_name(source.name) do
     # Logger.info("Received SUB from #{:erlang.pid_to_list(pid) |> to_string}")
@@ -14,7 +14,7 @@ defmodule Cocktailparty.Input.WebsocketClient do
     # end
   end
 
-  def handle_info({:unsubscribe, source = %{name: {:source, _}, datatype: _}}, state) do
+  def handle_info({:unsubscribe, source = %{name: {:source, _}, input_datatype: _}}, state) do
     with pid <- :global.whereis_name(source.name) do
       Logger.info("Received UNSUB from #{:erlang.pid_to_list(pid) |> to_string}")
       {:ok, Map.put(state, :subscribed, MapSet.delete(state.subscribed, source))}
@@ -34,10 +34,10 @@ defmodule Cocktailparty.Input.WebsocketClient do
         case :global.whereis_name(source.name) do
           :undefined ->
             {:source, n} = source.name
-            Logger.info("Cannot find process #{n}")
+            Process.exit(self(), "Cannot find process \#{:source, #{n}\}")
 
           pid ->
-            case source.datatype do
+            case source.input_datatype do
               "text" ->
                 send(pid, {:new_text_message, content})
 
@@ -61,11 +61,11 @@ defmodule Cocktailparty.Input.WebsocketClient do
       Enum.each(state.subscribed, fn source ->
         case :global.whereis_name(source.name) do
           :undefined ->
-            {:source, n} = source.name
-            Logger.info("Cannot find process #{n}")
+            # If the source process cannot be find, we terminate the present process
+            Process.exit(self(), "Cannot find process #{source.name}")
 
           pid ->
-            case source.datatype do
+            case source.input_datatype do
               "binary" ->
                 send(pid, {:new_binary_message, content})
 
@@ -86,13 +86,13 @@ defmodule Cocktailparty.Input.WebsocketClient do
     {:ok, state}
   end
 
-  def handle_control({:ping, message}, state) do
-    IO.puts("Received ping with content: #{message}!")
+  def handle_control({:ping, _message}, state) do
+    # IO.puts("Received ping with content: #{message}!")
     {:ok, state}
   end
 
-  def handle_control({:pong, message}, state) do
-    IO.puts("Received pong with content: #{message}!")
+  def handle_control({:pong, _message}, state) do
+    # IO.puts("Received pong with content: #{message}!")
     {:ok, state}
   end
 

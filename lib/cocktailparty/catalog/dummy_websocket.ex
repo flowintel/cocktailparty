@@ -25,15 +25,19 @@ defmodule Cocktailparty.Catalog.DummyWebsocket do
       # Tell the connection process to send the packet this way
       send(
         conn_pid,
-        {:subscribe, %{name: {:source, source.id}, datatype: source.config["datatype"]}}
+        {:subscribe,
+         %{
+           name: {:source, source.id},
+           input_datatype: source.config["input_datatype"]
+         }}
       )
-
-      Logger.error("SENT SUB")
 
       {:ok,
        %{
          conn_id: source.connection_id,
-         source_id: source.id
+         source_id: source.id,
+         input_datatype: source.config["input_datatype"],
+         output_datatype: source.config["output_datatype"]
        }}
     end
   end
@@ -42,11 +46,22 @@ defmodule Cocktailparty.Catalog.DummyWebsocket do
   # Receiving a message from a websocket we are subscribed to.
   def handle_info({:new_text_message, message}, state) do
     # wrap messages into %Broadcast{} to keep metadata about the payload
-    broadcast = %Broadcast{
-      topic: "feed:" <> Integer.to_string(state.source_id),
-      event: :new_text_message,
-      payload: message
-    }
+    broadcast =
+      case state.output_datatype do
+        "text" ->
+          %Broadcast{
+            topic: "feed:" <> Integer.to_string(state.source_id),
+            event: :new_text_message,
+            payload: message
+          }
+
+        "binary" ->
+          %Broadcast{
+            topic: "feed:" <> Integer.to_string(state.source_id),
+            event: :new_binary_message,
+            payload: message
+          }
+      end
 
     :ok =
       Phoenix.PubSub.broadcast(
