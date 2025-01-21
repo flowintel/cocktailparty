@@ -23,7 +23,7 @@ defmodule Cocktailparty.Catalog.SourceType do
       %{
         type: "dummy",
         module: Cocktailparty.Catalog.DummyWebsocket,
-        required_fields: [:input_datatype, :output_datatype]
+        required_fields: [:output_datatype]
       }
     ]
   }

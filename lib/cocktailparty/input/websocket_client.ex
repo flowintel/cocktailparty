@@ -3,18 +3,23 @@ defmodule Cocktailparty.Input.WebsocketClient do
   use Fresh
 
   # TODO binary data etc.
-  defstruct [:subscribed]
+  defstruct [:subscribed, :input_datatype]
 
-  # def handle_cast({:subscribe, name = {:source, _}}, state) do
-  def handle_info({:subscribe, source = %{name: {:source, _}, input_datatype: _}}, state) do
+  def handle_info({:subscribe, source = %{name: {:source, _}}}, state) do
     Logger.error("Received SUB")
     # with pid <- :global.whereis_name(source.name) do
     # Logger.info("Received SUB from #{:erlang.pid_to_list(pid) |> to_string}")
-    {:ok, Map.put(state, :subscribed, MapSet.put(state.subscribed, source))}
+    {:ok,
+     Map.put(
+       state,
+       :subscribed,
+       MapSet.put(state.subscribed, source) |> Map.put(:input_datatype, state.input_datatype)
+     )}
+
     # end
   end
 
-  def handle_info({:unsubscribe, source = %{name: {:source, _}, input_datatype: _}}, state) do
+  def handle_info({:unsubscribe, source = %{name: {:source, _}}}, state) do
     with pid <- :global.whereis_name(source.name) do
       Logger.info("Received UNSUB from #{:erlang.pid_to_list(pid) |> to_string}")
       {:ok, Map.put(state, :subscribed, MapSet.delete(state.subscribed, source))}
@@ -26,63 +31,31 @@ defmodule Cocktailparty.Input.WebsocketClient do
     {:ok, state}
   end
 
-  def handle_in({:text, content}, state) do
-    # IO.puts("Received state: #{inspect(content)}")
+  def handle_in({datatype, content}, state) do
+    if state.input_datatype == datatype do
+      if state.subscribed != MapSet.new() do
+        Enum.each(state.subscribed, fn source ->
+          case :global.whereis_name(source.name) do
+            :undefined ->
+              {:source, n} = source.name
+              Process.exit(self(), "Cannot find process \#{:source, #{n}\}")
 
-    if state.subscribed != MapSet.new() do
-      Enum.each(state.subscribed, fn source ->
-        case :global.whereis_name(source.name) do
-          :undefined ->
-            {:source, n} = source.name
-            Process.exit(self(), "Cannot find process \#{:source, #{n}\}")
+            pid ->
+              case datatype do
+                :text ->
+                  send(pid, {:new_text_message, content})
 
-          pid ->
-            case source.input_datatype do
-              "text" ->
-                send(pid, {:new_text_message, content})
+                :binary ->
+                  send(pid, {:new_binary_message, content})
 
-              "both" ->
-                send(pid, {:new_text_message, content})
-
-              _ ->
-                {:ok, state}
-            end
-        end
-      end)
+                _ ->
+                  {:ok, state}
+              end
+          end
+        end)
+      end
     end
 
-    {:ok, state}
-  end
-
-  def handle_in({:binary, content}, state) do
-    # IO.puts("Received state: #{inspect(content)}")
-
-    if state.subscribed != MapSet.new() do
-      Enum.each(state.subscribed, fn source ->
-        case :global.whereis_name(source.name) do
-          :undefined ->
-            # If the source process cannot be find, we terminate the present process
-            Process.exit(self(), "Cannot find process #{source.name}")
-
-          pid ->
-            case source.input_datatype do
-              "binary" ->
-                send(pid, {:new_binary_message, content})
-
-              "both" ->
-                send(pid, {:new_binary_message, content})
-
-              _ ->
-                {:ok, state}
-            end
-        end
-      end)
-    end
-
-    {:ok, state}
-  end
-
-  def handle_in({_, _}, state) do
     {:ok, state}
   end
 

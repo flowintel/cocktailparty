@@ -27,8 +27,7 @@ defmodule Cocktailparty.Catalog.DummyWebsocket do
         conn_pid,
         {:subscribe,
          %{
-           name: {:source, source.id},
-           input_datatype: source.config["input_datatype"]
+           name: {:source, source.id}
          }}
       )
 
@@ -44,7 +43,7 @@ defmodule Cocktailparty.Catalog.DummyWebsocket do
 
   @impl GenServer
   # Receiving a message from a websocket we are subscribed to.
-  def handle_info({:new_text_message, message}, state) do
+  def handle_info({_message_type_atom, message}, state) do
     # wrap messages into %Broadcast{} to keep metadata about the payload
     broadcast =
       case state.output_datatype do
@@ -62,30 +61,6 @@ defmodule Cocktailparty.Catalog.DummyWebsocket do
             payload: message
           }
       end
-
-    :ok =
-      Phoenix.PubSub.broadcast(
-        Cocktailparty.PubSub,
-        "feed:" <> Integer.to_string(state.source_id),
-        broadcast
-      )
-
-    :telemetry.execute([:cocktailparty, :broker], %{count: 1}, %{
-      feed: "feed:" <> Integer.to_string(state.source_id)
-    })
-
-    {:noreply, state}
-  end
-
-  @impl GenServer
-  # Receiving a message from a websocket we are subscribed to.
-  def handle_info({:new_binary_message, message}, state) do
-    # wrap messages into %Broadcast{} to keep metadata about the payload
-    broadcast = %Broadcast{
-      topic: "feed:" <> Integer.to_string(state.source_id),
-      event: :new_binary_message,
-      payload: message
-    }
 
     :ok =
       Phoenix.PubSub.broadcast(
