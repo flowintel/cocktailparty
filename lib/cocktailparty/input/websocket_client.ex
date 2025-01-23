@@ -6,7 +6,6 @@ defmodule Cocktailparty.Input.WebsocketClient do
   defstruct [:subscribed, :input_datatype]
 
   def handle_info({:subscribe, source = %{name: {:source, _}}}, state) do
-    Logger.error("Received SUB")
     # with pid <- :global.whereis_name(source.name) do
     # Logger.info("Received SUB from #{:erlang.pid_to_list(pid) |> to_string}")
     {:ok,

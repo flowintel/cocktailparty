@@ -324,6 +324,10 @@ defmodule Cocktailparty.Input do
               _ ->
                 false
             end
+
+            "phoenix" ->
+              :sys.get_state(pid)
+              |> Slipstream.Socket.connected?()
         end
     end
   end
