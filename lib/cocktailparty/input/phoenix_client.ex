@@ -21,22 +21,41 @@ defmodule Cocktailparty.Input.PhoenixClient do
     {:ok, socket}
   end
 
-  # @impl Slipstream
-  # def handle_connect(socket) do
-  #   socket =
-  #     socket.assigns.topics
-  #     |> Enum.reduce(socket, fn topic, socket ->
-  #       case rejoin(socket, topic) do
-  #         {:ok, socket} -> socket
-  #         {:error, _reason} -> socket
-  #       end
-  #     end)
+  @impl Slipstream
+  def handle_connect(socket) do
+    socket =
+      socket
+      |> update(
+        :subscriptions,
+        &Enum.reduce(&1, %{}, fn destination, acc ->
+          acc
+          |> Map.put(
+            destination,
+            MapSet.union(
+              socket.assigns.subscriptions[destination],
+              socket.assigns.subscribing[destination]
+            )
+          )
+        end)
+      )
 
-  #   {:ok, socket}
-  # end
+    socket =
+      socket.assigns.subscriptions
+      |> Enum.reduce(socket, fn topic, socket ->
+        case rejoin(socket, topic) do
+          {:ok, socket} -> socket
+          {:error, _reason} -> socket
+        end
+      end)
+
+    {:ok, socket}
+  end
 
   @impl Slipstream
-  def handle_cast({:subscribe, destination, name = {:source, _srcid}}, socket) do
+  def handle_cast(
+        {:subscribe, %{destination: destination, name: {:source, _srcid} = name}},
+        socket
+      ) do
     subscribers = Map.get(socket.assigns.subscriptions, destination, MapSet.new())
     subscribers_subscribing = Map.get(socket.assigns.subscribing, destination, MapSet.new())
     new_subsribers = MapSet.put(subscribers, name)
@@ -51,6 +70,32 @@ defmodule Cocktailparty.Input.PhoenixClient do
           socket
           |> update(:subscribing, &Map.put(&1, destination, new_subscribers_subscribing))
           |> join(destination)
+      end
+
+    {:noreply, socket}
+  end
+
+  # def handle_cast({:unsubscribe, destination, _name = {:source, _srcid}}, socket) do
+  def handle_cast({:unsubscribe, %{destination: destination, name: {:source, _srcid}}}, socket) do
+    subscribers = Map.get(socket.assigns.subscriptions, destination, MapSet.new())
+
+    socket =
+      case joined?(socket, destination) do
+        true ->
+          # if that was the last subscriber we send leave
+          if MapSet.size(subscribers) == 1 do
+            socket
+            |> leave(destination)
+            |> update(:subscriptions, &Map.delete(&1, destination))
+          else
+            socket
+            |> update(:subscriptions, &Map.delete(&1, destination))
+          end
+
+        false ->
+          # we remove the sub from the set
+          socket
+          |> update(:subscriptions, &Map.delete(&1, destination))
       end
 
     {:noreply, socket}
@@ -78,8 +123,6 @@ defmodule Cocktailparty.Input.PhoenixClient do
   @impl Slipstream
   def handle_message(destination, event, message, socket) do
     # Here we will push to subscribed sources
-    Logger.info("Got message on #{destination}/#{event}: #{inspect(message)}")
-
     subscribers = Map.get(socket.assigns.subscriptions, destination, MapSet.new())
 
     Enum.each(subscribers, fn name ->

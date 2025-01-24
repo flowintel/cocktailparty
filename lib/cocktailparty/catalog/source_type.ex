@@ -25,6 +25,13 @@ defmodule Cocktailparty.Catalog.SourceType do
         module: Cocktailparty.Catalog.DummyWebsocket,
         required_fields: [:output_datatype]
       }
+    ],
+    "phoenix" => [
+      %{
+        type: "phoenix_downlink",
+        module: Cocktailparty.Catalog.PhoenixDownlink,
+        required_fields: [:output_datatype, :destination]
+      }
     ]
   }
 

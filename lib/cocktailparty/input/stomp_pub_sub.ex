@@ -238,7 +238,7 @@ defmodule Cocktailparty.Input.StompPubSub do
         case :global.whereis_name(name) do
           :undefined ->
             {:source, n} = name
-            Logger.info("Cannot find process #{n}")
+            Logger.error("Cannot find process #{n}")
 
           pid ->
             send(pid, {:new_stomp_message, frame})
