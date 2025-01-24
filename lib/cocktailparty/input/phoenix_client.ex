@@ -37,34 +37,61 @@ defmodule Cocktailparty.Input.PhoenixClient do
 
   @impl Slipstream
   def handle_cast({:subscribe, destination, name = {:source, _srcid}}, socket) do
-    subscribers = Map.get(socket.assigns.subscribing, destination, MapSet.new())
+    subscribers = Map.get(socket.assigns.subscriptions, destination, MapSet.new())
+    subscribers_subscribing = Map.get(socket.assigns.subscribing, destination, MapSet.new())
     new_subsribers = MapSet.put(subscribers, name)
-    new_subscribing = Map.put(socket.assigns.subscribing, destination, new_subsribers)
+    new_subscribers_subscribing = MapSet.put(subscribers_subscribing, name)
 
-    if MapSet.size(subscribers) == 0 do
-      join(socket, destination)
-    end
+    socket =
+      case joined?(socket, destination) do
+        true ->
+          socket |> update(:subscriptions, &Map.put(&1, destination, new_subsribers))
 
-    # TODO this is failing for some reason
-    {:noreply, update(socket, :subscribing, new_subscribing)}
+        false ->
+          socket
+          |> update(:subscribing, &Map.put(&1, destination, new_subscribers_subscribing))
+          |> join(destination)
+      end
+
+    {:noreply, socket}
   end
 
   @impl Slipstream
-  def handle_join(topic, join_response, socket) do
-    dbg(socket)
-    Logger.info(topic <> " " <> join_response)
+  def handle_join(destination, join_response, socket) do
+    Logger.info("#{destination} #{inspect(join_response)}")
+
+    # we move from subscribing to subscriptions
+    subscribers = Map.get(socket.assigns.subscriptions, destination, MapSet.new())
+    subscribers_subscribing = Map.get(socket.assigns.subscribing, destination, MapSet.new())
+
+    socket =
+      socket
+      |> update(
+        :subscriptions,
+        &Map.put(&1, destination, MapSet.union(subscribers, subscribers_subscribing))
+      )
+      |> update(:subscribing, &Map.put(&1, destination, MapSet.new()))
 
     {:ok, socket}
   end
 
-  # @impl Slipstream
-  # def handle_connect(socket) do
-  #   {:ok, join(socket, @topic)}
-
   @impl Slipstream
-  def handle_message(topic, event, message, socket) do
+  def handle_message(destination, event, message, socket) do
     # Here we will push to subscribed sources
-    Logger.info(inspect({topic, event, message}))
+    Logger.info("Got message on #{destination}/#{event}: #{inspect(message)}")
+
+    subscribers = Map.get(socket.assigns.subscriptions, destination, MapSet.new())
+
+    Enum.each(subscribers, fn name ->
+      case :global.whereis_name(name) do
+        :undefined ->
+          {:source, n} = name
+          Logger.error("Cannot find process #{n}")
+
+        pid ->
+          send(pid, {:new_phoenix_message, message})
+      end
+    end)
 
     {:ok, socket}
   end
