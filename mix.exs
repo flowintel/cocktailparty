@@ -44,7 +44,7 @@ defmodule Cocktailparty.MixProject do
   defp deps do
     [
       {:argon2_elixir, "~> 3.0"},
-      {:phoenix, "~> 1.7.14"},
+      {:phoenix, "~> 1.7.20"},
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},
       {:postgrex, ">= 0.0.0"},
@@ -53,12 +53,12 @@ defmodule Cocktailparty.MixProject do
       {:geo, ">= 0.0.0"},
       {:tds, ">= 0.0.0"},
       {:phoenix_html, "~> 3.3"},
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
+      {:phoenix_live_reload, "~> 1.5", only: :dev},
       {:phoenix_live_view, "~> 0.18.16"},
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.7.2"},
-      {:esbuild, "~> 0.5", runtime: Mix.env() == :dev},
-      {:tailwind, "~> 0.1.8", runtime: Mix.env() == :dev},
+      {:esbuild, "~> 0.9.0", runtime: Mix.env() == :dev},
+      {:tailwind, "~> 0.2.4", runtime: Mix.env() == :dev},
       {:swoosh, "~> 1.3"},
       {:gen_smtp, "~> 1.1"},
       {:finch, "~> 0.13"},
@@ -77,12 +77,15 @@ defmodule Cocktailparty.MixProject do
       {:tzdata, "~> 1.1.2"},
       # STOMP support
       {:barytherium, "~> 0.7.0"},
+      # Slipstream to connect to other phoenix nodes
+      {:slipstream, "~> 1.1.3"},
       # YAML parsing
       {:yaml_elixir, "~> 2.9.0"},
       # YAML encoding
       {:ymlr, "~> 5.0"},
       # Encryption at rest
-      {:cloak_ecto, "~> 1.3.0"}
+      {:cloak_ecto, "~> 1.3.0"},
+      {:fresh, "~> 0.4.4"}
     ]
   end
 
