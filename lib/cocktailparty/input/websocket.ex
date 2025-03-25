@@ -6,15 +6,22 @@ defmodule Cocktailparty.Input.WebSocket do
     Logger.info("Supervisor Starting #{connection.name} websocket")
 
     # TODO have proper validation on YAML fields
-    input_datatype = case connection.config["input_datatype"] do
-      "text" -> :text
-      "binary" -> :binary
-    end
+    input_datatype =
+      case connection.config["input_datatype"] do
+        "text" -> :text
+        "binary" -> :binary
+      end
+
+    preambule =
+      case connection.config["preambule"] do
+        nil -> ""
+        a -> a
+      end
 
     specs =
       {Cocktailparty.Input.WebsocketClient,
        uri: connection.config["uri"],
-       state: %{subscribed: MapSet.new(), input_datatype: input_datatype},
+       state: %{subscribed: MapSet.new(), input_datatype: input_datatype, preambule: preambule},
        opts: [name: {:global, {connection.type, connection.id}}]}
 
     # Add to the ConnectionDynamicSupervisor children

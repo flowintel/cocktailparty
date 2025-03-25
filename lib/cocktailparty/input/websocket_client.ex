@@ -3,7 +3,7 @@ defmodule Cocktailparty.Input.WebsocketClient do
   use Fresh
 
   # TODO binary data etc.
-  defstruct [:subscribed, :input_datatype]
+  defstruct [:subscribed, :input_datatype, :preambule]
 
   def handle_info({:subscribe, source = %{name: {:source, _}}}, state) do
     # with pid <- :global.whereis_name(source.name) do
@@ -27,7 +27,19 @@ defmodule Cocktailparty.Input.WebsocketClient do
 
   def handle_connect(status, headers, state) do
     IO.puts("Upgrade request headers:#{inspect(status)} - #{inspect(headers)}")
-    {:ok, state}
+    dbg(state.preambule)
+
+    # we reply with the preambule only if its defined
+    case state.preambule do
+      "" ->
+        {:ok, state}
+
+      _ ->
+        {:reply,
+         [
+           {:text, state.preambule}
+         ], state}
+    end
   end
 
   def handle_in({datatype, content}, state) do
