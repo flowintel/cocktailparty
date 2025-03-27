@@ -1,4 +1,5 @@
 defmodule CocktailpartyWeb.UserSettingsLive do
+  alias Phoenix.LiveView.Socket
   use CocktailpartyWeb, :live_view
 
   alias Cocktailparty.Accounts
@@ -69,6 +70,56 @@ defmodule CocktailpartyWeb.UserSettingsLive do
           </:actions>
         </.simple_form>
       </div>
+
+      <div class="space-y-12 divide-y">
+        <div>
+          <h2 class="text-lg font-semibold">API Keys</h2>
+          <p class="text-sm text-gray-500">You can generate and manage your API keys here.
+            Each token can be used for API authentication and can only be seen once. So store
+            it somewhere and keep it safe.</p>
+          <!-- Button to create a new token -->
+          <.button phx-click="create_api_token" class="my-4">Generate New API Key</.button>
+          <!-- If we just created a token, show it once -->
+          <%= if @new_api_token do %>
+            <div class="p-2 bg-gray-100 rounded mt-2">
+              <p><strong>Your new API key (copy it now):</strong></p>
+              <p><code><%= @new_api_token %></code></p>
+            </div>
+          <% end %>
+          <!-- List existing tokens -->
+          <table class="mt-4 min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th scope="col" class="px-4 py-2">Token ID</th>
+                <th scope="col" class="px-4 py-2">Inserted At</th>
+                <th scope="col" class="px-4 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%= for token <- @api_tokens do %>
+                <tr>
+                  <!-- Just an example. You can show partial token or other info. -->
+                  <td class="px-4 py-2 text-sm text-gray-900">
+                    <%= token.id %>
+                  </td>
+                  <td class="px-4 py-2 text-sm text-gray-500">
+                    <%= token.inserted_at %>
+                  </td>
+                  <td class="px-4 py-2 text-sm">
+                    <.button
+                      phx-click="delete_api_token"
+                      phx-value-id={token.id}
+                      data-confirm="Are you sure you want to revoke this token?"
+                    >
+                      Revoke
+                    </.button>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
     """
   end
@@ -90,6 +141,7 @@ defmodule CocktailpartyWeb.UserSettingsLive do
     user = socket.assigns.current_user
     email_changeset = Accounts.change_user_email(user)
     password_changeset = Accounts.change_user_password(user)
+    api_tokens = Accounts.list_user_api_tokens(user)
 
     socket =
       socket
@@ -99,6 +151,8 @@ defmodule CocktailpartyWeb.UserSettingsLive do
       |> assign(:email_form, to_form(email_changeset))
       |> assign(:password_form, to_form(password_changeset))
       |> assign(:trigger_submit, false)
+      |> assign(:api_tokens, api_tokens)
+      |> assign(:new_api_token, nil)
 
     {:ok, socket}
   end
@@ -162,6 +216,35 @@ defmodule CocktailpartyWeb.UserSettingsLive do
 
       {:error, changeset} ->
         {:noreply, assign(socket, password_form: to_form(changeset))}
+    end
+  end
+
+  def handle_event("create_api_token", _params, socket) do
+    user = socket.assigns.current_user
+
+    token_string = Accounts.create_user_api_token(user)
+
+    api_tokens = Accounts.list_user_api_tokens(user)
+
+    socket =
+      socket
+      |> assign(:new_api_token, token_string)
+      |> assign(:api_tokens, api_tokens)
+
+    {:noreply, put_flash(socket, :info, "Token created")}
+  end
+
+  def handle_event("delete_api_token", %{"id" => token_id}, socket) do
+    user = socket.assigns.current_user
+
+    # first, find the token in user’s tokens or via Repo.get_by
+    case Accounts.delete_user_api_token_by_id(user, token_id) do
+      {:ok, _} ->
+        api_tokens = Accounts.list_user_api_tokens(user)
+        {:noreply, assign(socket, :api_tokens, api_tokens)}
+
+      _ ->
+        {:noreply, put_flash(socket, :error, "Token not found.")}
     end
   end
 end

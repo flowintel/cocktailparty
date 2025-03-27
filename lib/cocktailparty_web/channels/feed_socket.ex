@@ -3,15 +3,14 @@ defmodule CocktailpartyWeb.FeedSocket do
 
   require RemoteIp
   require Logger
+  alias Cocktailparty.Accounts
 
   channel "feed:*", CocktailpartyWeb.FeedChannel
 
   @impl true
   def connect(%{"token" => token}, socket, connect_info) do
-    # TODO make the salt a config value
-    # max_age: 1209600 is equivalent to two weeks in seconds
-    case Phoenix.Token.verify(socket, "user socket", token, max_age: 1_209_600) do
-      {:ok, user_id} ->
+    case Accounts.fetch_user_by_api_token(token) do
+      {:ok, user} ->
         remote_ip =
           case RemoteIp.from(connect_info.x_headers) do
             nil -> connect_info.peer_data.address
@@ -23,11 +22,11 @@ defmodule CocktailpartyWeb.FeedSocket do
 
         Logger.metadata(FeedSoket_token: token)
         Logger.metadata(remote_ip: to_string(:inet_parse.ntoa(remote_ip)))
-        Logger.metadata(current_user: user_id)
+        Logger.metadata(current_user: user.id)
         Logger.info(to_string(:inet_parse.ntoa(remote_ip)))
-        {:ok, assign(socket, %{current_user: user_id, remote_ip: remote_ip})}
+        {:ok, assign(socket, %{current_user: user.id, remote_ip: remote_ip})}
 
-      {:error, _reason} ->
+      :error ->
         :error
     end
   end

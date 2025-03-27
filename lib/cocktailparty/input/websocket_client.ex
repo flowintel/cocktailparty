@@ -27,7 +27,6 @@ defmodule Cocktailparty.Input.WebsocketClient do
 
   def handle_connect(status, headers, state) do
     IO.puts("Upgrade request headers:#{inspect(status)} - #{inspect(headers)}")
-    dbg(state.preambule)
 
     # we reply with the preambule only if its defined
     case state.preambule do
