@@ -269,4 +269,16 @@ defmodule CocktailpartyWeb.UserAuthTest do
       refute conn.status
     end
   end
+
+  describe "update_api_hasked_token_last_seen/1" do
+    test "last_seen fields get correctly updated when a api-token is used", %{user: user} do
+      user_token = Accounts.create_user_api_token(user)
+
+      user_token
+      |> Accounts.update_api_hasked_token_last_seen()
+
+      final = Accounts.get_token_from_hashed_token(user_token)
+      assert final.last_seen
+    end
+  end
 end

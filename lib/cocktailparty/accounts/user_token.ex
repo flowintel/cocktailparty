@@ -18,6 +18,7 @@ defmodule Cocktailparty.Accounts.UserToken do
     field :token, :binary
     field :context, :string
     field :sent_to, :string
+    field :last_seen, :utc_datetime_usec
     belongs_to :user, Cocktailparty.Accounts.User
 
     timestamps(updated_at: false)
@@ -153,6 +154,24 @@ defmodule Cocktailparty.Accounts.UserToken do
         query =
           from token in token_and_context_query(hashed_token, context),
             where: token.inserted_at > ago(@change_email_validity_in_days, "day")
+
+        {:ok, query}
+
+      :error ->
+        :error
+    end
+  end
+
+  @doc """
+  The query returns the token found by the hashed_token, if any.
+  """
+  def get_corresponding_token_entry(token) do
+    case Base.url_decode64(token, padding: false) do
+      {:ok, decoded_token} ->
+        hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
+
+        query =
+          from token in token_and_context_query(hashed_token, "api-token")
 
         {:ok, query}
 

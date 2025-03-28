@@ -396,10 +396,44 @@ defmodule Cocktailparty.Accounts do
   def fetch_user_by_api_token(token) do
     with {:ok, query} <- UserToken.verify_email_token_query(token, "api-token"),
          %User{} = user <- Repo.one(query) do
+      update_api_hasked_token_last_seen(token)
       {:ok, user}
     else
       _ -> :error
     end
+  end
+
+  @doc """
+  Update api token last_seen field from hashed token
+  """
+  def update_api_hasked_token_last_seen(hashed_token) do
+    with {:ok, query} <- UserToken.get_corresponding_token_entry(hashed_token),
+         hashed_token <- Repo.one(query) do
+      update_api_token_last_seen(hashed_token)
+    else
+      _ -> :error
+    end
+  end
+
+  @doc """
+  Get api token by hashed_token
+  """
+  def get_token_from_hashed_token(hashed_token) do
+    with {:ok, query} <- UserToken.get_corresponding_token_entry(hashed_token),
+         hashed_token <- Repo.one(query) do
+      hashed_token
+    else
+      _ -> :error
+    end
+  end
+
+  @doc """
+  Update token last_seen field
+  """
+  def update_api_token_last_seen(%UserToken{} = token) do
+    token
+    |> Ecto.Changeset.change(last_seen: DateTime.utc_now())
+    |> Repo.update()
   end
 
   @doc """

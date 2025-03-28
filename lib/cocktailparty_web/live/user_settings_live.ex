@@ -1,5 +1,4 @@
 defmodule CocktailpartyWeb.UserSettingsLive do
-  alias Phoenix.LiveView.Socket
   use CocktailpartyWeb, :live_view
 
   alias Cocktailparty.Accounts
@@ -71,41 +70,45 @@ defmodule CocktailpartyWeb.UserSettingsLive do
         </.simple_form>
       </div>
 
-      <div class="space-y-12 divide-y">
-        <div>
-          <h2 class="text-lg font-semibold">API Keys</h2>
-          <p class="text-sm text-gray-500">You can generate and manage your API keys here.
+      <div class="space-y-8 divide-y mt-10">
+        <div class="space-y-4 mt-10">
+          <h2 class="text-lg font-semibold text-zinc-800">API Keys</h2>
+          <p class="block text-sm leading-6 text-zinc-800">You can generate and manage your API keys here.
             Each token can be used for API authentication and can only be seen once. So store
             it somewhere and keep it safe.</p>
           <!-- Button to create a new token -->
           <.button phx-click="create_api_token" class="my-4">Generate New API Key</.button>
           <!-- If we just created a token, show it once -->
           <%= if @new_api_token do %>
-            <div class="p-2 bg-gray-100 rounded mt-2">
+            <div class="p-2 bg-gray-100 rounded mt-2 text-zinc-800">
               <p><strong>Your new API key (copy it now):</strong></p>
               <p><code><%= @new_api_token %></code></p>
             </div>
           <% end %>
           <!-- List existing tokens -->
-          <table class="mt-4 min-w-full divide-y divide-gray-200">
+          <table class="min-w-full divide-y divide-gray-200">
             <thead>
               <tr>
-                <th scope="col" class="px-4 py-2">Token ID</th>
-                <th scope="col" class="px-4 py-2">Inserted At</th>
-                <th scope="col" class="px-4 py-2">Actions</th>
+                <th scope="col" class="text-left text-zinc-800">Token ID</th>
+                <th scope="col" class="text-left text-zinc-800">Inserted at</th>
+                <th scope="col" class="text-left text-zinc-800">Last seen</th>
+                <th scope="col" class="text-left text-zinc-800">Actions</th>
               </tr>
             </thead>
             <tbody>
               <%= for token <- @api_tokens do %>
-                <tr>
+                <tr class="min-w-full ">
                   <!-- Just an example. You can show partial token or other info. -->
-                  <td class="px-4 py-2 text-sm text-gray-900">
+                  <td class="text-left text-sm text-zinc-800">
                     <%= token.id %>
                   </td>
-                  <td class="px-4 py-2 text-sm text-gray-500">
+                  <td class="text-left text-sm text-zinc-800">
                     <%= token.inserted_at %>
                   </td>
-                  <td class="px-4 py-2 text-sm">
+                  <td class="text-left text-sm text-zinc-800">
+                    <%= token.last_seen %>
+                  </td>
+                  <td class="text-left text-sm">
                     <.button
                       phx-click="delete_api_token"
                       phx-value-id={token.id}
