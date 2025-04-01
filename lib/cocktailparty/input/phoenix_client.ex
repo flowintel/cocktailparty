@@ -121,7 +121,7 @@ defmodule Cocktailparty.Input.PhoenixClient do
   end
 
   @impl Slipstream
-  def handle_message(destination, event, message, socket) do
+  def handle_message(destination, _event, message, socket) do
     # Here we will push to subscribed sources
     subscribers = Map.get(socket.assigns.subscriptions, destination, MapSet.new())
 

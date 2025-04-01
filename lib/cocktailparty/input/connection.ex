@@ -11,6 +11,7 @@ defmodule Cocktailparty.Input.Connection do
     field :type, :string
     field :config, Cocktailparty.Encrypted.Map
     field :sink, :boolean, default: false
+    field :is_default_sink, :boolean, default: false
 
     has_many :sources, Cocktailparty.Catalog.Source
     has_many :sinks, Cocktailparty.SinkCatalog.Sink

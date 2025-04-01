@@ -31,14 +31,14 @@ defmodule Cocktailparty.Catalog.Source do
     |> validate_config_fields()
   end
 
-  defp validate_required_config_yaml(changeset, attrs) do
-    # Only validate presence of config_yaml if it's provided in attrs
-    if Map.has_key?(attrs, "config_yaml") do
-      validate_required(changeset, [:config_yaml])
-    else
-      changeset
-    end
-  end
+  # defp validate_required_config_yaml(changeset, attrs) do
+  #   # Only validate presence of config_yaml if it's provided in attrs
+  #   if Map.has_key?(attrs, "config_yaml") do
+  #     validate_required(changeset, [:config_yaml])
+  #   else
+  #     changeset
+  #   end
+  # end
 
   defp parse_yaml(changeset) do
     config_yaml = get_field(changeset, :config_yaml) || ""

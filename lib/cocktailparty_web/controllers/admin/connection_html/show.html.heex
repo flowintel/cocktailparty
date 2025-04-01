@@ -5,6 +5,11 @@
     <.link href={~p"/admin/connections/#{@connection}/edit"}>
       <.button>Edit connection</.button>
     </.link>
+    <.link :if={!@connection.is_default_sink && @connection.sink}
+       href={~p"/admin/connections/set_default_sink/#{@connection}"}
+       method="post">
+      <.button>Set as default sink connection</.button>
+    </.link>
   </:actions>
 </.header>
 
@@ -20,6 +25,10 @@
   <:item title="Sink">
     <.icon :if={@connection.sink} name="hero-check" />
     <.icon :if={!@connection.sink} name="hero-x-mark" />
+  </:item>
+  <:item title="Default Sink">
+    <.icon :if={@connection.is_default_sink} name="hero-check" />
+    <.icon :if={!@connection.is_default_sink} name="hero-x-mark" />
   </:item>
   <:item title="Status">
     <div :if={@connection.connected} class="badge badge-success">

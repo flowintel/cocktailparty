@@ -74,7 +74,15 @@ defmodule CocktailpartyWeb.Admin.SourceController do
   def show(conn, %{"id" => id}) do
     source = Catalog.get_source_map!(id)
 
-    connected_users = Tracker.get_all_connected_users_feeds()
+    # Any feed
+    # connected_users = Tracker.get_all_connected_users_feeds()
+
+    # Only this feed
+    connected_users = Tracker.get_all_connected_users_to_feed(source.id)
+
+    connected_by_public =
+      UserManagement.list_users()
+      |> Enum.filter(&Enum.member?(connected_users, &1.id))
 
     updated_users =
       Enum.reduce(source.users, [], fn user, updated_users ->
@@ -108,6 +116,7 @@ defmodule CocktailpartyWeb.Admin.SourceController do
       source: source,
       sample: sample,
       potential_subscribers: potential_subscribers,
+      connected_users: connected_by_public,
       changeset: changeset
     )
   end

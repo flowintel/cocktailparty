@@ -60,6 +60,7 @@ defmodule CocktailpartyWeb.Router do
     delete "/sources/mass_unsubscribe/:source_id", SourceController, :mass_unsubscribe
     resources "/sinks", SinkController
     resources "/connections", ConnectionController
+    post "/connections/set_default_sink/:connection_id" , ConnectionController, :set_default_sink
     resources "/roles", RoleController
     live_dashboard "/dashboard", metrics: CocktailpartyWeb.Telemetry
   end

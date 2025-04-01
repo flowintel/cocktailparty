@@ -208,7 +208,7 @@ defmodule Cocktailparty.SinkCatalog do
 
   """
   def create_sink(attrs, user_id) do
-    Cocktailparty.Input.get_one_sink_connection()
+    Cocktailparty.Input.get_default_sink_connection()
     |> Ecto.build_assoc(:sinks)
     |> change_sink(attrs)
     |> put_change(:user_id, user_id)

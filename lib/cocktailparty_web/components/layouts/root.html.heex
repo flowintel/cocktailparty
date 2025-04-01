@@ -104,7 +104,7 @@
                       @conn.assigns.current_user.id,
                       :create_sinks
                     ) &&
-                    Cocktailparty.Input.get_one_sink_connection() != nil
+                    Cocktailparty.Input.sink_connection?
                 }
                 href={~p"/sinks"}
                 class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"

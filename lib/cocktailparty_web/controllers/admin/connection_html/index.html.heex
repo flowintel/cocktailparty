@@ -24,6 +24,10 @@
     <.icon :if={connection.sink} name="hero-check" />
     <.icon :if={!connection.sink} name="hero-x-mark" />
   </:col>
+  <:col :let={connection} label="Default Sink">
+    <.icon :if={connection.is_default_sink} name="hero-check" />
+    <.icon :if={!connection.is_default_sink} name="hero-x-mark" />
+  </:col>
   <:col :let={connection} label="Status">
     <div :if={connection.connected} class="badge badge-success">
       online

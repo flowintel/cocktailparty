@@ -240,6 +240,11 @@ defmodule Cocktailparty.Catalog do
   def update_source(%Source{} = source, attrs) do
     changeset = change_source(source, attrs)
 
+    # if the source becomes private, we kick all unsubscribed users.
+    if changed?(changeset, :public, to: false ) do
+      kick_all_public_users_from_source(source.id)
+    end
+
     if changed?(changeset, :config) do
       source =
         changeset
@@ -539,6 +544,36 @@ defmodule Cocktailparty.Catalog do
           topic: "feed:" <> Integer.to_string(source_id),
           event: :kick,
           payload: user_id
+        }
+      )
+
+      :ok
+    end)
+  end
+
+  @doc """
+  kick_all_public_users_from_source kicks all public users from a source
+  """
+  def kick_all_public_users_from_source(source_id) when is_integer(source_id) do
+    # query the tracker to get the list of users present on the source's channel
+    users_id = Tracker.get_all_connected_users_to_feed(source_id)
+
+    # get all the ones connected thanks to the feeds being public
+    connected_by_public =
+      UserManagement.list_users()
+      |> Enum.filter(&Enum.member?(users_id, &1.id))
+
+    dbg(connected_by_public)
+
+    # kick commands
+    Enum.each(connected_by_public, fn user ->
+      Phoenix.PubSub.broadcast(
+        Cocktailparty.PubSub,
+        "feed:" <> Integer.to_string(source_id),
+        %Phoenix.Socket.Broadcast{
+          topic: "feed:" <> Integer.to_string(source_id),
+          event: :kick,
+          payload: user.id
         }
       )
 

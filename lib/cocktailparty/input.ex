@@ -61,16 +61,21 @@ defmodule Cocktailparty.Input do
   end
 
   @doc """
-  Returns the list of redis intances that can be used to push data in
-
-  ## Examples
-
-      iex> list_connections()
-      [%Connection{}, ...]
-
+  Return the connection that is defined as default for creating sinks
   """
-  def get_one_sink_connection do
-    Repo.one(from r in Connection, where: r.sink == true)
+  def get_default_sink_connection do
+    Repo.one(from c in Connection, where: c.sink == true and c.is_default_sink == true)
+  end
+
+  @doc """
+  Returns whether there are connections configured as sinks, true or false
+  """
+  def sink_connection? do
+    if Repo.one(from c in Connection, where: c.sink == true, select: count("*")) > 0 do
+      true
+    else
+      false
+    end
   end
 
   @doc """
@@ -155,6 +160,22 @@ defmodule Cocktailparty.Input do
     end
   end
 
+  @doc """
+  Set connection as default_sink, and unset all the other ones.
+  """
+  def set_default_sink(connection_id) do
+    Repo.transaction(fn ->
+      Repo.update_all(Connection, set: [is_default_sink: false])
+
+      # Set the default sink for the selected connection
+      connection = Repo.get!(Connection, connection_id)
+
+      connection
+      |> Ecto.Changeset.change(is_default_sink: true)
+      |> Repo.update!()
+    end)
+  end
+
   @spec create_connection() :: any()
   @doc """
   Creates a connection.
@@ -219,8 +240,8 @@ defmodule Cocktailparty.Input do
     # We restart related processes if needed
     if changed?(changeset, :config) do
       connection =
-          changeset
-          |> validate_full_duplex()
+        changeset
+        |> validate_full_duplex()
 
       case Repo.update(connection) do
         {:ok, connection} ->
@@ -325,9 +346,9 @@ defmodule Cocktailparty.Input do
                 false
             end
 
-            "phoenix" ->
-              :sys.get_state(pid)
-              |> Slipstream.Socket.connected?()
+          "phoenix" ->
+            :sys.get_state(pid)
+            |> Slipstream.Socket.connected?()
         end
     end
   end

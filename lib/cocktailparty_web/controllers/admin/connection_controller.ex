@@ -136,4 +136,12 @@ defmodule CocktailpartyWeb.Admin.ConnectionController do
     |> put_flash(:info, "Connection deleted successfully.")
     |> redirect(to: ~p"/admin/connections")
   end
+
+  def set_default_sink(conn, %{"connection_id" => connection_id}) do
+    Cocktailparty.Input.set_default_sink(connection_id)
+
+    conn
+    |> put_flash(:info, "This connection is now the default sink.")
+    |> redirect(to: ~p"/admin/connections/#{connection_id}")
+  end
 end
