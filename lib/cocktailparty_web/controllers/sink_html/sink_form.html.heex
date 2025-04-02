@@ -1,0 +1,25 @@
+<.simple_form :let={f} for={@changeset} action={@action}>
+  <.error :if={@changeset.action}>
+    Oops, something went wrong! Please check the errors below.
+  </.error>
+  <.input field={f[:name]} type="text" label="Name" />
+  <.input field={f[:description]} type="text" label="Description" />
+  <!-- Display Required Fields -->
+  <div class="mt-14">
+    <dl class="-my-4 divide-y divide-zinc-100" id="required-fields">
+      <div class="flex gap-4 py-4 sm:gap-8">
+        <dt class="w-1/4 flex-none text-[0.8125rem] leading-6 text-zinc-500">Required fields:</dt>
+        <dd class="text-sm leading-6 text-zinc-700">
+          <%= for field <- @required_fields do %>
+            <div><%= field %></div>
+          <% end %>
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  <.input field={f[:config_yaml]} type="textarea" label="Config" />
+  <:actions>
+    <.button>Save Sink</.button>
+  </:actions>
+</.simple_form>

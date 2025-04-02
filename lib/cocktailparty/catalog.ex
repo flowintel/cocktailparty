@@ -241,7 +241,7 @@ defmodule Cocktailparty.Catalog do
     changeset = change_source(source, attrs)
 
     # if the source becomes private, we kick all unsubscribed users.
-    if changed?(changeset, :public, to: false ) do
+    if changed?(changeset, :public, to: false) do
       kick_all_public_users_from_source(source.id)
     end
 

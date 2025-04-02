@@ -38,12 +38,12 @@ defmodule Cocktailparty.Catalog.StompSubscribe do
          channel: source.config["destination"],
          source_id: source.id
        }}
-    # TODO handle with with
-    #  else
-    #    :undefined -> {:stop, {:connection_not_found, source.connection_id}}
+
+      # TODO handle with with
+      #  else
+      #    :undefined -> {:stop, {:connection_not_found, source.connection_id}}
     end
   end
-
 
   # Receiving a message from a source we are subscribed to.
   @impl GenServer
@@ -72,7 +72,10 @@ defmodule Cocktailparty.Catalog.StompSubscribe do
 
   @impl true
   def terminate(reason, state) do
-    Logger.info("Terminating stomp subscribe source process #{state.source_id} because: #{reason}")
+    Logger.info(
+      "Terminating stomp subscribe source process #{state.source_id} because: #{reason}"
+    )
+
     conn_pid = :global.whereis_name({"stomp", state.conn_id})
     # we unsubscribe here so the drive should not get irrelevant message from the server
     StompPubSub.unsubscribe(conn_pid, state.channel, {:source, state.source_id})

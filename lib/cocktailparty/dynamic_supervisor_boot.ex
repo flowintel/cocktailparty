@@ -23,14 +23,17 @@ defmodule Cocktailparty.DynamicSupervisorBoot do
       {Task,
        fn ->
          Logger.info("Starting Connections")
+
          Cocktailparty.Input.list_enabled_connections()
          |> Enum.each(fn x -> ConnectionManager.start_connection(x) end)
 
          Logger.info("Starting Sources")
+
          Cocktailparty.Catalog.list_sources()
          |> Enum.each(fn x -> SourceManager.start_source(x) end)
 
          Logger.info("Starting Sinks")
+
          Cocktailparty.SinkCatalog.list_sinks()
          |> Enum.each(fn x -> SinkManager.start_sink(x) end)
        end}

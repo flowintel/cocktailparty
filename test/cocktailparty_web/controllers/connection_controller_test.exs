@@ -114,7 +114,9 @@ defmodule CocktailpartyWeb.ConnectionControllerTest do
 
     test "renders errors when data is invalid", %{conn: conn, connection: connection} do
       conn =
-        put(conn, ~p"/admin/connections/#{connection.id}", connection: @invalid_attrs_missing_yaml)
+        put(conn, ~p"/admin/connections/#{connection.id}",
+          connection: @invalid_attrs_missing_yaml
+        )
 
       assert html_response(conn, 200) =~ "Missing required keys in config"
     end

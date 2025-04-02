@@ -171,7 +171,7 @@ defmodule Cocktailparty.Accounts.UserToken do
         hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
 
         query =
-          from token in token_and_context_query(hashed_token, "api-token")
+          from(token in token_and_context_query(hashed_token, "api-token"))
 
         {:ok, query}
 

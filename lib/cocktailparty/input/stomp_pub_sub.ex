@@ -56,8 +56,8 @@ defmodule Cocktailparty.Input.StompPubSub do
       connection_id: Keyword.get(opts, :connection_id)
     }
 
-      # We monitor the network process, so we have to kill ourself on termination
-      Process.flag(:trap_exit, true)
+    # We monitor the network process, so we have to kill ourself on termination
+    Process.flag(:trap_exit, true)
 
     {:ok, state, {:continue, :connect}}
   end
@@ -103,11 +103,12 @@ defmodule Cocktailparty.Input.StompPubSub do
         # Otherwise we don't do anything, the driver will reconnect all the source anyway
         Logger.info("Connection is not ready -- Subscription for #{srcid} will occur once ready")
       end
-    # TODO handle error with with
-    # else
-    #   :undefined ->
-    #     Logger.info("Cannot find process #{name}")
-    #     {:noreply, state}
+
+      # TODO handle error with with
+      # else
+      #   :undefined ->
+      #     Logger.info("Cannot find process #{name}")
+      #     {:noreply, state}
     end
   end
 
@@ -271,6 +272,7 @@ defmodule Cocktailparty.Input.StompPubSub do
   @impl true
   def terminate(_reason, state) do
     Logger.info("Cleaning after Stomp connection #{state.connection_id}")
+
     if state.network_pid do
       Process.exit(state.network_pid, :kill)
     end

@@ -4,7 +4,7 @@ defmodule Cocktailparty.SinkCatalog.SinkBehaviour do
   """
 
   @callback required_fields() :: [atom()]
-  @doc"""
+  @doc """
     Takes a sink process PID and a message (of any type) and returns :ok or an error tuple.
   """
   defmacro __using__(_) do

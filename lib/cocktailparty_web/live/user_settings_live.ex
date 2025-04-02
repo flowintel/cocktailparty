@@ -73,9 +73,11 @@ defmodule CocktailpartyWeb.UserSettingsLive do
       <div class="space-y-8 divide-y mt-10">
         <div class="space-y-4 mt-10">
           <h2 class="text-lg font-semibold text-zinc-800">API Keys</h2>
-          <p class="block text-sm leading-6 text-zinc-800">You can generate and manage your API keys here.
+          <p class="block text-sm leading-6 text-zinc-800">
+            You can generate and manage your API keys here.
             Each token can be used for API authentication and can only be seen once. So store
-            it somewhere and keep it safe.</p>
+            it somewhere and keep it safe.
+          </p>
           <!-- Button to create a new token -->
           <.button phx-click="create_api_token" class="my-4">Generate New API Key</.button>
           <!-- If we just created a token, show it once -->

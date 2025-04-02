@@ -1,6 +1,9 @@
 defmodule Cocktailparty.Input.ConnectionTypes do
   @moduledoc """
   Defines available connection types, their associated modules, and required fields.
+
+  fullduplex is the variable responsible for the connection to be able to receive sinks.
+  If the connection is full duplex, it MUST have a default_sink_module
   """
 
   @connection_types %{
@@ -8,10 +11,11 @@ defmodule Cocktailparty.Input.ConnectionTypes do
       name: "Redis",
       module: Cocktailparty.Input.Redis,
       required_fields: [:hostname, :port],
-      fullduplex: true
+      fullduplex: true,
+      default_sink_module: "pub"
     },
     "redis_pub_sub" => %{
-      name: "Redis PubSub",
+      name: "Redis Subscribe",
       module: Cocktailparty.Input.RedisPubSub,
       required_fields: [:hostname, :port],
       fullduplex: false
@@ -71,7 +75,7 @@ defmodule Cocktailparty.Input.ConnectionTypes do
   ## Examples
 
       iex> Cocktailparty.Input.ConnectionTypes.get_required_fields("stomp")
-      []
+      [:host, :port, :virtual_host, :login, :passcode, :ssl]
 
       iex> Cocktailparty.Input.ConnectionTypes.get_required_fields("unknown_type")
       []
@@ -79,6 +83,16 @@ defmodule Cocktailparty.Input.ConnectionTypes do
   def get_required_fields(type) do
     case Map.get(@connection_types, type) do
       %{required_fields: req_fields} -> req_fields
+      nil -> []
+    end
+  end
+
+  @doc """
+  Returns the default sink module
+  """
+  def get_default_sink_module(type) do
+    case Map.get(@connection_types, type) do
+      %{default_sink_module: mod} -> mod
       nil -> []
     end
   end
@@ -100,7 +114,7 @@ defmodule Cocktailparty.Input.ConnectionTypes do
         false -> {:error, "Missing required keys in config"}
       end
     else
-        {:error, "Cannot validate config"}
+      {:error, "Cannot validate config"}
     end
   end
 end

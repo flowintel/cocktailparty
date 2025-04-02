@@ -7,6 +7,7 @@ defmodule Cocktailparty.Repo.Migrations.AddEncryptedConfig do
       add :config, :binary
     end
   end
+
   def down do
     alter table(:connections) do
       remove :config

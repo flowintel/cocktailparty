@@ -15,6 +15,31 @@
   <:item title="Type"><%= @sink.type %></:item>
   <:item title="Connection"><%= @sink.connection.name %></:item>
   <:item title="User"><%= @sink.user.email %></:item>
+  <:item title="Config">
+    <table class="sm:w-full">
+      <thead class="text-left text-[0.8125rem] leading-6 text-zinc-500">
+        <tr>
+          <th class="p-0 pr-6 font-normal text-center">key</th>
+          <th class="p-0 pr-6 font-normal text-center">value</th>
+        </tr>
+      </thead>
+
+      <%= for {key, value} <- @sink.config do %>
+        <tr>
+          <td>
+            <div class="block pr-6 text-center">
+              <%= key %>
+            </div>
+          </td>
+          <td>
+            <div class="block pr-6 text-center">
+              <%= value %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  </:item>
 </.list>
 
 <br />

@@ -15,7 +15,7 @@ defmodule CocktailpartyWeb.SocketTest do
 
   test "a user can join a channel using a api-token", %{user: user} do
     token = Accounts.create_user_api_token(user)
-    dbg(token)
+
     connect_info = %{
       peer_data: %{port: 59388, address: {127, 0, 0, 1}, ssl_cert: nil},
       x_headers: []

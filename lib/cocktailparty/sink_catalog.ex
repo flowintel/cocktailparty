@@ -8,6 +8,7 @@ defmodule Cocktailparty.SinkCatalog do
   import Ecto.Query, warn: false
   import Ecto.Changeset
   alias Cocktailparty.Input.Connection
+  alias Cocktailparty.Input.ConnectionTypes
   alias Cocktailparty.UserManagement
   alias Cocktailparty.Input
   alias Cocktailparty.Repo
@@ -39,8 +40,6 @@ defmodule Cocktailparty.SinkCatalog do
     connection = Input.get_connection!(connection_id)
     SinkType.get_sink_types_for_connection(connection.type)
   end
-
-
 
   @doc """
   Returns the list of sinks / joined with its use
@@ -169,6 +168,28 @@ defmodule Cocktailparty.SinkCatalog do
     Cocktailparty.Input.get_connection_map!(attrs["connection_id"])
     |> Ecto.build_assoc(:sinks)
     |> change_sink(attrs)
+    |> validate_sink_type()
+    |> Repo.insert()
+    |> case do
+      {:ok, sink} ->
+        notify_monitor({:subscribe, "sink:" <> Integer.to_string(sink.id)})
+        {:ok, sink}
+
+      {:error, msg} ->
+        {:error, msg}
+    end
+  end
+
+  @doc """
+  Create a default sink for a user
+  """
+  def create_default_sink(attrs \\ %{}) do
+    conn = Cocktailparty.Input.get_default_sink_connection()
+    type = ConnectionTypes.get_default_sink_module(conn.type)
+
+    conn
+    |> Ecto.build_assoc(:sinks)
+    |> change_sink(Map.put(attrs, "type", type))
     |> validate_sink_type()
     |> Repo.insert()
     |> case do

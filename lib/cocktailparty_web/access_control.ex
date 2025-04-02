@@ -65,6 +65,7 @@ defmodule CocktailpartyWeb.AccessControl do
       conn
       |> put_flash(:error, "Unauthorized")
       |> redirect(to: ~p"/")
+      |> halt()
     end
   end
 end

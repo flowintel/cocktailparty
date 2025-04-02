@@ -6,19 +6,23 @@ defmodule Cocktailparty.SinkCatalog.SinkType do
   # The connection type MUST be fullduplex otherwise it will introduce non controlled bugs.
   @sink_types %{
     "redis" => [
-      %{type: "pub", module: Cocktailparty.SinkCatalog.RedisChannelSink, required_fields: [:channel]}
+      %{
+        type: "pub",
+        module: Cocktailparty.SinkCatalog.RedisChannelSink,
+        required_fields: [:channel]
+      }
     ]
   }
 
   @doc """
-  Returns the list of source types available for the given connection type.
+  Returns the list of sink types available for the given connection type.
   """
   def get_sink_types_for_connection(connection_type) do
     Map.get(@sink_types, connection_type, [])
   end
 
   @doc """
-  Returns the module associated with the given connection type and source type.
+  Returns the module associated with the given connection type and sink type.
   """
   def get_module(connection_type, sink_type) do
     @sink_types
@@ -31,7 +35,7 @@ defmodule Cocktailparty.SinkCatalog.SinkType do
   end
 
   @doc """
-  Returns the required fields for the given connection type and source type.
+  Returns the required fields for the given connection type and sink type.
   """
   def get_required_fields(connection_type, sink_type) do
     @sink_types

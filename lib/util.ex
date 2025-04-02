@@ -41,7 +41,6 @@ defmodule Cocktailparty.Util do
       # Forward {:error}
       x ->
         x
-
     end
   end
 

@@ -28,5 +28,4 @@ defmodule Cocktailparty.Input.Stomp do
         )
     end
   end
-
 end

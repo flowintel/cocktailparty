@@ -46,8 +46,9 @@ defmodule CocktailpartyWeb.Router do
     get "/sources/:id", SourceController, :show
     post "/sources/subscribe/:source_id", SourceController, :subscribe
     delete "/sources/unsubscribe/:source_id", SourceController, :unsubscribe
-    get "/sinks", SinkController, :index
-    get "/sinks/:id", SinkController, :show
+    # get "/sinks", SinkController, :index
+    # get "/sinks/:id", SinkController, :show
+    resources "/sinks", SinkController
   end
 
   scope "/admin", CocktailpartyWeb.Admin do
@@ -60,7 +61,7 @@ defmodule CocktailpartyWeb.Router do
     delete "/sources/mass_unsubscribe/:source_id", SourceController, :mass_unsubscribe
     resources "/sinks", SinkController
     resources "/connections", ConnectionController
-    post "/connections/set_default_sink/:connection_id" , ConnectionController, :set_default_sink
+    post "/connections/set_default_sink/:connection_id", ConnectionController, :set_default_sink
     resources "/roles", RoleController
     live_dashboard "/dashboard", metrics: CocktailpartyWeb.Telemetry
   end

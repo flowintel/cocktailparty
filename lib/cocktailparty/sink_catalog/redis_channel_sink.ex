@@ -44,8 +44,13 @@ defmodule Cocktailparty.SinkCatalog.RedisChannelSink do
 
   @impl true
   def handle_info(
-        %Phoenix.Socket.Broadcast{topic: "sink:" <> sink_id, event: :new_client_message, payload: message},
-        state)
+        %Phoenix.Socket.Broadcast{
+          topic: "sink:" <> sink_id,
+          event: :new_client_message,
+          payload: message
+        },
+        state
+      )
       when sink_id == state.sink_id do
     case Redix.command(state.conn_pid, ["PUBLISH", state.channel, message]) do
       {:ok, _} ->

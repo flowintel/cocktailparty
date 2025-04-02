@@ -5,9 +5,11 @@
     <.link href={~p"/admin/connections/#{@connection}/edit"}>
       <.button>Edit connection</.button>
     </.link>
-    <.link :if={!@connection.is_default_sink && @connection.sink}
-       href={~p"/admin/connections/set_default_sink/#{@connection}"}
-       method="post">
+    <.link
+      :if={!@connection.is_default_sink && @connection.sink}
+      href={~p"/admin/connections/set_default_sink/#{@connection}"}
+      method="post"
+    >
       <.button>Set as default sink connection</.button>
     </.link>
   </:actions>

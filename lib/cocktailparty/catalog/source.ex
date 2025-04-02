@@ -62,7 +62,9 @@ defmodule Cocktailparty.Catalog.Source do
       config = get_field(changeset, :config) || %{}
 
       connection = Cocktailparty.Input.get_connection!(connection_id)
-      with {:ok, required_fields} <- Cocktailparty.Catalog.SourceType.get_required_fields(connection.type, source_type) do
+
+      with {:ok, required_fields} <-
+             Cocktailparty.Catalog.SourceType.get_required_fields(connection.type, source_type) do
         missing_fields =
           required_fields
           |> Enum.filter(fn field -> Map.get(config, to_string(field)) in [nil, ""] end)
@@ -81,5 +83,4 @@ defmodule Cocktailparty.Catalog.Source do
       changeset
     end
   end
-
 end

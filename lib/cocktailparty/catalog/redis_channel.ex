@@ -8,7 +8,10 @@ defmodule Cocktailparty.Catalog.RedisChannel do
   @impl Cocktailparty.Catalog.SourceBehaviour
   def required_fields do
     SourceType
-    {:ok, required_fields} = Cocktailparty.Catalog.SourceType.get_required_fields("redis_pub_sub", "pubsub")
+
+    {:ok, required_fields} =
+      Cocktailparty.Catalog.SourceType.get_required_fields("redis_pub_sub", "pubsub")
+
     required_fields
   end
 
@@ -29,9 +32,10 @@ defmodule Cocktailparty.Catalog.RedisChannel do
          source_id: source.id,
          reference: ref
        }}
-    # TODO handle with with
-    # else
-    #   :undefined -> {:stop, {:connection_not_found, source.connection_id}}
+
+      # TODO handle with with
+      # else
+      #   :undefined -> {:stop, {:connection_not_found, source.connection_id}}
     end
   end
 

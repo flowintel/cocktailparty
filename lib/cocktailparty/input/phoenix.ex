@@ -8,8 +8,7 @@ defmodule Cocktailparty.Input.Phoenix do
     specs =
       {
         Cocktailparty.Input.PhoenixClient,
-        uri: connection.config["uri"],
-        name: {:global, {connection.type, connection.id}}
+        uri: connection.config["uri"], name: {:global, {connection.type, connection.id}}
       }
 
     # Add to the ConnectionDynamicSupervisor children

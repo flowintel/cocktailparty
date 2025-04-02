@@ -57,7 +57,9 @@ defmodule Cocktailparty.SinkCatalog.Sink do
       config = get_field(changeset, :config) || %{}
 
       connection = Cocktailparty.Input.get_connection!(connection_id)
-      with {:ok, required_fields} <- Cocktailparty.SinkCatalog.SinkType.get_required_fields(connection.type, sink_type) do
+
+      with {:ok, required_fields} <-
+             Cocktailparty.SinkCatalog.SinkType.get_required_fields(connection.type, sink_type) do
         missing_fields =
           required_fields
           |> Enum.filter(fn field -> Map.get(config, to_string(field)) in [nil, ""] end)
@@ -76,6 +78,4 @@ defmodule Cocktailparty.SinkCatalog.Sink do
       changeset
     end
   end
-
-
 end
