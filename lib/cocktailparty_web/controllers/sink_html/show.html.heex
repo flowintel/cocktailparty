@@ -41,6 +41,108 @@
 </.list>
 
 <br />
+<h1 class="text-lg font-semibold leading-8 text-zinc-800">Instructions</h1>
+<div class="w-full border-opacity-50">
+  In order to push data into the websocket one need to join the sink channel using the following parameters:
+  <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
+    <table class="mt-11 w-[40rem] sm:w-full">
+      <thead class="text-left text-[0.8125rem] leading-6 text-zinc-500"></thead>
+      <tbody class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700">
+        <tr class="group hover:bg-zinc-50">
+          <td class="relative p-0 hover:cursor-pointer">
+            <div class="block py-4 pr-6">
+              <span class="relative font-semibold text-zinc-900">
+                protocol
+              </span>
+            </div>
+          </td>
+          <td class="relative p-0 w-14">
+            <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
+              wss://
+            </div>
+          </td>
+        </tr>
+
+        <tr class="group hover:bg-zinc-50">
+          <td class="relative p-0 hover:cursor-pointer">
+            <div class="block py-4 pr-6">
+              <span class="relative font-semibold text-zinc-900">
+                host
+              </span>
+            </div>
+          </td>
+          <td class="relative p-0 w-14">
+            <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
+              <%= @conn.host %>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="group hover:bg-zinc-50">
+          <td class="relative p-0 hover:cursor-pointer">
+            <div class="block py-4 pr-6">
+              <span class="relative font-semibold text-zinc-900">
+                port
+              </span>
+            </div>
+          </td>
+          <td class="relative p-0 w-14">
+            <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
+              <%!-- <%= Integer.to_string(@conn.port) %> --%> 443
+            </div>
+          </td>
+        </tr>
+
+        <tr class="group hover:bg-zinc-50">
+          <td class="relative p-0 hover:cursor-pointer">
+            <div class="block py-4 pr-6">
+              <span class="relative font-semibold text-zinc-900">
+                ressource
+              </span>
+            </div>
+          </td>
+          <td class="relative p-0 w-14">
+            <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
+              /sinksocket/websocket?vsn=2.0.0&token=
+            </div>
+          </td>
+        </tr>
+
+        <tr class="group hover:bg-zinc-50">
+          <td class="relative p-0 hover:cursor-pointer">
+            <div class="block py-4 pr-6">
+              <span class="relative font-semibold text-zinc-900">
+                token
+              </span>
+            </div>
+          </td>
+          <td class="relative p-0 w-14">
+            <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
+              Use your API token
+            </div>
+          </td>
+        </tr>
+
+        <tr class="group hover:bg-zinc-50">
+          <td class="relative p-0 hover:cursor-pointer">
+            <div class="block py-4 pr-6">
+              <span class="relative font-semibold text-zinc-900">
+                join message
+              </span>
+            </div>
+          </td>
+          <td class="relative p-0 w-14">
+            <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
+              ["0","0","sink:<%= @sink.id %>","phx_join",{}]
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<br />
 <h1 class="text-lg font-semibold leading-8 text-zinc-800">Last messages</h1>
 <.table id="sample" rows={@sample}>
   <:col :let={event} label="payload"><%= event %></:col>
