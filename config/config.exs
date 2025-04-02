@@ -27,7 +27,11 @@ config :cocktailparty, CocktailpartyWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :cocktailparty, Cocktailparty.Mailer, adapter: Swoosh.Adapters.Local
+# config :cocktailparty, Cocktailparty.Mailer, adapter: Swoosh.Adapters.Local
+
+config :cocktailparty, Cocktailparty.Mailer,
+  adapter: Swoosh.Adapters.Sendmail,
+  cmd_path: "sendmail"
 
 # Configure esbuild (the version is required)
 config :esbuild,
@@ -41,7 +45,7 @@ config :esbuild,
 
 # Configure tailwind (the version is required)
 config :tailwind,
-  version: "3.3.2",
+  version: "3.4.17",
   default: [
     args: ~w(
       --config=tailwind.config.js
@@ -116,3 +120,9 @@ config :remote_ip, debug: false
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 
 config :tzdata, :autoupdate, :disabled
+
+config :cocktailparty, Cocktailparty.Accounts.AdminNotifier,
+  # The external domain
+  instance_baseurl: "localhost:4000",
+  instance_name: "CIRCL Cocktailparty",
+  instance_email: "info@circl.lu"

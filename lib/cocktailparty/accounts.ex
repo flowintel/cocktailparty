@@ -6,7 +6,8 @@ defmodule Cocktailparty.Accounts do
   import Ecto.Query, warn: false
   alias Cocktailparty.Repo
 
-  alias Cocktailparty.Accounts.{User, UserToken, UserNotifier}
+  alias Cocktailparty.Accounts.{User, UserToken, UserNotifier, AdminNotifier}
+  alias Cocktailparty.UserManagement
 
   ## Database getters
 
@@ -269,6 +270,16 @@ defmodule Cocktailparty.Accounts do
       Repo.insert!(user_token)
       UserNotifier.deliver_confirmation_instructions(user, confirmation_url_fun.(encoded_token))
     end
+  end
+
+  ## Admin confirmation
+  @doc """
+
+
+  """
+  def deliver_admin_confirmation_instructions(%User{} = user) do
+    UserManagement.get_admins()
+    |> Enum.map(&AdminNotifier.notify_new_account_creation(&1, user.id))
   end
 
   @doc """

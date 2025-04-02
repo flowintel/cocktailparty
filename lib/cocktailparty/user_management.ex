@@ -252,6 +252,13 @@ defmodule Cocktailparty.UserManagement do
   end
 
   @doc """
+  Get the list of admins
+  """
+  def get_admins() do
+    Repo.all(from u in User, where: u.is_admin == true)
+  end
+
+  @doc """
   check whether a user has a given permission
   return true if the user is_admin, unless the
   permission does not exist
