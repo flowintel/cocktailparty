@@ -35,6 +35,7 @@ defmodule Cocktailparty.Roles.Permissions do
     field :access_all_sources, :boolean, default: false
     field :list_all_sources, :boolean, default: false
     field :create_sinks, :boolean, default: false
+    field :use_sinks, :boolean, default: false
     field :test, :boolean, default: false
     # more permission to come
   end
@@ -62,8 +63,14 @@ defmodule Cocktailparty.Roles.Permissions do
 
   def changeset(permissions, attrs) do
     permissions
-    |> cast(attrs, [:access_all_sources, :list_all_sources, :create_sinks, :test])
-    |> validate_required([:access_all_sources, :list_all_sources, :create_sinks, :test])
+    |> cast(attrs, [:access_all_sources, :list_all_sources, :create_sinks, :use_sinks, :test])
+    |> validate_required([
+      :access_all_sources,
+      :list_all_sources,
+      :create_sinks,
+      :use_sinks,
+      :test
+    ])
   end
 
   @doc """
@@ -88,6 +95,21 @@ defmodule Cocktailparty.Roles.Permissions do
       - delete said sinks from Repo
   """
   def create_sinks(direction, affected_users_id) do
+    Logger.info("Triggering demotion callback for users: #{affected_users_id}")
+
+    if direction == "demotion" do
+      # we kill the socket and delete the created sinks
+      Cocktailparty.SinkCatalog.destroy_sinks_for_users(affected_users_id)
+    end
+  end
+
+  @doc """
+  Call back for :use_sinks
+    - demotion:
+      - we kill the socket linked to the sink that users used when they had the permission
+      - delete said sinks from Repo
+  """
+  def use_sinks(direction, affected_users_id) do
     Logger.info("Triggering demotion callback for users: #{affected_users_id}")
 
     if direction == "demotion" do

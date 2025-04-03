@@ -100,10 +100,14 @@
               <.link
                 :if={
                   !@is_admin &&
-                    Cocktailparty.UserManagement.can?(
-                      @conn.assigns.current_user.id,
-                      :create_sinks
-                    ) &&
+                    (Cocktailparty.UserManagement.can?(
+                       @conn.assigns.current_user.id,
+                       :use_sinks
+                     ) or
+                       Cocktailparty.UserManagement.can?(
+                         @conn.assigns.current_user.id,
+                         :create_sinks
+                       )) &&
                     Cocktailparty.Input.sink_connection?()
                 }
                 href={~p"/sinks"}

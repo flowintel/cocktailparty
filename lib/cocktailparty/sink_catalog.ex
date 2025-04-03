@@ -17,8 +17,6 @@ defmodule Cocktailparty.SinkCatalog do
   alias Cocktailparty.Accounts.User
   alias CocktailpartyWeb.Endpoint
 
-  @action :create_sinks
-
   @doc """
   Returns the list of sinks.
 
@@ -321,7 +319,9 @@ defmodule Cocktailparty.SinkCatalog do
 
   def list_authorized_users do
     Repo.all(User)
-    |> Enum.filter(fn user -> UserManagement.can?(user.id, @action) end)
+    |> Enum.filter(fn user ->
+      UserManagement.can?(user.id, :create_sinks) or UserManagement.can?(user.id, :use_sinks)
+    end)
   end
 
   def get_sample(sink_id) when is_binary(sink_id) do

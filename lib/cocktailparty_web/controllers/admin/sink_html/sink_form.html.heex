@@ -30,41 +30,40 @@
   </:actions>
 </.simple_form>
 <script>
-  // Include the connection_sink_types map as a JavaScript variable
-  var connectionSinkTypes = <%= raw(Jason.encode!(@connection_sink_types)) %>;
+   // Include the connection_sink_types map as a JavaScript variable
+   var connectionSinkTypes = <%= raw(Jason.encode!(@connection_sink_types)) %>;
 
-  // Function to update the required fields display based on the selected sink type
-  function updateRequiredFields() {
-    const connectionId = document.getElementById("sink_connection_id").value;
-    const sinkType = document.getElementById("sink_type").value;
+   // Function to update the required fields display based on the selected sink type
+   function updateRequiredFields() {
+     const connectionId = document.getElementById("sink_connection_id").value;
+     const sinkType = document.getElementById("sink_type").value;
 
-    const requiredFieldsDiv = document.getElementById("required-fields");
-    requiredFieldsDiv.innerHTML = '';
+     const requiredFieldsDiv = document.getElementById("required-fields");
+     requiredFieldsDiv.innerHTML = '';
 
-    if (connectionSinkTypes[connectionId]) {
-      const sinkTypeInfo = connectionSinkTypes[connectionId].find(function(item) {
-        return item.type === sinkType;
-      });
+     if (connectionSinkTypes[connectionId]) {
+       const sinkTypeInfo = connectionSinkTypes[connectionId].find(function(item) {
+         return item.type === sinkType;
+       });
 
-      if (sinkTypeInfo && sinkTypeInfo.required_fields) {
-        var heading = document.createElement("dt");
-        heading.setAttribute("class", "w-1/4 flex-none text-[0.8125rem] leading-6 text-zinc-500");
-        var content = document.createTextNode("Required fields:");
-        heading.appendChild(content);
-        requiredFieldsDiv.appendChild(heading);
+       if (sinkTypeInfo && sinkTypeInfo.required_fields) {
+         var heading = document.createElement("dt");
+         heading.setAttribute("class", "w-1/4 flex-none text-[0.8125rem] leading-6 text-zinc-500");
+         var content = document.createTextNode("Required fields:");
+         heading.appendChild(content);
+         requiredFieldsDiv.appendChild(heading);
 
-        sinkTypeInfo.required_fields.forEach(function(field) {
-          var listItem = document.createElement("dd");
-          listItem.setAttribute("class", "text-sm leading-6 text-zinc-700");
-          listItem.innerText = field;
-          requiredFieldsDiv.appendChild(listItem);
-        });
-      }
-    }
-  }
+         sinkTypeInfo.required_fields.forEach(function(field) {
+           var listItem = document.createElement("dd");
+           listItem.setAttribute("class", "text-sm leading-6 text-zinc-700");
+           listItem.innerText = field;
+           requiredFieldsDiv.appendChild(listItem);
+         });
+       }
+     }
+   }
 
-  // Event listener for when the connection selection changes
-  document.getElementById("sink_connection_id").addEventListener("change", function() {
+  function updateSinkTypes() {
     const connectionId = this.value;
     const sinkTypeSelect = document.getElementById("sink_type");
     const requiredFieldsDiv = document.getElementById("required-fields");
@@ -94,9 +93,12 @@
       option.disabled = true;
       sinkTypeSelect.add(option);
     }
-  });
-
-  // Event listener for when the sink type selection changes
-  document.getElementById("sink_type").addEventListener("change", updateRequiredFields);
-  updateRequiredFields();
+   }
+   // Event listener for when the connection selection changes
+   document.getElementById("sink_connection_id").addEventListener("change", updateSinkTypes);
+   // Event listener for when the sink type selection changes
+   document.getElementById("sink_type").addEventListener("change", updateRequiredFields);
+   document.getElementById("sink_connection_id").selectedIndex = 0;
+   const event = new Event("change");
+   document.getElementById("sink_connection_id").dispatchEvent(event);
 </script>

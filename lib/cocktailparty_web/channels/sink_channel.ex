@@ -8,8 +8,6 @@ defmodule CocktailpartyWeb.SinkChannel do
   alias Cocktailparty.SinkCatalog
   alias Phoenix.Socket.Broadcast
 
-  @action :create_sinks
-
   @impl true
   def join("sink:lobby", _payload, socket) do
     {:ok, socket}
@@ -95,7 +93,8 @@ defmodule CocktailpartyWeb.SinkChannel do
     )
 
     # TODO write access test
-    UserManagement.can?(user_id, @action) &&
+    UserManagement.is_confirmed?(user_id) &&
+      (UserManagement.can?(user_id, :create_sinks) or UserManagement.can?(user_id, :use_sinks)) &&
       UserManagement.has_access_to_sink?(user_id, sink_id)
   end
 end

@@ -2,13 +2,15 @@ defmodule CocktailpartyWeb.SinkController do
   use CocktailpartyWeb, :controller
 
   import Cocktailparty.Util
+  alias CocktailpartyWeb.AccessControl
   alias Cocktailparty.SinkCatalog
   alias Cocktailparty.SinkCatalog.Sink
   alias Cocktailparty.SinkCatalog.SinkType
   alias Cocktailparty.Input.ConnectionTypes
   import CocktailpartyWeb.AccessControl
 
-  plug :sink_access_control
+  plug :see_sinks_access_control when action in [:show, :index]
+  plug :create_sinks_access_control when action in [:new, :create, :update, :edit, :delete]
 
   def new(conn, _params) do
     changeset = SinkCatalog.change_sink(%Sink{})
@@ -73,7 +75,11 @@ defmodule CocktailpartyWeb.SinkController do
 
   def index(conn, _params) do
     sinks = SinkCatalog.list_user_sinks(conn.assigns.current_user.id)
-    render(conn, :index, sinks: sinks)
+
+    render(conn, :index,
+      sinks: sinks,
+      can_create: AccessControl.can_create_sink?(conn.assigns.current_user.id)
+    )
   end
 
   def show(conn, %{"id" => id}) do

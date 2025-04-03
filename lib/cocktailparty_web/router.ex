@@ -50,8 +50,6 @@ defmodule CocktailpartyWeb.Router do
     get "/sources/:id", SourceController, :show
     post "/sources/subscribe/:source_id", SourceController, :subscribe
     delete "/sources/unsubscribe/:source_id", SourceController, :unsubscribe
-    # get "/sinks", SinkController, :index
-    # get "/sinks/:id", SinkController, :show
     resources "/sinks", SinkController
   end
 

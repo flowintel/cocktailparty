@@ -1,6 +1,6 @@
 <.header>
   Listing Sinks
-  <:actions>
+  <:actions :if={@can_create}>
     <.link href={~p"/sinks/new"}>
       <.button>New Sink</.button>
     </.link>

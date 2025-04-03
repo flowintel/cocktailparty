@@ -56,10 +56,14 @@ defmodule CocktailpartyWeb.AccessControl do
   end
 
   @doc """
-  Access to most routes are linked to :create_sinks
+  Access to :index, :show route to a sink are restricted by:
+   - whether the user is confirmed or not
+   - whether they have :create_sinks or :use_sinks permission
   """
-  def sink_access_control(conn, _opts) do
-    if UserManagement.can?(conn.assigns.current_user.id, :create_sinks) do
+  def see_sinks_access_control(conn, _opts) do
+    if (UserManagement.is_confirmed?(conn.assigns.current_user.id) &&
+          UserManagement.can?(conn.assigns.current_user.id, :create_sinks)) or
+         UserManagement.can?(conn.assigns.current_user.id, :use_sinks) do
       conn
     else
       conn
@@ -67,5 +71,29 @@ defmodule CocktailpartyWeb.AccessControl do
       |> redirect(to: ~p"/")
       |> halt()
     end
+  end
+
+  @doc """
+  Access to :create, :update, :edit route
+  """
+  def create_sinks_access_control(conn, _opts) do
+    if can_create_sink?(conn.assigns.current_user.id) do
+      conn
+    else
+      conn
+      |> put_flash(:error, "Unauthorized")
+      |> redirect(to: ~p"/")
+      |> halt()
+    end
+  end
+
+  @doc """
+  Return whether or not a user can create sinks. Depends:
+   - whether the user is confirmed or not
+   - whether they have :create_sinks or :use_sinks permission
+  """
+  def can_create_sink?(user_id) do
+    UserManagement.is_confirmed?(user_id) &&
+      UserManagement.can?(user_id, :create_sinks)
   end
 end
