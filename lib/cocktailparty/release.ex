@@ -28,8 +28,10 @@ defmodule Cocktailparty.Release do
           repo.insert!(%Cocktailparty.Roles.Role{
             name: "default",
             permissions: %Cocktailparty.Roles.Permissions{
+              access_all_sources: false,
               list_all_sources: false,
               create_sinks: false,
+              use_sinks: false,
               test: false
             }
           })
@@ -37,7 +39,7 @@ defmodule Cocktailparty.Release do
     end
   end
 
-  def init_admin do
+  def init_admin(email) do
     load_app()
 
     for repo <- repos() do
@@ -46,7 +48,7 @@ defmodule Cocktailparty.Release do
           # Create your default admin account
           repo.insert!(%Cocktailparty.Accounts.User{
             is_admin: true,
-            email: "email@example.com",
+            email: email,
             hashed_password: Argon2.hash_pwd_salt("passwordtochange"),
             role_id: Cocktailparty.Roles.get_default_role_id!()
           })
