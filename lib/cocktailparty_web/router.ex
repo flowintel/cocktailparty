@@ -40,8 +40,12 @@ defmodule CocktailpartyWeb.Router do
   end
 
   scope "/", CocktailpartyWeb do
-    pipe_through [:browser, :auth]
+    pipe_through [:browser]
     get "/", PageController, :home
+  end
+
+  scope "/", CocktailpartyWeb do
+    pipe_through [:browser, :auth]
     get "/sources", SourceController, :index
     get "/sources/:id", SourceController, :show
     post "/sources/subscribe/:source_id", SourceController, :subscribe

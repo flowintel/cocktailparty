@@ -59,15 +59,15 @@ defmodule CocktailpartyWeb.UserRegistrationLive do
 
     case Accounts.register_user(user_with_default_role) do
       {:ok, user} ->
+        # Users confirms their email
         {:ok, _} =
-          # Users confirms their email
           Accounts.deliver_user_confirmation_instructions(
             user,
             &url(~p"/users/confirm/#{&1}")
           )
 
-          # Admins still have to give the user proper rights
-          Accounts.deliver_admin_confirmation_instructions(user)
+        # Admins still have to give the user proper rights
+        Accounts.deliver_admin_confirmation_instructions(url(~p"/admin/users/#{user.id}"))
 
         changeset = Accounts.change_user_registration(user)
         {:noreply, socket |> assign(trigger_submit: true) |> assign_form(changeset)}

@@ -274,12 +274,12 @@ defmodule Cocktailparty.Accounts do
 
   ## Admin confirmation
   @doc """
-
-
+  Deliver an email to all admin in order for them to review the role attributed to a
+  freshly registered user
   """
-  def deliver_admin_confirmation_instructions(%User{} = user) do
+  def deliver_admin_confirmation_instructions(url) do
     UserManagement.get_admins()
-    |> Enum.map(&AdminNotifier.notify_new_account_creation(&1, user.id))
+    |> Enum.map(&AdminNotifier.notify_new_account_creation(&1, url))
   end
 
   @doc """
