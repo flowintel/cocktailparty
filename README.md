@@ -10,12 +10,12 @@ Key Features:
 - Stream Distribution: The project focuses on delivering real-time data streams to end-users.
 - Web Interface: The user interface allows users to easily navigate and discover the streams they are interested in.
 - Stream Subscription: Users can subscribe to their desired streams and receive realtime updates.
-- Stream Creation: Users create `sinks` in which that can upload streams of data using [realtime-py](https://github.com/flowintel/realtime-py/tree/master)
+- Stream Creation: Users may create `sinks` in which that can upload streams of data using [realtime-py](https://github.com/flowintel/realtime-py/tree/master)
   
 # Moving parts
 
 Cocktailparty leverages the [phoenix framework](https://www.phoenixframework.org/) and the [BEAM virtual machine](https://www.erlang.org/blog/a-brief-beam-primer/) capabilities to provide:
-- A broker that take data from different sources (at the moment only topics from redis instances) and publish the content into phoenix channels, that are then displayed as *sources* to the end user.
+- A broker that take data from different sources (redis/valkey/kvrocks, STOMP, or websocket) and publish the content into phoenix channels, that are then displayed as *sources* to the end user.
 - A pubsub system based on [pg2](https://www.erlang.org/docs/18/man/pg2.html) to route redis topics' content to channels.
 - A web interface for managing users, and for users to list sources and sinks, and get access instructions.
 That's it.
@@ -49,7 +49,7 @@ export DATABASE_URL=ecto://cocktailparty:mysuperpassword@192.168.1.1/cocktailpar
 export PHX_HOST=broker.d4-project.org
 # Is it standalone?
 export STANDALONE=false
-# Shall we launch the broker?
+# Shall this node connect to upstream connection?
 export BROKER=false
 # after mix compile:
 # mix phx.server
@@ -65,7 +65,6 @@ Cocktailparty is meant to be deployed behind a proxy. Nodes' duties can be separ
 ## Common deployment
 - Apache terminates https
 - Apache load balance between a set of phoenix nodes
-- One broker is keeping connections to redis servers
 - Clustering is done through [libcluster](https://hex.pm/packages/libcluster) (gossip protocol by default)
 
 ```mermaid
@@ -136,8 +135,8 @@ Here is an example of an apache config for one broker node, and 2 nodes serving 
 # Contribution
 
 ## License
-        Copyright (C) 2023-2024 CIRCL - Computer Incident Response Center Luxembourg
-        Copyright (C) 2023-2024 Jean-Louis Huynen
+        Copyright (C) 2023-2025 CIRCL - Computer Incident Response Center Luxembourg
+        Copyright (C) 2023-2025 Jean-Louis Huynen
 
         This program is free software: you can redistribute it and/or modify
         it under the terms of the GNU Affero General Public License as
