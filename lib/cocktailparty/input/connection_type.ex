@@ -37,6 +37,12 @@ defmodule Cocktailparty.Input.ConnectionTypes do
       module: Cocktailparty.Input.Phoenix,
       required_fields: [:uri],
       fullduplex: false
+    },
+    "certstream" => %{
+      name: "certstream",
+      module: Cocktailparty.Input.CertStream,
+      required_fields: [:uri],
+      fullduplex: false
     }
     # Add other connection types here
   }

@@ -32,7 +32,15 @@ defmodule Cocktailparty.Catalog.SourceType do
         module: Cocktailparty.Catalog.PhoenixDownlink,
         required_fields: [:output_datatype, :destination]
       }
+    ],
+    "certstream" => [
+      %{
+        type: "certstream",
+        module: Cocktailparty.Catalog.Certstream,
+        required_fields: [:mode]
+      }
     ]
+
   }
 
   @doc """
