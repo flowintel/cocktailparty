@@ -4,7 +4,7 @@ defmodule Cocktailparty.MixProject do
   def project do
     [
       app: :cocktailparty,
-      version: "0.2.0",
+      version: "0.3.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -27,7 +27,7 @@ defmodule Cocktailparty.MixProject do
   def application do
     [
       mod: {Cocktailparty.Application, []},
-      extra_applications: extra_applications(Mix.env()) ++ [:logger, :runtime_tools, :os_mon]
+      extra_applications: extra_applications(Mix.env()) ++ [:logger, :runtime_tools, :os_mon, :public_key]
     ]
   end
 
@@ -85,7 +85,13 @@ defmodule Cocktailparty.MixProject do
       {:ymlr, "~> 5.0"},
       # Encryption at rest
       {:cloak_ecto, "~> 1.3.0"},
-      {:fresh, "~> 0.4.4"}
+      {:fresh, "~> 0.4.4"},
+      # Certstream
+      # {:easy_ssl, "~> 1.3.0"}
+      {:easy_ssl, path: "/home/jlouis/Git/EasySSL"},
+      # hack around httpoinson issue #494
+      {:hackney, "~> 1.21.0"},
+      {:httpoison, "~>2.2.2", override: true}
     ]
   end
 
