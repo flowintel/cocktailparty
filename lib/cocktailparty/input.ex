@@ -351,7 +351,7 @@ defmodule Cocktailparty.Input do
             |> Slipstream.Socket.connected?()
 
           "certstream" ->
-            false
+            DynamicSupervisor.count_children(pid) > 0
         end
     end
   end
