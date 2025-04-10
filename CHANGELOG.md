@@ -1,3 +1,31 @@
+# Changelog for Cocktailparty v0.3 (Multisource beta)
+
+Welcome to the latest update of Cocktailparty, that comes with a revamped brokering mechanism. While v0.2 was tied to redis-compatible connections, v0.3 brings the ability to connect to new types of sources:
+ - STOMP source as for instance [UK national rail STOMP feed](https://wiki.openraildata.com/index.php/Connecting_with_Stomp), or [CERT.pl n6 notification system](https://cert.pl/en/n6/)
+ - websocket sources as for instance [aisstream](https://aisstream.io/) 
+ - redis and redis pubsub just as before
+ - phoenix -- this is an crude support at the moment but cocktailparty instance can actually connect to other phoenix instances ;)
+
+## Configuring connections
+Connection configuration is now define through `yaml`, the interface reminding us of the required fields:
+
+![connection](https://github.com/user-attachments/assets/20019d3a-a158-4e2f-b982-2f784962f388)
+
+Only redis connections are capable of hosting sinks at the moment.
+
+## Configuring sources
+Source are tied to a connection and `required_fields` depends from connection to another.
+For instance for certstream, the `mode` parameter will define what data will be pushed into the socket, 4 modes are available:
+- `serialized_certificate_full`
+- `serialized_certificate_lite`
+- `certificate_lite`
+- `dns_entries_only`
+
+# What's next
+- Improved documentation will follow,
+- User-defined filters (and integration of Genstage) will be the next big development,
+- [CIRCL's instance](https://cocktailparty.lu) is accept user registration.
+
 # Changelog for Cocktailparty v0.2.0 ( Stream distribution Beta)
 
 Welcome to the latest update of Cocktailparty! We're excited to bring you several new features and improvements in this release. Here's what's new in version 0.2.0:
