@@ -21,6 +21,10 @@ For instance for certstream, the `mode` parameter will define what data will be 
 - `certificate_lite`
 - `dns_entries_only`
 
+## Support for long-lived API keys
+Until now Cocktailparty was reusing phoenix token, in v0.3 the application allows users to create long-lived API keys to access sources and sinks.
+![api-keys](https://github.com/user-attachments/assets/2b3e5057-0dad-48c1-a897-f02b572785ed)
+
 # What's next
 - Improved documentation will follow,
 - User-defined filters (and integration of Genstage) will be the next big development,
