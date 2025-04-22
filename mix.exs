@@ -5,7 +5,7 @@ defmodule Cocktailparty.MixProject do
     [
       app: :cocktailparty,
       version: "0.3.0",
-      elixir: "~> 1.14",
+      elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
@@ -87,7 +87,7 @@ defmodule Cocktailparty.MixProject do
       {:cloak_ecto, "~> 1.3.0"},
       {:fresh, "~> 0.4.4"},
       # Certstream
-      # {:easy_ssl, "~> 1.3.0"}
+      # {:easy_ssl, "~> 1.3.0"},
       {:easy_ssl, path: "/home/jlouis/Git/EasySSL"},
       # hack around httpoinson issue #494
       {:hackney, "~> 1.21.0"},

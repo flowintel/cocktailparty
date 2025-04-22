@@ -47,6 +47,7 @@ defmodule Cocktailparty.Input.CertStream do
           {
             DynamicSupervisor,
             strategy: :one_for_one,
+            restart: :permanent,
             name: {:global, {connection.type, connection.id}}
           }
 
