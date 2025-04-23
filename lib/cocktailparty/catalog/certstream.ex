@@ -68,11 +68,18 @@ defmodule Cocktailparty.Catalog.Certstream do
 
   @impl GenServer
   def terminate(reason, state) do
-    Logger.info("Dummy websocket source #{state.source.id} terminating because #{reason}")
+    Logger.info("Certstream source #{state.source.id} terminating because #{reason}")
 
-    with conn_pid <- :global.whereis_name({"websocket", state.source.connection_id}) do
+    with conn_pid <- :global.whereis_name({"certstream", state.source.connection_id}) do
       # Tell the connection process that we terminate
-      send(conn_pid, {:unsubscribe, {:source, state.source.id}, state.source.mode})
+      send(
+          conn_pid,
+          {:unsubscribe,
+           %{
+             name: {:source, state.source.id},
+             mode: state.source.config["mode"]
+           }}
+        )
     end
   end
 end

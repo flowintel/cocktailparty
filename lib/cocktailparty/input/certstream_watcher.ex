@@ -218,6 +218,28 @@ defmodule Cocktailparty.Input.CertstreamWatcher do
       |> Enum.map(fn dns_entries -> %{:message_type => "dns_entries", :data => dns_entries} end)
       |> Enum.map(&Jason.encode!/1)
 
+    md2_certs_only =
+      certificates
+      |> Enum.filter(fn x ->
+        leaf =
+          case get_in(x, [:data, :leaf_cert, :signature_algorithm]) do
+            "md2, rsa" ->
+              true
+
+            nil ->
+              false
+
+            _ ->
+              false
+          end
+
+        chain =
+          get_in(x, [:data, :chain, Access.all(), :signature_algorithm])
+          |> Enum.find_value(false, &String.contains?(&1, "md2, rsa"))
+
+        Enum.any?([leaf, chain])
+      end)
+
     Enum.each(state.subscribed, fn {source, mode} ->
       case :global.whereis_name(source) do
         :undefined ->
@@ -244,6 +266,11 @@ defmodule Cocktailparty.Input.CertstreamWatcher do
             "dns_entries_only" ->
               Enum.map(dns_entries_only, fn x ->
                 send(pid, {:dns_entries_only, x})
+              end)
+
+            "md2_certs_only" ->
+              Enum.map(md2_certs_only, fn x ->
+                send(pid, {:md2_certs_only, x})
               end)
           end
       end
